@@ -93,7 +93,7 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
           <li>Confirm your selections</li>
           <li>Proceed to booking with payment</li>
           <li>Receive detailed travel guides for each site</li>
-          <li>Connect with local tour guides</li>
+          <li>Book experiences including guides, music shows, and workshops</li>
         </ol>
       </div>
     </div>

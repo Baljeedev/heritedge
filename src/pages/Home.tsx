@@ -1,5 +1,5 @@
 import type React from "react"
-import { Search, MapPin, Users, Heart } from "lucide-react"
+import { Search, MapPin, Users, Heart, Music, Hammer, BookOpen } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
@@ -18,8 +18,7 @@ export default function HomePage() {
             Preserve the Past, Experience Tomorrow
           </h1>
           <p className="text-xl text-muted-foreground mb-12 text-pretty">
-            Discover world heritage sites through immersive journeys, support local communities, and help restore our
-            shared cultural treasures.
+            Discover world heritage sites through immersive trips and experiences. Book local guides, attend cultural shows, join workshops, and help restore our shared cultural treasures.
           </p>
 
           {/* Search Bar */}
@@ -44,8 +43,8 @@ export default function HomePage() {
               Plan Trip
             </Link>
             <span className="text-border">•</span>
-            <Link to="/guides" className="text-primary hover:underline">
-              Local Guides
+            <Link to="/experiences" className="text-primary hover:underline">
+              Experiences
             </Link>
             <span className="text-border">•</span>
             <Link to="/donate" className="text-primary hover:underline">
@@ -64,6 +63,41 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Experiences Section */}
+      <section className="py-16 px-4 bg-card">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h2 className="text-3xl font-serif font-bold text-foreground mb-2">Trips & Experiences</h2>
+              <p className="text-muted-foreground">Immerse yourself in culture through curated experiences</p>
+            </div>
+            <Link to="/experiences">
+              <Button variant="outline">View All</Button>
+            </Link>
+          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <ExperienceTypeCard
+              icon={<Users className="w-6 h-6" />}
+              title="Local Guides"
+              description="Connect with certified guides who bring history to life with authentic stories and deep cultural knowledge."
+              link="/experiences?category=guides"
+            />
+            <ExperienceTypeCard
+              icon={<Music className="w-6 h-6" />}
+              title="Music Shows"
+              description="Experience traditional music performances and cultural shows that celebrate the heritage of each region."
+              link="/experiences?category=music"
+            />
+            <ExperienceTypeCard
+              icon={<Hammer className="w-6 h-6" />}
+              title="Workshops"
+              description="Learn traditional crafts, artisanal techniques, and cultural practices from master craftspeople."
+              link="/experiences?category=workshops"
+            />
+          </div>
+        </div>
+      </section>
+
       {/* Features Grid */}
       <section className="py-16 px-4">
         <div className="max-w-6xl mx-auto">
@@ -76,8 +110,8 @@ export default function HomePage() {
             />
             <FeatureCard
               icon={<Users className="w-8 h-8" />}
-              title="Connect with Locals"
-              description="Book certified local guides and artisans who share authentic stories and cultural wisdom."
+              title="Curated Experiences"
+              description="Discover local guides, cultural music shows, artisan workshops, and immersive experiences that bring heritage to life."
             />
             <FeatureCard
               icon={<Heart className="w-8 h-8" />}
@@ -103,6 +137,28 @@ export default function HomePage() {
         </div>
       </section>
     </div>
+  )
+}
+
+function ExperienceTypeCard({
+  icon,
+  title,
+  description,
+  link,
+}: {
+  icon: React.ReactNode
+  title: string
+  description: string
+  link: string
+}) {
+  return (
+    <Link to={link} className="block">
+      <div className="p-6 border border-border rounded-lg hover:border-primary transition-all hover:shadow-lg bg-background h-full">
+        <div className="text-primary mb-4">{icon}</div>
+        <h3 className="text-xl font-serif font-bold text-foreground mb-2">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+      </div>
+    </Link>
   )
 }
 

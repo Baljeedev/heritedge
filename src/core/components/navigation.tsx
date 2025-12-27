@@ -24,8 +24,8 @@ export function Navigation() {
           <Link to="/trip-planner" className="text-foreground hover:text-primary transition-colors">
             Trip Planner
           </Link>
-          <Link to="/guides" className="text-foreground hover:text-primary transition-colors">
-            Local Guides
+          <Link to="/experiences" className="text-foreground hover:text-primary transition-colors">
+            Experiences
           </Link>
           <Link to="/donate" className="text-foreground hover:text-primary transition-colors">
             Donate
@@ -48,8 +48,8 @@ export function Navigation() {
             <Link to="/trip-planner" className="block text-foreground hover:text-primary py-2">
               Trip Planner
             </Link>
-            <Link to="/guides" className="block text-foreground hover:text-primary py-2">
-              Local Guides
+            <Link to="/experiences" className="block text-foreground hover:text-primary py-2">
+              Experiences
             </Link>
             <Link to="/donate" className="block text-foreground hover:text-primary py-2">
               Donate
