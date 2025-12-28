@@ -1,5 +1,5 @@
 import type React from "react"
-import { Search, MapPin, Users, Heart, Music, Hammer, BookOpen } from "lucide-react"
+import { Search, MapPin, Users, Heart, Music, Hammer } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
@@ -57,7 +57,7 @@ export default function HomePage() {
       {/* Featured Sites */}
       <section className="py-16 px-4 bg-card">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Featured Heritage Sites</h2>
+          <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Featured Experiences</h2>
           <p className="text-muted-foreground mb-8">Handpicked destinations waiting for your discovery</p>
           <FeaturedSites />
         </div>
@@ -98,23 +98,23 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-16 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* Features List */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-4xl mx-auto">
           <h2 className="text-3xl font-serif font-bold text-foreground mb-12 text-center">Why Choose HeritEdge</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <FeatureCard
-              icon={<MapPin className="w-8 h-8" />}
+          <div className="space-y-6">
+            <FeatureListItem
+              icon={<MapPin className="w-6 h-6" />}
               title="Curated Heritage Map"
               description="Explore carefully selected heritage sites with rich historical context and verified information."
             />
-            <FeatureCard
-              icon={<Users className="w-8 h-8" />}
+            <FeatureListItem
+              icon={<Users className="w-6 h-6" />}
               title="Curated Experiences"
               description="Discover local guides, cultural music shows, artisan workshops, and immersive experiences that bring heritage to life."
             />
-            <FeatureCard
-              icon={<Heart className="w-8 h-8" />}
+            <FeatureListItem
+              icon={<Heart className="w-6 h-6" />}
               title="Support Restoration"
               description="Contribute to active heritage restoration projects and help preserve these treasures."
             />
@@ -162,12 +162,16 @@ function ExperienceTypeCard({
   )
 }
 
-function FeatureCard({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
+function FeatureListItem({ icon, title, description }: { icon: React.ReactNode; title: string; description: string }) {
   return (
-    <div className="p-6 border border-border rounded-lg hover:border-primary transition-colors">
-      <div className="text-primary mb-4">{icon}</div>
-      <h3 className="text-xl font-serif font-bold text-foreground mb-2">{title}</h3>
-      <p className="text-muted-foreground">{description}</p>
+    <div className="flex gap-6 p-6 bg-background rounded-lg border-l-4 border-primary shadow-sm hover:shadow-md transition-all">
+      <div className="shrink-0 w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <h3 className="text-xl font-serif font-bold text-foreground mb-2">{title}</h3>
+        <p className="text-muted-foreground leading-relaxed">{description}</p>
+      </div>
     </div>
   )
 }

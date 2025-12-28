@@ -1,11 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane } from "lucide-react";
+import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane, Clock, DollarSign, ArrowRight } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Navigation } from "@/core/components/navigation";
+import { PREMADE_TRIPS } from "@/data/premade-trips";
 
 const TripPlanner = () => {
+  const [showCustomPlanner, setShowCustomPlanner] = useState(false);
   const [selectedMonuments, setSelectedMonuments] = useState<string[]>([]);
 
   const monuments = [
@@ -22,17 +25,106 @@ const TripPlanner = () => {
     );
   };
 
+  if (!showCustomPlanner) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        
+        <div className="container mx-auto px-4 py-8">
+          <div className="mb-8">
+            <div className="flex items-center gap-3 mb-3">
+              <Sparkles className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                Trip Planner
+              </h1>
+            </div>
+            <p className="text-lg text-muted-foreground">
+              Choose from our curated heritage trips or create your own personalized itinerary
+            </p>
+          </div>
+
+          {/* Premade Trips Grid */}
+          <div className="mb-12">
+            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Featured Heritage Trips</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              {PREMADE_TRIPS.map((trip) => (
+                <Link key={trip.id} to={`/trip-planner/${trip.id}`}>
+                  <Card className="h-full hover:shadow-lg transition-all cursor-pointer group">
+                    <div className="relative h-48 overflow-hidden rounded-t-lg">
+                      <img
+                        src={trip.image}
+                        alt={trip.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                      />
+                      <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground">
+                        {trip.budget}
+                      </Badge>
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-serif font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                        {trip.name}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-3">{trip.location}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-4 h-4" />
+                          {trip.duration}
+                        </div>
+                      </div>
+                      <p className="text-sm text-foreground line-clamp-2 mb-3">{trip.description}</p>
+                      <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                        View Itinerary
+                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA to Create Custom Trip */}
+          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+            <CardContent className="p-8 text-center">
+              <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
+                Want Something Different?
+              </h3>
+              <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
+                Create your own personalized heritage itinerary with our AI-powered trip planner. 
+                Select monuments, choose preferences, and get a custom day-by-day plan tailored to your interests.
+              </p>
+              <Button
+                size="lg"
+                onClick={() => setShowCustomPlanner(true)}
+                className="bg-primary hover:bg-primary/90 px-8"
+              >
+                <Sparkles className="mr-2 h-5 w-5" />
+                Create Your Own Trip
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
-          <div className="flex items-center gap-3 mb-3">
-            <Sparkles className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl md:text-4xl font-bold text-foreground">
-              AI Trip Planner
-            </h1>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-3">
+              <Sparkles className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                AI Trip Planner
+              </h1>
+            </div>
+            <Button variant="outline" onClick={() => setShowCustomPlanner(false)}>
+              View Premade Trips
+            </Button>
           </div>
           <p className="text-lg text-muted-foreground">
             Let our AI create the perfect heritage itinerary with monuments, hotels, restaurants, and local experiences
