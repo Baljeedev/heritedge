@@ -1,0 +1,28 @@
+{
+  "name": "api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "start": "bun src/index.ts",
+    "seed:trips": "bun src/scripts/seedTrips.ts",
+    "seed:sites": "bun src/scripts/seedHeritageSites.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^5.2.1",
+    "mongoose": "^8.0.0",
+    "@clerk/clerk-sdk-node": "^5.0.0",
+    "zod": "^3.22.4"
+  }
+}

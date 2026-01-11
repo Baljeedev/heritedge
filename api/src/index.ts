@@ -1,0 +1,71 @@
+import express from "express";
+import cors from "cors";
+import connectDB from "./config/database";
+
+// Bun automatically loads .env files, no need for dotenv
+
+// Import routes
+import heritageSitesRouter from "./routes/heritageSites";
+import guidesRouter from "./routes/guides";
+import hotelsRouter from "./routes/hotels";
+import experiencesRouter from "./routes/experiences";
+import tripsRouter from "./routes/trips";
+import reviewsRouter from "./routes/reviews";
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Connect to MongoDB
+connectDB().catch((err) => {
+  console.error("❌ MongoDB connection error:", err);
+  process.exit(1);
+});
+
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.json({
+    message: "HeritEdge API",
+    version: "1.0.0",
+    status: "running",
+  });
+});
+
+// API Routes
+app.use("/api/heritage-sites", heritageSitesRouter);
+app.use("/api/guides", guidesRouter);
+app.use("/api/hotels", hotelsRouter);
+app.use("/api/experiences", experiencesRouter);
+app.use("/api/trips", tripsRouter);
+app.use("/api/reviews", reviewsRouter);
+
+// Error handling middleware
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  console.error("Error:", err);
+  res.status(err.status || 500).json({
+    error: err.message || "Internal server error",
+  });
+});
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).json({ error: "Route not found" });
+});
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`🚀 Server is running on port ${PORT}`);
+  console.log(`📡 API available at http://localhost:${PORT}`);
+  console.log(`📚 API Documentation:`);
+  console.log(`   GET    /api/heritage-sites`);
+  console.log(`   GET    /api/guides`);
+  console.log(`   GET    /api/hotels`);
+  console.log(`   GET    /api/experiences`);
+  console.log(`   GET    /api/trips`);
+  console.log(`   GET    /api/trips/featured (open to all)`);
+  console.log(`   GET    /api/reviews`);
+});
