@@ -59,7 +59,7 @@ export function GuideCard({ guide }: GuideCardProps) {
   const getSpecialization = () => {
     if (isApiData) {
       const apiGuide = guide as ApiGuide
-      return Array.isArray(apiGuide.specialization) ? apiGuide.specialization.join(', ') : apiGuide.specialization
+      return apiGuide.specialization
     } else {
       return (guide as StaticGuide).specialization
     }
@@ -84,6 +84,16 @@ export function GuideCard({ guide }: GuideCardProps) {
     }
   }
 
+  // Get experience years
+  const getExperience = () => {
+    if (isApiData) {
+      const apiGuide = guide as ApiGuide
+      return apiGuide.experience
+    } else {
+      return (guide as StaticGuide).experience
+    }
+  }
+
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all">
       {/* Header with Image */}
@@ -91,7 +101,7 @@ export function GuideCard({ guide }: GuideCardProps) {
         <img
           src={
             isApiData 
-              ? (guide as ApiGuide).avatar || "/placeholder.svg"
+              ? (guide as ApiGuide).image || "/placeholder.svg"
               : (guide as StaticGuide).image || "/placeholder.svg"
           }
           alt={guide.name}
@@ -130,7 +140,7 @@ export function GuideCard({ guide }: GuideCardProps) {
           <div className="bg-muted p-2 rounded text-center">
             <Award className="w-4 h-4 text-primary mx-auto mb-1" />
             <p className="text-muted-foreground">
-              {isApiData ? 'Certified' : `${(guide as StaticGuide).experience}+ years`}
+              {getExperience()}+ years
             </p>
           </div>
           <div className="bg-muted p-2 rounded text-center">

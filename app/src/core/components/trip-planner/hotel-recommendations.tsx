@@ -115,7 +115,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
 
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold text-primary">
-                    ${hotel.pricePerNight?.min || hotel.pricePerNight || 'N/A'}
+                    {hotel.pricePerNight?.currency || '₹'}{hotel.pricePerNight?.min || 'N/A'}
                   </span>
                   <span className="text-sm text-muted-foreground">per night</span>
                 </div>

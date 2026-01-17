@@ -4,15 +4,13 @@ export interface Hotel {
   _id: string;
   name: string;
   chain?: string;
-  location: {
-    city: string;
-    state: string;
-    country: string;
-    address: string;
-  };
+  location: string;
+  city: string;
+  state: string;
+  country: string;
   coordinates: {
-    type: 'Point';
-    coordinates: [number, number]; // [longitude, latitude]
+    latitude: number;
+    longitude: number;
   };
   images: string[];
   rating: number;
@@ -20,18 +18,31 @@ export interface Hotel {
   pricePerNight: {
     min: number;
     max: number;
+    currency: string;
   };
-  nearbySites: string[] | { _id: string; name: string; location: any; image?: string }[];
+  description: string;
+  amenities: string[];
+  roomTypes?: {
+    name: string;
+    description: string;
+    pricePerNight: number;
+    maxOccupancy: number;
+    isLivingHistory: boolean;
+    theme?: string;
+  }[];
   heritageFeatures: {
     hasLivingHistoryRooms: boolean;
     hasHistoryLectures: boolean;
     hasCulturalMeals: boolean;
-    historicalPeriod?: string;
+    hasStorytellingEvenings?: boolean;
+    historicalTimelinePosters?: boolean;
   };
-  amenities: string[];
+  nearbySites: string[] | { _id: string; name: string; location: any; image?: string }[];
+  partnershipType?: "listing" | "referral" | "premium";
+  listingFee?: number;
+  referralFee?: number;
+  discountPercentage?: number;
   isActive: boolean;
-  website?: string;
-  phone?: string;
   createdAt: string;
   updatedAt: string;
 }

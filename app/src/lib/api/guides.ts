@@ -4,28 +4,30 @@ export interface Guide {
   _id: string;
   clerkUserId: string;
   name: string;
-  email: string;
-  phone?: string;
-  bio: string;
-  specialization: string[];
-  languages: string[];
-  pricePerDay: number;
+  image?: string;
+  video?: string;
+  specialization: string;
+  sites: string[] | { _id: string; name: string; location: any; image?: string }[];
   rating: number;
   reviewCount: number;
-  sites: string[] | { _id: string; name: string; location: any; image?: string }[];
+  pricePerDay: number;
+  languages: string[];
+  experience: number; // years of experience
+  bio: string;
   certifications: Array<{
     name: string;
-    issuer: string;
-    date: string;
+    issuingAuthority: string;
+    certificateNumber: string;
+    issueDate: string;
+    expiryDate?: string;
     verified: boolean;
     verificationDate?: string;
   }>;
   isIntern: boolean;
-  isActive: boolean;
   age?: number;
-  internshipStatus?: 'pending' | 'approved' | 'rejected';
+  internshipStatus?: "pending" | "approved" | "rejected" | "completed";
   internshipTestScore?: number;
-  avatar?: string;
+  isActive: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -44,23 +46,20 @@ export interface GuidesQueryParams {
 
 export interface CreateGuideData {
   name: string;
-  email: string;
-  phone?: string;
   bio: string;
-  specialization: string[];
+  specialization: string;
   languages: string[];
   pricePerDay: number;
   sites?: string[];
   certifications?: Guide['certifications'];
-  avatar?: string;
+  image?: string;
+  experience?: number;
 }
 
 export interface InternshipApplicationData {
   name: string;
-  email: string;
-  phone?: string;
   bio: string;
-  specialization: string[];
+  specialization: string;
   languages: string[];
   age: number;
   testScore: number;

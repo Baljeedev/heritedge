@@ -2,24 +2,34 @@ import { apiClient } from './client';
 
 export interface Experience {
   _id: string;
+  type: "guide" | "music" | "workshop";
   name: string;
-  description: string;
-  type: 'workshop' | 'tour' | 'activity' | 'event';
+  image: string;
+  video?: string;
   sites: string[] | { _id: string; name: string; location: any; image?: string }[];
-  guideId?: string | { _id: string; name: string; specialization: string; rating: number; languages?: string[] };
-  price: number;
-  duration: number; // in minutes
-  skillLevel: 'beginner' | 'intermediate' | 'advanced';
-  maxParticipants?: number;
   rating: number;
   reviewCount: number;
-  images?: string[];
+  price: number;
+  description: string;
+  
+  // Guide-specific fields
+  guideId?: string | { _id: string; name: string; specialization: string; rating: number; languages?: string[] };
+  
+  // Music-specific fields
+  duration?: string;
+  venue?: string;
+  performers?: string[];
+  genre?: string;
+  schedule?: string[];
+  
+  // Workshop-specific fields
+  instructor?: string;
+  skillLevel?: "beginner" | "intermediate" | "advanced";
+  materialsIncluded?: boolean;
+  maxParticipants?: number;
+  topics?: string[];
+  
   isActive: boolean;
-  schedule?: {
-    startDate: string;
-    endDate?: string;
-    recurring?: string;
-  };
   createdAt: string;
   updatedAt: string;
 }

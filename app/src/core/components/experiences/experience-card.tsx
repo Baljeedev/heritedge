@@ -141,7 +141,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
             <Clock className="w-4 h-4 text-primary" />
             <span className="text-muted-foreground">
               {isApiData 
-                ? `${Math.floor((experience as ApiExperience).duration / 60)}h ${(experience as ApiExperience).duration % 60}m`
+                ? (experience as ApiExperience).duration || "Full day"
                 : (experience as StaticExperience).type === "guide" 
                   ? "Full day" 
                   : (experience as StaticExperience).type === "music" 

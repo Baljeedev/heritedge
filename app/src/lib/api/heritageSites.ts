@@ -3,34 +3,28 @@ import { apiClient } from './client';
 export interface HeritageSite {
   _id: string;
   name: string;
-  description: string;
-  location: {
-    city: string;
-    state: string;
-    country: string;
-    address?: string;
-  };
-  coordinates: {
-    type: 'Point';
-    coordinates: [number, number]; // [longitude, latitude]
-  };
+  location: string;
+  city?: string;
+  state?: string;
+  country: string;
   image: string;
-  images?: string[];
-  category: string;
-  era?: string;
-  unescoWorldHeritage: boolean;
-  status: 'active' | 'restoration' | 'closed';
   rating: number;
   reviewCount: number;
-  openingHours?: {
-    [key: string]: string;
+  era: string;
+  status: "Preserved" | "Under Restoration" | "At Risk" | "Ruins";
+  annualVisitors?: number; // in millions
+  description: string;
+  historicalWriteup: string;
+  keyFacts: string[];
+  coordinates: {
+    latitude: number;
+    longitude: number;
   };
-  admissionFee?: {
-    adult: number;
-    child: number;
-    senior?: number;
-  };
-  website?: string;
+  unescoWorldHeritage?: boolean;
+  yearOfConstruction?: string;
+  creator?: string;
+  architecturalStyle?: string;
+  materials?: string[];
   createdAt: string;
   updatedAt: string;
 }

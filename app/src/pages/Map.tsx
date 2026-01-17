@@ -1,13 +1,9 @@
 "use client"
 
-import { HeritageMap } from "@/core/components/map/heritage-map"
 import { MapControls } from "@/core/components/map/map-controls"
 import { SiteDetailPanel } from "@/core/components/map/site-detail-panel"
 import { Navigation } from "@/core/components/navigation"
 import { useState } from "react"
-
-
-import React from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -15,7 +11,7 @@ import { useHeritageSites } from "@/lib/api"
 import { Loader2 } from "lucide-react"
 
 // Fix for default markers in React Leaflet
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
@@ -23,11 +19,10 @@ L.Icon.Default.mergeOptions({
 });
 
 interface MapComponentProps {
-  selectedSiteId: string | null;
   onSiteSelect: (siteId: string) => void;
 }
 
-const MapComponent = ({ selectedSiteId, onSiteSelect }: MapComponentProps) => {
+const MapComponent = ({ onSiteSelect }: MapComponentProps) => {
   const { data, isLoading, error } = useHeritageSites({ limit: 20 });
   const sites = data?.sites || [];
 
@@ -55,10 +50,10 @@ const MapComponent = ({ selectedSiteId, onSiteSelect }: MapComponentProps) => {
 
   // Center the map on India (approximate center)
   const indiaCenter: [number, number] = [20.5937, 78.9629];
-  
+
   return (
     <MapContainer 
-      center={indiaCenter} 
+      center={indiaCenter as [number, number]} 
       zoom={5} 
       scrollWheelZoom={true} 
       style={{ height: "100%", width: "100%" }}
@@ -70,7 +65,6 @@ const MapComponent = ({ selectedSiteId, onSiteSelect }: MapComponentProps) => {
       
       {sites.map((site) => {
         const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
-        const isSelected = selectedSiteId === site._id;
         
         return (
           <Marker 
@@ -90,7 +84,9 @@ const MapComponent = ({ selectedSiteId, onSiteSelect }: MapComponentProps) => {
                   />
                   <div>
                     <h3 className="font-bold text-sm">{site.name}</h3>
-                    <p className="text-xs text-gray-600">{site.city}, {site.state}</p>
+                    <p className="text-xs text-gray-600">
+                      {site.city || ''}{site.city && site.state ? ', ' : ''}{site.state || ''}
+                    </p>
                   </div>
                 </div>
                 
@@ -145,7 +141,7 @@ export default function MapPage() {
       <div className="flex h-[calc(100vh-60px)]">
         {/* Map Section */}
         <div className="flex-1 relative">
-          <MapComponent selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} />
+          <MapComponent onSiteSelect={setSelectedSiteId} />
           {/* <HeritageMap selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} /> */}
 
           {/* Map Controls */}

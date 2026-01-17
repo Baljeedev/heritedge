@@ -4,6 +4,7 @@ export interface IGuide extends Document {
   clerkUserId: string; // Links to Clerk user
   name: string;
   image?: string;
+  video?: string; // Video URL or path
   specialization: string;
   sites: mongoose.Types.ObjectId[]; // References to HeritageSite
   rating: number;
@@ -35,6 +36,7 @@ const GuideSchema = new Schema<IGuide>(
     clerkUserId: { type: String, required: true, unique: true, index: true },
     name: { type: String, required: true },
     image: { type: String },
+    video: { type: String },
     specialization: { type: String, required: true },
     sites: [{ type: Schema.Types.ObjectId, ref: "HeritageSite" }],
     rating: { type: Number, default: 0, min: 0, max: 5 },

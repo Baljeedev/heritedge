@@ -4,6 +4,7 @@ export interface IExperience extends Document {
   type: "guide" | "music" | "workshop";
   name: string;
   image: string;
+  video?: string; // Video URL or path
   sites: mongoose.Types.ObjectId[]; // References to HeritageSite
   rating: number;
   reviewCount: number;
@@ -41,6 +42,7 @@ const ExperienceSchema = new Schema<IExperience>(
     },
     name: { type: String, required: true, index: true },
     image: { type: String, required: true },
+    video: { type: String },
     sites: [{ type: Schema.Types.ObjectId, ref: "HeritageSite" }],
     rating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0 },
