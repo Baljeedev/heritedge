@@ -1,5 +1,5 @@
-import connectDB from "../config/database";
 import Trip from "../models/Trip";
+import mongoose from "mongoose";
 
 // Premade trips data (from frontend)
 const PREMADE_TRIPS = [
@@ -8,7 +8,7 @@ const PREMADE_TRIPS = [
     name: "Delhi Heritage Trail",
     location: "Delhi, India",
     duration: "3 Days",
-    image: "/placeholder.jpg",
+    image: "https://cdn.britannica.com/20/189820-050-D650A54D/Red-Fort-Old-Delhi-India.jpg",
     description: "Explore the rich Mughal and British colonial heritage of India's capital city, from ancient forts to modern monuments.",
     highlights: [
       "Red Fort - UNESCO World Heritage Site",
@@ -115,7 +115,7 @@ const PREMADE_TRIPS = [
     name: "Pink City Royalty",
     location: "Jaipur, Rajasthan",
     duration: "4 Days",
-    image: "/placeholder.jpg",
+    image: "https://static.toiimg.com/img/115224983/Master.jpg",
     description: "Experience the royal heritage of Rajasthan through magnificent palaces, forts, and vibrant culture.",
     highlights: [
       "Amber Fort - Hilltop fortress",
@@ -249,7 +249,7 @@ const PREMADE_TRIPS = [
     name: "Hampi Ruins & Temples",
     location: "Hampi, Karnataka",
     duration: "3 Days",
-    image: "/placeholder.jpg",
+    image: "https://s7ap1.scene7.com/is/image/incredibleindia/a-journey-through-masthead-hero-1?qlt=82&ts=1727368343764",
     description: "Discover the ruins of the magnificent Vijayanagara Empire, a UNESCO World Heritage Site.",
     highlights: [
       "Virupaksha Temple - Ancient temple complex",
@@ -378,7 +378,7 @@ const PREMADE_TRIPS = [
     name: "Taj Mahal & Mughal Heritage",
     location: "Agra, Uttar Pradesh",
     duration: "2 Days",
-    image: "/taj-mahal-marble-monument.jpg",
+    image: "https://media.architecturaldigest.com/photos/67acb9b0339bcbaaadeb91b5/16:9/w_2560%2Cc_limit/GettyImages-873536102.jpg",
     description: "Witness the iconic Taj Mahal and explore the rich Mughal heritage of Agra.",
     highlights: [
       "Taj Mahal - Wonder of the World",
@@ -462,6 +462,17 @@ const PREMADE_TRIPS = [
     ]
   }
 ];
+
+const connectDB = async () => {
+  try {
+    const mongoURI = process.env.MONGODB_URI || "mongodb://localhost:27017/heritedge";
+    await mongoose.connect(mongoURI);
+    console.log("✅ Connected to database");
+  } catch (error) {
+    console.error("❌ Database connection error:", error);
+    process.exit(1);
+  }
+};
 
 async function seedTrips() {
   try {

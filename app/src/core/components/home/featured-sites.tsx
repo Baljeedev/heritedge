@@ -5,7 +5,7 @@ import { Link } from "react-router-dom"
 import { useHeritageSites } from "@/lib/api"
 
 export function FeaturedSites() {
-  const { data, isLoading, error } = useHeritageSites({ limit: 4 })
+  const { data, isLoading, error } = useHeritageSites({limit: 8})
 
   if (isLoading) {
     return (
@@ -36,13 +36,13 @@ export function FeaturedSites() {
   }
 
   return (
-    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 space-y-6">
       {data.sites.map((site) => (
         <Link key={site._id} to={`/map?site=${site._id}`}>
           <div className="group cursor-pointer">
             <div className="relative h-64 overflow-hidden rounded-lg mb-4 bg-muted">
               <img
-                src={site.images?.[0] || "/placeholder.svg"}
+                src={site.image || "/placeholder.svg"}
                 alt={site.name}
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />

@@ -69,7 +69,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
       {/* Image Gallery */}
       <div className="relative h-64 bg-muted overflow-hidden">
         <img 
-          src={site.images?.[0] || "/placeholder.svg"} 
+          src={site.image || "/placeholder.svg"} 
           alt={site.name} 
           className="w-full h-full object-cover" 
         />
