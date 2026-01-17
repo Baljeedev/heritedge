@@ -63,6 +63,22 @@ const HeritageSiteSchema = new Schema<IHeritageSite>(
   }
 );
 
+// TypeScript type
+interface IPerson {
+  name: string;
+  location: string;
+  city: string;
+}
+
+// database schema
+const PersonSchema = new Schema<IPerson>(
+  {
+    name: { type: String, required: true, index: true },
+    location: { type: String, required: true },
+    city: { type: String },
+  },
+);
+
 // Index for geospatial queries
 HeritageSiteSchema.index({ coordinates: "2dsphere" });
 HeritageSiteSchema.index({ name: "text", description: "text", location: "text" });

@@ -82,9 +82,6 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
           <CheckCircle className="w-4 h-4 mr-2" />
           Confirm & Book
         </Button>
-        <Button variant="outline" className="flex-1 bg-transparent">
-          Download Itinerary
-        </Button>
       </div>
 
       <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 text-sm text-foreground">

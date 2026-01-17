@@ -1,15 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane, Clock, DollarSign, ArrowRight } from "lucide-react";
+import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane, Clock, DollarSign, ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/core/components/navigation";
-import { PREMADE_TRIPS } from "@/data/premade-trips";
+import { useFeaturedTrips, type Trip } from "@/lib/api";
 
 const TripPlanner = () => {
   const [showCustomPlanner, setShowCustomPlanner] = useState(false);
   const [selectedMonuments, setSelectedMonuments] = useState<string[]>([]);
+  
+  // Fetch featured trips from API
+  const { data: featuredTripsData, isLoading, error } = useFeaturedTrips();
 
   const monuments = [
     { id: "taj-mahal", name: "Taj Mahal", location: "Agra" },
@@ -46,41 +49,68 @@ const TripPlanner = () => {
           {/* Premade Trips Grid */}
           <div className="mb-12">
             <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Featured Heritage Trips</h2>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {PREMADE_TRIPS.map((trip) => (
-                <Link key={trip.id} to={`/trip-planner/${trip.id}`}>
-                  <Card className="h-full hover:shadow-lg transition-all cursor-pointer group">
-                    <div className="relative h-48 overflow-hidden rounded-t-lg">
-                      <img
-                        src={trip.image}
-                        alt={trip.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-                      />
-                      <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground">
-                        {trip.budget}
-                      </Badge>
-                    </div>
-                    <CardContent className="p-4">
-                      <h3 className="font-serif font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
-                        {trip.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground mb-3">{trip.location}</p>
-                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
-                        <div className="flex items-center gap-1">
-                          <Clock className="w-4 h-4" />
-                          {trip.duration}
-                        </div>
-                      </div>
-                      <p className="text-sm text-foreground line-clamp-2 mb-3">{trip.description}</p>
-                      <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
-                        View Itinerary
-                        <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
+            
+            {isLoading && (
+              <div className="flex items-center justify-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2 text-muted-foreground">Loading featured trips...</span>
+              </div>
+            )}
+            
+            {error && (
+              <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6">
+                <p className="text-destructive">Error loading trips: {error.message}</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Please make sure the backend API is running and accessible.
+                </p>
+              </div>
+            )}
+            
+            {!isLoading && !error && featuredTripsData && (
+              <>
+                {featuredTripsData.trips.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No featured trips available. Run the seed script to add trips.</p>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    {featuredTripsData.trips.map((trip: Trip) => (
+                      <Link key={trip._id} to={`/trip-planner/${trip._id}`}>
+                        <Card className="h-full hover:shadow-lg transition-all cursor-pointer group">
+                          <div className="relative h-48 overflow-hidden rounded-t-lg">
+                            <img
+                              src={trip.image || "/placeholder.jpg"}
+                              alt={trip.name}
+                              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                            />
+                            <Badge className="absolute top-3 right-3 bg-primary/90 text-primary-foreground">
+                              {trip.budget}
+                            </Badge>
+                          </div>
+                          <CardContent className="p-4">
+                            <h3 className="font-serif font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                              {trip.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground mb-3">{trip.location}</p>
+                            <div className="flex items-center gap-4 text-xs text-muted-foreground mb-3">
+                              <div className="flex items-center gap-1">
+                                <Clock className="w-4 h-4" />
+                                {trip.duration}
+                              </div>
+                            </div>
+                            <p className="text-sm text-foreground line-clamp-2 mb-3">{trip.description}</p>
+                            <div className="flex items-center text-primary font-medium text-sm group-hover:gap-2 transition-all">
+                              View Itinerary
+                              <ArrowRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
           </div>
 
           {/* CTA to Create Custom Trip */}

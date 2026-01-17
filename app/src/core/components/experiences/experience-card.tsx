@@ -4,37 +4,73 @@ import { Star, MapPin, Heart, Music, Hammer, Users, Clock, Calendar } from "luci
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
 import { HERITAGE_SITES } from "@/data/heritage-sites"
-import type { Experience, GuideExperience, MusicShowExperience, WorkshopExperience } from "@/data/experiences"
+import type { Experience as ApiExperience } from "@/lib/api/experiences"
+import type { Experience as StaticExperience, GuideExperience, MusicShowExperience, WorkshopExperience } from "@/data/experiences"
 
 interface ExperienceCardProps {
-  experience: Experience
+  experience: ApiExperience | StaticExperience
 }
 
 export function ExperienceCard({ experience }: ExperienceCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
 
-  const experienceSites = HERITAGE_SITES.filter((site) => experience.sites.includes(site.id))
+  // Check if this is API data or static data
+  const isApiData = '_id' in experience
+  
+  // Handle sites data - could be populated objects or just IDs
+  const getSiteNames = () => {
+    if (!experience.sites) return []
+    
+    if (isApiData) {
+      const apiExp = experience as ApiExperience
+      if (Array.isArray(apiExp.sites) && apiExp.sites.length > 0) {
+        if (typeof apiExp.sites[0] === 'object' && 'name' in apiExp.sites[0]) {
+          return (apiExp.sites as any[]).map(site => site.name)
+        }
+      }
+      return ['Heritage Site'] // fallback for unpopulated sites
+    } else {
+      // Static data - use HERITAGE_SITES lookup
+      const staticExp = experience as StaticExperience
+      const experienceSites = HERITAGE_SITES.filter((site) => staticExp.sites.includes(site.id))
+      return experienceSites.map(site => site.name)
+    }
+  }
+
+  const siteNames = getSiteNames()
 
   const getTypeIcon = () => {
-    switch (experience.type) {
+    const type = isApiData ? (experience as ApiExperience).type : (experience as StaticExperience).type
+    switch (type) {
       case "guide":
+      case "tour":
         return <Users className="w-5 h-5" />
       case "music":
+      case "event":
         return <Music className="w-5 h-5" />
       case "workshop":
+      case "activity":
         return <Hammer className="w-5 h-5" />
+      default:
+        return <Users className="w-5 h-5" />
     }
   }
 
   const getTypeLabel = () => {
-    switch (experience.type) {
+    const type = isApiData ? (experience as ApiExperience).type : (experience as StaticExperience).type
+    switch (type) {
       case "guide":
+      case "tour":
         return "Local Guide"
       case "music":
+      case "event":
         return "Music Show"
       case "workshop":
+      case "activity":
         return "Workshop"
+      default:
+        return "Experience"
     }
   }
 
@@ -43,7 +79,11 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
       {/* Header with Image */}
       <div className="relative h-48 bg-muted overflow-hidden group">
         <img
-          src={experience.image || "/placeholder.svg"}
+          src={
+            isApiData 
+              ? (experience as ApiExperience).images?.[0] || "/placeholder.svg"
+              : (experience as StaticExperience).image || "/placeholder.svg"
+          }
           alt={experience.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform"
         />
@@ -77,54 +117,49 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
             ))}
           </div>
           <span className="font-semibold text-foreground">{experience.rating}</span>
-          <span className="text-xs text-muted-foreground">({experience.reviews})</span>
+          <span className="text-xs text-muted-foreground">
+            ({isApiData ? (experience as ApiExperience).reviewCount : (experience as StaticExperience).reviews})
+          </span>
         </div>
 
         {/* Sites */}
         <div className="mb-4">
           <p className="text-xs font-semibold text-muted-foreground mb-2">Available at:</p>
           <div className="flex flex-wrap gap-1">
-            {experienceSites.map((site) => (
-              <span key={site.id} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
+            {siteNames.map((siteName, index) => (
+              <span key={index} className="text-xs bg-primary/10 text-primary px-2 py-1 rounded flex items-center gap-1">
                 <MapPin className="w-3 h-3" />
-                {site.name}
+                {siteName}
               </span>
             ))}
           </div>
         </div>
 
-        {/* Type-specific quick info */}
-        {experience.type === "guide" && (
-          <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-            <div className="bg-muted p-2 rounded text-center">
-              <p className="text-muted-foreground">{(experience as GuideExperience).experience}+ years</p>
-            </div>
-            <div className="bg-muted p-2 rounded text-center">
-              <p className="text-muted-foreground">{(experience as GuideExperience).languages.length} languages</p>
-            </div>
+        {/* Duration info for all types */}
+        <div className="mb-4 text-xs">
+          <div className="bg-muted p-2 rounded flex items-center gap-2">
+            <Clock className="w-4 h-4 text-primary" />
+            <span className="text-muted-foreground">
+              {isApiData 
+                ? `${Math.floor((experience as ApiExperience).duration / 60)}h ${(experience as ApiExperience).duration % 60}m`
+                : (experience as StaticExperience).type === "guide" 
+                  ? "Full day" 
+                  : (experience as StaticExperience).type === "music" 
+                    ? (experience as MusicShowExperience).duration
+                    : (experience as WorkshopExperience).duration
+              }
+            </span>
           </div>
-        )}
+        </div>
 
-        {experience.type === "music" && (
+        {/* Max participants for API data */}
+        {isApiData && (experience as ApiExperience).maxParticipants && (
           <div className="mb-4 text-xs">
             <div className="bg-muted p-2 rounded flex items-center gap-2">
-              <Clock className="w-4 h-4 text-primary" />
-              <span className="text-muted-foreground">{(experience as MusicShowExperience).duration}</span>
-            </div>
-          </div>
-        )}
-
-        {experience.type === "workshop" && (
-          <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-            <div className="bg-muted p-2 rounded text-center">
-              <Clock className="w-4 h-4 text-primary mx-auto mb-1" />
-              <p className="text-muted-foreground">{(experience as WorkshopExperience).duration}</p>
-            </div>
-            <div className="bg-muted p-2 rounded text-center">
-              <Users className="w-4 h-4 text-primary mx-auto mb-1" />
-              <p className="text-muted-foreground">
-                Max {(experience as WorkshopExperience).maxParticipants} people
-              </p>
+              <Users className="w-4 h-4 text-primary" />
+              <span className="text-muted-foreground">
+                Max {(experience as ApiExperience).maxParticipants} people
+              </span>
             </div>
           </div>
         )}
@@ -132,9 +167,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
         {/* Price */}
         <div className="flex items-baseline gap-1 mb-4 border-t border-border pt-4">
           <span className="text-2xl font-bold text-primary">${experience.price}</span>
-          <span className="text-sm text-muted-foreground">
-            {experience.type === "guide" ? "per day" : experience.type === "music" ? "per person" : "per person"}
-          </span>
+          <span className="text-sm text-muted-foreground">per person</span>
         </div>
 
         {/* Actions */}
@@ -156,8 +189,37 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
               <p className="text-sm text-muted-foreground">{experience.description}</p>
             </div>
 
-            {/* Type-specific details */}
-            {experience.type === "guide" && (
+            {/* API Data Details */}
+            {isApiData && (
+              <>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="font-semibold text-foreground">Skill Level:</span>{" "}
+                    <span className="text-muted-foreground capitalize">
+                      {(experience as ApiExperience).skillLevel}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-semibold text-foreground">Duration:</span>{" "}
+                    <span className="text-muted-foreground">
+                      {Math.floor((experience as ApiExperience).duration / 60)}h {(experience as ApiExperience).duration % 60}m
+                    </span>
+                  </div>
+                </div>
+                
+                {(experience as ApiExperience).guideId && typeof (experience as ApiExperience).guideId === 'object' && (
+                  <div>
+                    <h4 className="font-semibold text-foreground text-sm mb-2">Guide</h4>
+                    <p className="text-sm text-muted-foreground">
+                      {((experience as ApiExperience).guideId as any).name} - {((experience as ApiExperience).guideId as any).specialization}
+                    </p>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Static Data Details - only show for static experiences */}
+            {!isApiData && experience.type === "guide" && (
               <>
                 <div>
                   <h4 className="font-semibold text-foreground text-sm mb-2">Languages</h4>
@@ -183,73 +245,21 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
               </>
             )}
 
-            {experience.type === "music" && (
-              <>
+            {!isApiData && experience.type === "workshop" && (
+              <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
-                  <h4 className="font-semibold text-foreground text-sm mb-2">Performers</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {(experience as MusicShowExperience).performers.map((performer, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Music className="w-3 h-3 text-primary" />
-                        {performer}
-                      </li>
-                    ))}
-                  </ul>
+                  <span className="font-semibold text-foreground">Skill Level:</span>{" "}
+                  <span className="text-muted-foreground capitalize">
+                    {(experience as WorkshopExperience).skillLevel}
+                  </span>
                 </div>
                 <div>
-                  <h4 className="font-semibold text-foreground text-sm mb-2">Schedule</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {(experience as MusicShowExperience).schedule.map((time, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <Calendar className="w-3 h-3 text-primary" />
-                        {time}
-                      </li>
-                    ))}
-                  </ul>
+                  <span className="font-semibold text-foreground">Materials:</span>{" "}
+                  <span className="text-muted-foreground">
+                    {(experience as WorkshopExperience).materialsIncluded ? "Included" : "Not included"}
+                  </span>
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-semibold">Venue:</span> {(experience as MusicShowExperience).venue}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    <span className="font-semibold">Genre:</span> {(experience as MusicShowExperience).genre}
-                  </p>
-                </div>
-              </>
-            )}
-
-            {experience.type === "workshop" && (
-              <>
-                <div>
-                  <h4 className="font-semibold text-foreground text-sm mb-2">Instructor</h4>
-                  <p className="text-sm text-muted-foreground">{(experience as WorkshopExperience).instructor}</p>
-                </div>
-                <div>
-                  <h4 className="font-semibold text-foreground text-sm mb-2">What You'll Learn</h4>
-                  <ul className="text-xs text-muted-foreground space-y-1">
-                    {(experience as WorkshopExperience).topics.map((topic, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="text-primary">•</span>
-                        {topic}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  <div>
-                    <span className="font-semibold text-foreground">Skill Level:</span>{" "}
-                    <span className="text-muted-foreground capitalize">
-                      {(experience as WorkshopExperience).skillLevel}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="font-semibold text-foreground">Materials:</span>{" "}
-                    <span className="text-muted-foreground">
-                      {(experience as WorkshopExperience).materialsIncluded ? "Included" : "Not included"}
-                    </span>
-                  </div>
-                </div>
-              </>
+              </div>
             )}
           </div>
         )}

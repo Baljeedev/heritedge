@@ -32,25 +32,6 @@ export default function HomePage() {
             </div>
             <Button className="bg-primary text-primary-foreground px-8 py-6">Search</Button>
           </div>
-
-          {/* Quick Links */}
-          <div className="flex flex-wrap justify-center gap-3 text-sm">
-            <Link to="/map" className="text-primary hover:underline">
-              Explore Map
-            </Link>
-            <span className="text-border">•</span>
-            <Link to="/trip-planner" className="text-primary hover:underline">
-              Plan Trip
-            </Link>
-            <span className="text-border">•</span>
-            <Link to="/experiences" className="text-primary hover:underline">
-              Experiences
-            </Link>
-            <span className="text-border">•</span>
-            <Link to="/donate" className="text-primary hover:underline">
-              Support Restoration
-            </Link>
-          </div>
         </div>
       </section>
 

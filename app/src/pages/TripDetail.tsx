@@ -3,20 +3,34 @@ import { Navigation } from "@/core/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PREMADE_TRIPS } from "@/data/premade-trips";
-import { Clock, MapPin, Calendar, DollarSign, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Clock, MapPin, Calendar, DollarSign, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
+import { useTrip } from "@/lib/api";
 
 export default function TripDetail() {
   const { tripId } = useParams<{ tripId: string }>();
-  const trip = PREMADE_TRIPS.find((t) => t.id === tripId);
+  const { data: trip, isLoading, error } = useTrip(tripId || "", !!tripId);
 
-  if (!trip) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading trip details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !trip) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="text-3xl font-bold text-foreground mb-4">Trip Not Found</h1>
-          <p className="text-muted-foreground mb-6">The trip you're looking for doesn't exist.</p>
+          <p className="text-muted-foreground mb-6">
+            {error ? error.message : "The trip you're looking for doesn't exist."}
+          </p>
           <Link to="/trip-planner">
             <Button>Back to Trip Planner</Button>
           </Link>
@@ -178,9 +192,6 @@ export default function TripDetail() {
                 </p>
                 <Button className="w-full" size="lg">
                   Customize This Trip
-                </Button>
-                <Button variant="outline" className="w-full">
-                  Download Itinerary
                 </Button>
               </CardContent>
             </Card>

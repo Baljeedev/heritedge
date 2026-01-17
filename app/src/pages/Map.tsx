@@ -6,11 +6,128 @@ import { SiteDetailPanel } from "@/core/components/map/site-detail-panel"
 import { Navigation } from "@/core/components/navigation"
 import { useState } from "react"
 
-export default function MapPage() {
-  const [selectedSiteId, setSelectedSiteId] = useState<number | null>(null)
-  const [selectedSites, setSelectedSites] = useState<number[]>([])
 
-  const handleToggleSite = (siteId: number) => {
+import React from 'react';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+import { useHeritageSites } from "@/lib/api"
+import { Loader2 } from "lucide-react"
+
+// Fix for default markers in React Leaflet
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
+
+interface MapComponentProps {
+  selectedSiteId: string | null;
+  onSiteSelect: (siteId: string) => void;
+}
+
+const MapComponent = ({ selectedSiteId, onSiteSelect }: MapComponentProps) => {
+  const { data, isLoading, error } = useHeritageSites({ limit: 20 });
+  const sites = data?.sites || [];
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
+        <div className="text-center">
+          <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading heritage sites...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || sites.length === 0) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-2">Unable to load heritage sites</p>
+          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Center the map on India (approximate center)
+  const indiaCenter: [number, number] = [20.5937, 78.9629];
+  
+  return (
+    <MapContainer 
+      center={indiaCenter} 
+      zoom={5} 
+      scrollWheelZoom={true} 
+      style={{ height: "100%", width: "100%" }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      
+      {sites.map((site) => {
+        const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
+        const isSelected = selectedSiteId === site._id;
+        
+        return (
+          <Marker 
+            key={site._id} 
+            position={position}
+            eventHandlers={{
+              click: () => onSiteSelect(site._id)
+            }}
+          >
+            <Popup>
+              <div className="p-2 min-w-[200px]">
+                <div className="flex items-center gap-2 mb-2">
+                  <img 
+                    src={site.image || "/placeholder.svg"} 
+                    alt={site.name}
+                    className="w-16 h-16 object-cover rounded"
+                  />
+                  <div>
+                    <h3 className="font-bold text-sm">{site.name}</h3>
+                    <p className="text-xs text-gray-600">{site.city}, {site.state}</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-1 mb-2">
+                  <span className="text-yellow-500">★</span>
+                  <span className="text-xs">{site.rating?.toFixed(1) || 'N/A'}</span>
+                  <span className="text-xs text-gray-500">({site.reviewCount || 0} reviews)</span>
+                </div>
+                
+                <p className="text-xs text-gray-700 line-clamp-2 mb-2">
+                  {site.description}
+                </p>
+                
+                <div className="flex gap-1 flex-wrap">
+                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                    {site.era}
+                  </span>
+                  {site.unescoWorldHeritage && (
+                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                      UNESCO
+                    </span>
+                  )}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        );
+      })}
+    </MapContainer>
+  );
+};
+
+export default function MapPage() {
+  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null)
+  const [selectedSites, setSelectedSites] = useState<string[]>([])
+
+  const handleToggleSite = (siteId: string) => {
     setSelectedSites((prev) => (prev.includes(siteId) ? prev.filter((id) => id !== siteId) : [...prev, siteId]))
   }
 
@@ -28,7 +145,8 @@ export default function MapPage() {
       <div className="flex h-[calc(100vh-60px)]">
         {/* Map Section */}
         <div className="flex-1 relative">
-          <HeritageMap selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} />
+          <MapComponent selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} />
+          {/* <HeritageMap selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} /> */}
 
           {/* Map Controls */}
           <MapControls

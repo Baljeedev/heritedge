@@ -2,10 +2,14 @@
 
 import { Globe, Menu, X } from "lucide-react"
 import { useState } from "react"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { SignedIn, UserButton, SignInButton, SignedOut } from '@clerk/clerk-react'
+import { Button } from "@/components/ui/button"
+
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
+  const navigate = useNavigate()
 
   return (
     <nav className="border-b border-border bg-card sticky top-0 z-50">
@@ -27,6 +31,9 @@ export function Navigation() {
           <Link to="/experiences" className="text-foreground hover:text-primary transition-colors">
             Experiences
           </Link>
+          <Link to="/guides" className="text-foreground hover:text-primary transition-colors">
+            Guides
+          </Link>
           <Link to="/donate" className="text-foreground hover:text-primary transition-colors">
             Donate
           </Link>
@@ -36,6 +43,15 @@ export function Navigation() {
         <button onClick={() => setIsOpen(!isOpen)} className="md:hidden p-2">
           {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
+
+
+        <SignedIn>
+          <UserButton />
+        </SignedIn>
+        
+        <SignedOut>
+          <Button onClick={() => navigate("/sign-in")}>Sign In</Button>
+        </SignedOut>
       </div>
 
       {/* Mobile Menu */}
@@ -51,12 +67,16 @@ export function Navigation() {
             <Link to="/experiences" className="block text-foreground hover:text-primary py-2">
               Experiences
             </Link>
+            <Link to="/guides" className="block text-foreground hover:text-primary py-2">
+              Guides
+            </Link>
             <Link to="/donate" className="block text-foreground hover:text-primary py-2">
               Donate
             </Link>
           </div>
         </div>
       )}
+
     </nav>
   )
 }

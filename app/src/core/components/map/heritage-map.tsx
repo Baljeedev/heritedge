@@ -3,11 +3,11 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { HERITAGE_SITES } from "@/data/heritage-sites"
+import { useHeritageSites } from "@/lib/api"
 
 interface HeritageMapProps {
-  selectedSiteId: number | null
-  onSiteSelect: (siteId: number) => void
+  selectedSiteId: string | null
+  onSiteSelect: (siteId: string) => void
 }
 
 export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) {
@@ -17,6 +17,10 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
   const [pan, setPan] = useState({ x: 0, y: 0 })
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+
+  // Fetch heritage sites from API
+  const { data, isLoading, error } = useHeritageSites({ limit: 20 })
+  const sites = data?.sites || []
 
   // Draw map background and sites
   useEffect(() => {
@@ -51,12 +55,16 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
     }
 
     // Draw sites
-    HERITAGE_SITES.forEach((site) => {
-      const x = site.coordinates.x * canvas.width + pan.x
-      const y = site.coordinates.y * canvas.height + pan.y
+    sites.forEach((site, index) => {
+      // Use a simple grid layout for positioning since we don't have coordinates in API data
+      const cols = Math.ceil(Math.sqrt(sites.length))
+      const col = index % cols
+      const row = Math.floor(index / cols)
+      const x = (col + 1) * (canvas.width / (cols + 1)) + pan.x
+      const y = (row + 1) * (canvas.height / (Math.ceil(sites.length / cols) + 1)) + pan.y
 
       // Draw site pin
-      const isSelected = selectedSiteId === site.id
+      const isSelected = selectedSiteId === site._id
       const radius = isSelected ? 20 : 16
 
       ctx.fillStyle = isSelected ? "#8B5A2B" : "#D2B48C"
@@ -82,7 +90,7 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
       ctx.textBaseline = "middle"
       ctx.fillText("📍", x, y)
     })
-  }, [zoom, pan, selectedSiteId])
+  }, [zoom, pan, selectedSiteId, sites])
 
   const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -93,13 +101,17 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
     const y = e.clientY - rect.top
 
     // Check if clicked on a site
-    for (const site of HERITAGE_SITES) {
-      const siteX = site.coordinates.x * canvas.width + pan.x
-      const siteY = site.coordinates.y * canvas.height + pan.y
+    for (let index = 0; index < sites.length; index++) {
+      const site = sites[index]
+      const cols = Math.ceil(Math.sqrt(sites.length))
+      const col = index % cols
+      const row = Math.floor(index / cols)
+      const siteX = (col + 1) * (canvas.width / (cols + 1)) + pan.x
+      const siteY = (row + 1) * (canvas.height / (Math.ceil(sites.length / cols) + 1)) + pan.y
       const distance = Math.sqrt((x - siteX) ** 2 + (y - siteY) ** 2)
 
       if (distance < 20) {
-        onSiteSelect(site.id)
+        onSiteSelect(site._id)
         return
       }
     }
@@ -132,6 +144,28 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
       const newZoom = direction === "in" ? prev * 1.2 : prev / 1.2
       return Math.max(0.5, Math.min(3, newZoom))
     })
+  }
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading heritage sites...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
+        <div className="text-center">
+          <p className="text-muted-foreground mb-2">Unable to load heritage sites</p>
+          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+        </div>
+      </div>
+    )
   }
 
   return (
