@@ -11,6 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadApi } from "@/lib/api/upload"
+import { toast } from "sonner"
 import type { IHotel } from "@/lib/types"
 
 interface HotelFormProps {
@@ -51,6 +54,7 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
     },
   )
 
+  const [imageFiles, setImageFiles] = useState<File[]>([])
   const [amenitiesInput, setAmenitiesInput] = useState(hotel?.amenities?.join(", ") || "")
   const [roomTypes, setRoomTypes] = useState(hotel?.roomTypes || [])
 
@@ -124,11 +128,25 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
     setRoomTypes(updated)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const newHotel: IHotel = {
-      _id: hotel?._id || "",
+    let imageUrls = formData.images || []
+
+    // Upload images if new files were selected
+    if (imageFiles.length > 0) {
+      try {
+        const uploadResult = await uploadApi.uploadMultiple("hotel", imageFiles)
+        const newUrls = uploadResult.files.map((f) => f.url)
+        imageUrls = [...imageUrls, ...newUrls]
+      } catch (error: any) {
+        toast.error(`Failed to upload images: ${error.message}`)
+        return
+      }
+    }
+
+    const newHotel: Partial<IHotel> = {
+      ...(hotel?._id && { _id: hotel._id }),
       name: formData.name || "",
       chain: formData.chain || "",
       location: formData.location || "",
@@ -136,10 +154,10 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
       state: formData.state || "",
       country: formData.country || "India",
       coordinates: formData.coordinates || { latitude: 0, longitude: 0 },
-      images: formData.images || [],
+      images: imageUrls,
       pricePerNight: formData.pricePerNight || { min: 0, max: 0, currency: "INR" },
       description: formData.description || "",
-      amenities: amenitiesInput.split(",").map((a) => a.trim()),
+      amenities: amenitiesInput.split(",").map((a) => a.trim()).filter(Boolean),
       roomTypes,
       heritageFeatures: formData.heritageFeatures || {
         hasLivingHistoryRooms: false,
@@ -295,6 +313,24 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
             onChange={handleChange}
           />
         </div>
+      </div>
+
+      {/* Images */}
+      <div>
+        <FileUpload
+          label="Hotel Images"
+          value={formData.images || []}
+          onChange={(file) => {
+            if (file) {
+              setImageFiles([file])
+            } else {
+              setImageFiles([])
+            }
+          }}
+          fileType="image"
+          multiple
+          onMultipleChange={(files) => setImageFiles(files)}
+        />
       </div>
 
       {/* Coordinates */}

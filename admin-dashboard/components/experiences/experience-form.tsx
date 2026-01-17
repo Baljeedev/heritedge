@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadApi } from "@/lib/api/upload"
+import { toast } from "sonner"
 import type { IExperience } from "@/lib/types"
 
 interface ExperienceFormProps {
@@ -35,6 +38,8 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
     },
   )
 
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
   const [performersInput, setPerformersInput] = useState(
     experience?.type === "music" && experience?.performers ? experience.performers.join(", ") : "",
   )
@@ -77,27 +82,54 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
     setFormData((prev) => ({ ...prev, [name]: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    let imageUrl = formData.image || ""
+    let videoUrl = formData.video || ""
+
+    // Upload image if a new file was selected
+    if (imageFile) {
+      try {
+        const uploadResult = await uploadApi.upload("experience", imageFile)
+        imageUrl = uploadResult.url
+      } catch (error: any) {
+        toast.error(`Failed to upload image: ${error.message}`)
+        return
+      }
+    }
+
+    // Upload video if a new file was selected
+    if (videoFile) {
+      try {
+        const uploadResult = await uploadApi.upload("experience", videoFile)
+        videoUrl = uploadResult.url
+      } catch (error: any) {
+        toast.error(`Failed to upload video: ${error.message}`)
+        return
+      }
+    }
 
     const experienceData: Partial<IExperience> = {
       ...formData,
+      image: imageUrl,
+      video: videoUrl,
     }
 
     // Add type-specific fields
     if (formData.type === "music") {
-      experienceData.performers = performersInput.split(",").map((p) => p.trim())
-      experienceData.schedule = scheduleInput.split(",").map((s) => s.trim())
+      experienceData.performers = performersInput.split(",").map((p) => p.trim()).filter(Boolean)
+      experienceData.schedule = scheduleInput.split(",").map((s) => s.trim()).filter(Boolean)
     } else if (formData.type === "workshop") {
-      experienceData.topics = topicsInput.split(",").map((t) => t.trim())
+      experienceData.topics = topicsInput.split(",").map((t) => t.trim()).filter(Boolean)
     }
 
-    const newExperience: IExperience = {
-      _id: experience?._id || "",
+    const newExperience: Partial<IExperience> = {
+      ...(experience?._id && { _id: experience._id }),
       type: (experienceData.type as "guide" | "music" | "workshop") || "music",
       name: experienceData.name || "",
-      image: experienceData.image || "",
-      video: experienceData.video || "",
+      image: imageUrl,
+      video: videoUrl,
       sites: experienceData.sites || [],
       price: experienceData.price || 0,
       description: experienceData.description || "",
@@ -113,10 +145,6 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
       maxParticipants: experienceData.maxParticipants,
       topics: experienceData.topics,
       isActive: experienceData.isActive ?? true,
-      rating: experienceData.rating || 0,
-      reviewCount: experienceData.reviewCount || 0,
-      createdAt: experienceData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
 
     onSave(newExperience)
@@ -167,14 +195,20 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
       </div>
 
       <div>
-        <Label htmlFor="image">Image URL *</Label>
-        <Input
-          id="image"
-          name="image"
-          value={formData.image || ""}
-          onChange={handleChange}
-          placeholder="https://..."
-          required
+        <FileUpload
+          label="Image *"
+          value={imageFile || formData.image || null}
+          onChange={(file) => setImageFile(file)}
+          fileType="image"
+        />
+      </div>
+
+      <div>
+        <FileUpload
+          label="Video (Optional)"
+          value={videoFile || formData.video || null}
+          onChange={(file) => setVideoFile(file)}
+          fileType="video"
         />
       </div>
 

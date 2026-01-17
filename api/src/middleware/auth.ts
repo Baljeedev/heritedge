@@ -1,5 +1,5 @@
 import type { Request, Response, NextFunction } from "express";
-import { clerkClient } from "@clerk/clerk-sdk-node";
+import { createClerkClient } from "@clerk/clerk-sdk-node";
 
 // Extend Express Request to include user
 declare global {
@@ -17,7 +17,7 @@ const getClerkClient = () => {
   if (!secretKey) {
     throw new Error("CLERK_SECRET_KEY is not set in environment variables");
   }
-  return clerkClient({ secretKey });
+  return createClerkClient({ secretKey });
 };
 
 export const authenticateUser = async (
@@ -36,6 +36,7 @@ export const authenticateUser = async (
 
     // Verify the token with Clerk
     const clerk = getClerkClient();
+    // In Clerk SDK v5, verifyToken is on the client directly
     const session = await clerk.verifyToken(token);
 
     if (!session || !session.sub) {
@@ -67,6 +68,7 @@ export const optionalAuth = async (
     if (authHeader && authHeader.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
       const clerk = getClerkClient();
+      // In Clerk SDK v5, verifyToken is on the client directly
       const session = await clerk.verifyToken(token);
 
       if (session && session.sub) {

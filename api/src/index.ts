@@ -11,6 +11,7 @@ import hotelsRouter from "./routes/hotels";
 import experiencesRouter from "./routes/experiences";
 import tripsRouter from "./routes/trips";
 import reviewsRouter from "./routes/reviews";
+import uploadRouter from "./routes/upload";
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use("/api/hotels", hotelsRouter);
 app.use("/api/experiences", experiencesRouter);
 app.use("/api/trips", tripsRouter);
 app.use("/api/reviews", reviewsRouter);
+app.use("/api/upload", uploadRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -12,6 +12,9 @@ import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, ChevronDown } from "lucide-react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadApi } from "@/lib/api/upload"
+import { toast } from "sonner"
 import type { ITrip, IDayPlan } from "@/lib/types"
 
 interface TripFormProps {
@@ -107,8 +110,21 @@ export function TripForm({ trip, onSave, onCancel }: TripFormProps) {
     setItinerary(updated)
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    let imageUrl = formData.image || ""
+
+    // Upload image if a new file was selected
+    if (imageFile) {
+      try {
+        const uploadResult = await uploadApi.upload("trip", imageFile)
+        imageUrl = uploadResult.url
+      } catch (error: any) {
+        toast.error(`Failed to upload image: ${error.message}`)
+        return
+      }
+    }
 
     // For featured trips created by admin, use "system" as clerkUserId
     const clerkUserId = formData.isFeatured ? "system" : (formData.clerkUserId || "system")
@@ -119,7 +135,7 @@ export function TripForm({ trip, onSave, onCancel }: TripFormProps) {
       name: formData.name || "",
       location: formData.location || "",
       duration: formData.duration || "",
-      image: formData.image || "",
+      image: imageUrl,
       description: formData.description || "",
       highlights: highlightsInput.split(",").map((h) => h.trim()).filter(Boolean),
       itinerary,
@@ -228,8 +244,13 @@ export function TripForm({ trip, onSave, onCancel }: TripFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="image">Image URL</Label>
-        <Input id="image" name="image" value={formData.image || ""} onChange={handleChange} placeholder="https://..." />
+        <FileUpload
+          label="Trip Image"
+          value={formData.image}
+          onChange={(url) => setFormData((prev) => ({ ...prev, image: url }))}
+          type="trip"
+          fileType="image"
+        />
       </div>
 
       <div>

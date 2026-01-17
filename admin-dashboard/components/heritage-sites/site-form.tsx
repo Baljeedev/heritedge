@@ -9,6 +9,9 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadApi } from "@/lib/api/upload"
+import { toast } from "sonner"
 import type { IHeritageSite } from "@/lib/types"
 
 interface SiteFormProps {
@@ -41,6 +44,7 @@ export function SiteForm({ site, onSave, onCancel }: SiteFormProps) {
     },
   )
 
+  const [imageFile, setImageFile] = useState<File | null>(null)
   const [keyFactsInput, setKeyFactsInput] = useState(site?.keyFacts?.join(", ") || "")
   const [materialsInput, setMaterialsInput] = useState(site?.materials?.join(", ") || "")
 
@@ -67,28 +71,38 @@ export function SiteForm({ site, onSave, onCancel }: SiteFormProps) {
     }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const newSite: IHeritageSite = {
-      _id: site?._id || "",
+    
+    let imageUrl = formData.image || ""
+
+    // Upload image if a new file was selected
+    if (imageFile) {
+      try {
+        const uploadResult = await uploadApi.upload("monument", imageFile)
+        imageUrl = uploadResult.url
+      } catch (error: any) {
+        toast.error(`Failed to upload image: ${error.message}`)
+        return
+      }
+    }
+
+    const newSite: Partial<IHeritageSite> = {
+      ...(site?._id && { _id: site._id }),
       name: formData.name || "",
       location: formData.location || "",
       city: formData.city || "",
       state: formData.state || "",
       country: formData.country || "India",
-      image: formData.image || "",
+      image: imageUrl,
       description: formData.description || "",
       historicalWriteup: formData.historicalWriteup || "",
       era: formData.era || "",
       status: (formData.status as "Preserved" | "Under Restoration" | "At Risk" | "Ruins") || "Preserved",
-      keyFacts: keyFactsInput.split(",").map((f) => f.trim()),
-      materials: materialsInput.split(",").map((m) => m.trim()),
+      keyFacts: keyFactsInput.split(",").map((f) => f.trim()).filter(Boolean),
+      materials: materialsInput.split(",").map((m) => m.trim()).filter(Boolean),
       coordinates: formData.coordinates || { latitude: 0, longitude: 0 },
       unescoWorldHeritage: formData.unescoWorldHeritage || false,
-      rating: formData.rating || 0,
-      reviewCount: formData.reviewCount || 0,
-      createdAt: formData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
     onSave(newSite)
   }
@@ -165,14 +179,11 @@ export function SiteForm({ site, onSave, onCancel }: SiteFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="image">Image URL *</Label>
-        <Input
-          id="image"
-          name="image"
-          value={formData.image || ""}
-          onChange={handleChange}
-          placeholder="https://..."
-          required
+        <FileUpload
+          label="Image *"
+          value={imageFile || formData.image || null}
+          onChange={(file) => setImageFile(file)}
+          fileType="image"
         />
       </div>
 

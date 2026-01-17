@@ -11,6 +11,9 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2 } from "lucide-react"
+import { FileUpload } from "@/components/ui/file-upload"
+import { uploadApi } from "@/lib/api/upload"
+import { toast } from "sonner"
 import type { IGuide } from "@/lib/types"
 
 interface GuideFormProps {
@@ -41,6 +44,8 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
     },
   )
 
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [videoFile, setVideoFile] = useState<File | null>(null)
   const [languagesInput, setLanguagesInput] = useState(guide?.languages?.join(", ") || "")
   const [certifications, setCertifications] = useState(guide?.certifications || [])
 
@@ -180,6 +185,26 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
             required
           />
         </div>
+      </div>
+
+      {/* Image */}
+      <div>
+        <FileUpload
+          label="Profile Image"
+          value={imageFile || formData.image || null}
+          onChange={(file) => setImageFile(file)}
+          fileType="image"
+        />
+      </div>
+
+      {/* Video */}
+      <div>
+        <FileUpload
+          label="Video (Optional)"
+          value={videoFile || formData.video || null}
+          onChange={(file) => setVideoFile(file)}
+          fileType="video"
+        />
       </div>
 
       <div>
