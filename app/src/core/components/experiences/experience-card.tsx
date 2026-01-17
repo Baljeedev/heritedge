@@ -104,7 +104,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
       {/* Content */}
       <div className="p-4">
         {/* Name */}
-        <h3 className="text-lg font-serif font-bold text-foreground mb-2">{experience.name}</h3>
+        <h3 className="text-lg  font-bold text-foreground mb-2">{experience.name}</h3>
 
         {/* Rating */}
         <div className="flex items-center gap-2 mb-3">

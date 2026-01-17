@@ -48,7 +48,7 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
           <ChevronLeft className="w-5 h-5" />
           Back
         </button>
-        <h1 className="text-2xl font-serif font-bold text-foreground">Support Restoration</h1>
+        <h1 className="text-2xl  font-bold text-foreground">Support Restoration</h1>
         <div className="w-10" />
       </div>
 
@@ -75,7 +75,7 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
       <div className="bg-card border border-border rounded-lg p-8 mb-8 min-h-96">
         {step === 0 && (
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">How much would you like to donate?</h2>
+            <h2 className="text-2xl  font-bold text-foreground mb-6">How much would you like to donate?</h2>
             <p className="text-muted-foreground mb-6">Your donation directly supports the {project.name} project</p>
 
             <div className="grid grid-cols-3 gap-4 mb-6">
@@ -123,7 +123,7 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
 
         {step === 1 && (
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Donation Type</h2>
+            <h2 className="text-2xl  font-bold text-foreground mb-6">Donation Type</h2>
             <p className="text-muted-foreground mb-6">Choose how you'd like to contribute</p>
 
             <div className="space-y-4">
@@ -158,7 +158,7 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
 
         {step === 2 && (
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Your Information</h2>
+            <h2 className="text-2xl  font-bold text-foreground mb-6">Your Information</h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-semibold text-foreground mb-2">Full Name</label>
@@ -195,7 +195,7 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
 
         {step === 3 && (
           <div>
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Confirm Your Donation</h2>
+            <h2 className="text-2xl  font-bold text-foreground mb-6">Confirm Your Donation</h2>
             <div className="space-y-4 mb-6">
               <div className="flex justify-between items-center pb-4 border-b border-border">
                 <span className="text-muted-foreground">Project</span>

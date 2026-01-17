@@ -47,7 +47,7 @@ export function FeaturedSites() {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
               />
             </div>
-            <h3 className="font-serif text-lg font-bold text-foreground group-hover:text-primary transition-colors">
+            <h3 className=" text-lg font-bold text-foreground group-hover:text-primary transition-colors">
               {site.name}
             </h3>
             <div className="flex items-center gap-1 text-sm text-muted-foreground mb-2">

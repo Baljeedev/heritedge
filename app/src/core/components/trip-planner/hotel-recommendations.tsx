@@ -28,7 +28,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
   if (isLoading) {
     return (
       <div>
-        <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Recommended Hotels</h2>
+        <h2 className="text-2xl  font-bold text-foreground mb-2">Recommended Hotels</h2>
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
           <span className="ml-2 text-muted-foreground">Loading hotels...</span>
@@ -40,7 +40,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
   if (error) {
     return (
       <div>
-        <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Recommended Hotels</h2>
+        <h2 className="text-2xl  font-bold text-foreground mb-2">Recommended Hotels</h2>
         <div className="text-center py-12 bg-card border border-border rounded-lg">
           <p className="text-muted-foreground mb-2">Unable to load hotels</p>
           <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
@@ -53,7 +53,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
 
   return (
     <div>
-      <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Recommended Hotels</h2>
+      <h2 className="text-2xl  font-bold text-foreground mb-2">Recommended Hotels</h2>
       <p className="text-muted-foreground mb-6">
         Stay with Stories - Premium heritage accommodations near your selected sites
       </p>
@@ -84,7 +84,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
               </div>
               <div className="p-4">
                 <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-serif font-bold text-foreground">{hotel.name}</h3>
+                  <h3 className=" font-bold text-foreground">{hotel.name}</h3>
                   <Checkbox 
                     checked={selectedHotels.includes(hotel._id)} 
                     onCheckedChange={() => handleToggle(hotel._id)} 

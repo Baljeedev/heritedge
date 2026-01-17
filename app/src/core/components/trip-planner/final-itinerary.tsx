@@ -26,7 +26,7 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-serif font-bold text-foreground">Your Complete Itinerary</h2>
+      <h2 className="text-2xl  font-bold text-foreground">Your Complete Itinerary</h2>
 
       {/* Summary Cards */}
       <div className="grid md:grid-cols-4 gap-4">
@@ -54,7 +54,7 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
 
       {/* Detailed Itinerary */}
       <div className="bg-card border border-border rounded-lg p-6">
-        <h3 className="text-lg font-serif font-bold text-foreground mb-4">Day-by-Day Plan</h3>
+        <h3 className="text-lg  font-bold text-foreground mb-4">Day-by-Day Plan</h3>
         <div className="space-y-4">
           {selectedSites.map((site, index) => (
             <div key={site.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
@@ -64,7 +64,7 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
                 </div>
               </div>
               <div className="flex-1">
-                <h4 className="font-serif font-bold text-foreground mb-1">{site.name}</h4>
+                <h4 className=" font-bold text-foreground mb-1">{site.name}</h4>
                 <p className="text-sm text-muted-foreground mb-2">{site.location}</p>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   <span>📍 {site.era}</span>

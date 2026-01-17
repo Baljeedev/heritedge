@@ -14,7 +14,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="pt-20 pb-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-6 text-balance">
+          <h1 className="text-5xl md:text-6xl  font-bold text-foreground mb-6 text-balance">
             Preserve the Past, Experience Tomorrow
           </h1>
           <p className="text-xl text-muted-foreground mb-12 text-pretty">
@@ -38,7 +38,7 @@ export default function HomePage() {
       {/* Featured Sites */}
       <section className="py-16 px-4 bg-card">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Featured Experiences</h2>
+          <h2 className="text-3xl  font-bold text-foreground mb-4">Featured Experiences</h2>
           <p className="text-muted-foreground mb-8">Handpicked destinations waiting for your discovery</p>
           <FeaturedSites />
         </div>
@@ -49,7 +49,7 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl font-serif font-bold text-foreground mb-2">Trips & Experiences</h2>
+              <h2 className="text-3xl  font-bold text-foreground mb-2">Trips & Experiences</h2>
               <p className="text-muted-foreground">Immerse yourself in culture through curated experiences</p>
             </div>
             <Link to="/experiences">
@@ -82,7 +82,7 @@ export default function HomePage() {
       {/* Features List */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-serif font-bold text-foreground mb-12 text-center">Why Choose HeritEdge</h2>
+          <h2 className="text-3xl  font-bold text-foreground mb-12 text-center">Why Choose HeritEdge</h2>
           <div className="space-y-6">
             <FeatureListItem
               icon={<MapPin className="w-6 h-6" />}
@@ -106,7 +106,7 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16 px-4 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl font-serif font-bold mb-4">Start Your Heritage Journey</h2>
+          <h2 className="text-3xl  font-bold mb-4">Start Your Heritage Journey</h2>
           <p className="text-lg mb-8 opacity-90">
             Plan your next adventure with AI-powered recommendations tailored to your interests.
           </p>
@@ -136,7 +136,7 @@ function ExperienceTypeCard({
     <Link to={link} className="block">
       <div className="p-6 border border-border rounded-lg hover:border-primary transition-all hover:shadow-lg bg-background h-full">
         <div className="text-primary mb-4">{icon}</div>
-        <h3 className="text-xl font-serif font-bold text-foreground mb-2">{title}</h3>
+        <h3 className="text-xl  font-bold text-foreground mb-2">{title}</h3>
         <p className="text-muted-foreground">{description}</p>
       </div>
     </Link>
@@ -150,7 +150,7 @@ function FeatureListItem({ icon, title, description }: { icon: React.ReactNode; 
         {icon}
       </div>
       <div className="flex-1">
-        <h3 className="text-xl font-serif font-bold text-foreground mb-2">{title}</h3>
+        <h3 className="text-xl  font-bold text-foreground mb-2">{title}</h3>
         <p className="text-muted-foreground leading-relaxed">{description}</p>
       </div>
     </div>

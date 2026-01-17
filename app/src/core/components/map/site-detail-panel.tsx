@@ -82,7 +82,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
       <div className="flex-1 overflow-y-auto p-6">
         {/* Header */}
         <div className="mb-6">
-          <h2 className="text-2xl font-serif font-bold text-foreground mb-2">{site.name}</h2>
+          <h2 className="text-2xl  font-bold text-foreground mb-2">{site.name}</h2>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
             <MapPin className="w-4 h-4" />
             {site.city}, {site.state || site.country}

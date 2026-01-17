@@ -126,7 +126,7 @@ export default function ExperiencesPage() {
 
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Trips & Experiences</h1>
+          <h1 className="text-4xl  font-bold text-foreground mb-2">Trips & Experiences</h1>
           <p className="text-muted-foreground mb-8">
             Discover immersive cultural experiences including local guides, music shows, workshops, and more. Support local
             communities while exploring world heritage sites.

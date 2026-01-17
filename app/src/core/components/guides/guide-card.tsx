@@ -108,7 +108,7 @@ export function GuideCard({ guide }: GuideCardProps) {
       {/* Content */}
       <div className="p-4">
         {/* Name & Title */}
-        <h3 className="text-lg font-serif font-bold text-foreground">{guide.name}</h3>
+        <h3 className="text-lg  font-bold text-foreground">{guide.name}</h3>
         <p className="text-sm text-muted-foreground mb-3">{getSpecialization()}</p>
 
         {/* Rating */}

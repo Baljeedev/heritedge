@@ -48,7 +48,7 @@ const TripPlanner = () => {
 
           {/* Premade Trips Grid */}
           <div className="mb-12">
-            <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Featured Heritage Trips</h2>
+            <h2 className="text-2xl  font-bold text-foreground mb-6">Featured Heritage Trips</h2>
             
             {isLoading && (
               <div className="flex items-center justify-center py-12">
@@ -88,7 +88,7 @@ const TripPlanner = () => {
                             </Badge>
                           </div>
                           <CardContent className="p-4">
-                            <h3 className="font-serif font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
+                            <h3 className=" font-bold text-lg text-foreground mb-2 group-hover:text-primary transition-colors">
                               {trip.name}
                             </h3>
                             <p className="text-sm text-muted-foreground mb-3">{trip.location}</p>
@@ -117,7 +117,7 @@ const TripPlanner = () => {
           <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
             <CardContent className="p-8 text-center">
               <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
-              <h3 className="text-2xl font-serif font-bold text-foreground mb-2">
+              <h3 className="text-2xl  font-bold text-foreground mb-2">
                 Want Something Different?
               </h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">

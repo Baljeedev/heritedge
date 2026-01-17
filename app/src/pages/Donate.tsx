@@ -32,7 +32,7 @@ export default function DonatePage() {
           {/* Impact Section */}
           <section className="py-16 px-4 bg-card">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-serif font-bold text-foreground mb-4 text-center">Your Impact</h2>
+              <h2 className="text-3xl  font-bold text-foreground mb-4 text-center">Your Impact</h2>
               <p className="text-muted-foreground mb-12 text-center max-w-2xl mx-auto">
                 Every donation directly supports heritage preservation, creates jobs for local communities, and ensures
                 these treasures survive for future generations.
@@ -50,7 +50,7 @@ export default function DonatePage() {
           {/* How It Works */}
           <section className="py-16 px-4">
             <div className="max-w-6xl mx-auto">
-              <h2 className="text-3xl font-serif font-bold text-foreground mb-12 text-center">
+              <h2 className="text-3xl  font-bold text-foreground mb-12 text-center">
                 How Your Donation Works
               </h2>
 
@@ -82,7 +82,7 @@ export default function DonatePage() {
           {/* Transparency Section */}
           <section className="py-16 px-4 bg-primary text-primary-foreground">
             <div className="max-w-6xl mx-auto text-center">
-              <h2 className="text-3xl font-serif font-bold mb-6">Complete Transparency</h2>
+              <h2 className="text-3xl  font-bold mb-6">Complete Transparency</h2>
               <p className="text-lg mb-8 max-w-2xl mx-auto opacity-90">
                 We believe in full accountability. View detailed breakdowns of how funds are allocated, see monthly
                 progress reports, and understand the direct impact of your contribution.
@@ -117,7 +117,7 @@ function ProcessStep({ number, title, description }: { number: number; title: st
       <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mx-auto mb-4">
         {number}
       </div>
-      <h3 className="font-serif font-bold text-foreground mb-2">{title}</h3>
+      <h3 className=" font-bold text-foreground mb-2">{title}</h3>
       <p className="text-sm text-muted-foreground">{description}</p>
     </div>
   )

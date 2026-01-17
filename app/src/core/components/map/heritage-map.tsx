@@ -199,7 +199,7 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
 
       {/* Map Legend */}
       <div className="absolute bottom-4 left-4 bg-card border border-border rounded-lg p-4 shadow-lg max-w-xs">
-        <h3 className="font-serif font-bold text-foreground mb-3">Heritage Sites Map</h3>
+        <h3 className=" font-bold text-foreground mb-3">Heritage Sites Map</h3>
         <div className="space-y-2 text-sm text-muted-foreground">
           <p>Drag to pan • Scroll wheel to zoom • Click on pins to view details</p>
           <div className="flex items-center gap-2 mt-3">

@@ -59,7 +59,7 @@ export default function TripDetail() {
                 Back to Trips
               </Button>
             </Link>
-            <h1 className="text-4xl md:text-5xl font-serif font-bold text-foreground mb-2">
+            <h1 className="text-4xl md:text-5xl  font-bold text-foreground mb-2">
               {trip.name}
             </h1>
             <p className="text-xl text-muted-foreground mb-4">{trip.location}</p>
@@ -114,7 +114,7 @@ export default function TripDetail() {
 
             {/* Day-by-Day Itinerary */}
             <div className="space-y-6">
-              <h2 className="text-3xl font-serif font-bold text-foreground">Day-by-Day Itinerary</h2>
+              <h2 className="text-3xl  font-bold text-foreground">Day-by-Day Itinerary</h2>
               {trip.itinerary.map((dayPlan) => (
                 <Card key={dayPlan.day} className="overflow-hidden">
                   <CardHeader className="bg-primary/5 border-b border-border">

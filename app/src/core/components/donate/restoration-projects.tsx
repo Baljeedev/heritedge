@@ -63,7 +63,7 @@ export function RestorationProjects({ onSelectProject }: RestorationProjectsProp
   return (
     <section className="py-16 px-4">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-3xl font-serif font-bold text-foreground mb-4">Active Restoration Projects</h2>
+        <h2 className="text-3xl  font-bold text-foreground mb-4">Active Restoration Projects</h2>
         <p className="text-muted-foreground mb-12">Support ongoing preservation efforts at heritage sites worldwide</p>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -84,7 +84,7 @@ export function RestorationProjects({ onSelectProject }: RestorationProjectsProp
 
               {/* Content */}
               <div className="p-6">
-                <h3 className="text-xl font-serif font-bold text-foreground mb-2">{project.name}</h3>
+                <h3 className="text-xl  font-bold text-foreground mb-2">{project.name}</h3>
                 <p className="text-sm text-muted-foreground mb-3">{project.location}</p>
                 <p className="text-sm text-foreground mb-4">{project.description}</p>
 

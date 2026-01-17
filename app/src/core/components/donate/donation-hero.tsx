@@ -2,7 +2,7 @@ export function DonationHero() {
   return (
     <section className="py-16 px-4 bg-gradient-to-b from-primary/10 to-background">
       <div className="max-w-4xl mx-auto text-center">
-        <h1 className="text-5xl md:text-6xl font-serif font-bold text-foreground mb-6 text-balance">
+        <h1 className="text-5xl md:text-6xl  font-bold text-foreground mb-6 text-balance">
           Preserve Heritage. Support Communities.
         </h1>
         <p className="text-xl text-muted-foreground mb-8 text-pretty">

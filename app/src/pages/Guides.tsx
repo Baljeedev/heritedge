@@ -36,7 +36,7 @@ export default function GuidesPage() {
 
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-serif font-bold text-foreground mb-2">Local Tour Guides & Artisans</h1>
+          <h1 className="text-4xl  font-bold text-foreground mb-2">Local Tour Guides & Artisans</h1>
           <p className="text-muted-foreground mb-8">
             Connect with certified guides who bring history to life while supporting local communities
           </p>

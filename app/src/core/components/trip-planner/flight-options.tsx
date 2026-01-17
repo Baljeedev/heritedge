@@ -61,7 +61,7 @@ interface FlightOptionsProps {
 export function FlightOptions({ selectedFlight, onSelect, travelers }: FlightOptionsProps) {
   return (
     <div>
-      <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Flight Options</h2>
+      <h2 className="text-2xl  font-bold text-foreground mb-2">Flight Options</h2>
       <p className="text-muted-foreground mb-6">Select the best flight for your group of {travelers}</p>
 
       <div className="space-y-3">
@@ -77,7 +77,7 @@ export function FlightOptions({ selectedFlight, onSelect, travelers }: FlightOpt
               <div className="flex items-center gap-3">
                 <Checkbox checked={selectedFlight === flight.id} onCheckedChange={() => onSelect(flight.id)} />
                 <div>
-                  <h3 className="font-serif font-bold text-foreground">{flight.airline}</h3>
+                  <h3 className=" font-bold text-foreground">{flight.airline}</h3>
                   <p className="text-xs text-muted-foreground">
                     {flight.from} → {flight.to}
                   </p>

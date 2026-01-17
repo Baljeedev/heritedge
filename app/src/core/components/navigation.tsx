@@ -15,7 +15,7 @@ export function Navigation() {
     <nav className="border-b border-border bg-card sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 text-xl font-serif font-bold">
+        <Link to="/" className="flex items-center gap-2 text-xl  font-bold">
           <Globe className="w-6 h-6 text-primary" />
           <span>HeritEdge</span>
         </Link>

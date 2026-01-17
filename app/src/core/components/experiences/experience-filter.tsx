@@ -22,7 +22,7 @@ export function ExperienceFilter({
 }: ExperienceFilterProps) {
   return (
     <div className="bg-card border border-border rounded-lg p-6 sticky top-24 h-fit space-y-6">
-      <h3 className="font-serif font-bold text-foreground text-lg">Filters</h3>
+      <h3 className=" font-bold text-foreground text-lg">Filters</h3>
 
       {/* Site Filter */}
       <div>

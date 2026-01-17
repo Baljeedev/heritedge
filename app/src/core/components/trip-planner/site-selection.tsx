@@ -18,7 +18,7 @@ export function SiteSelection({ selectedSites, onSelect }: SiteSelectionProps) {
 
   return (
     <div className="space-y-4">
-      <h2 className="text-2xl font-serif font-bold text-foreground mb-6">Which sites would you like to visit?</h2>
+      <h2 className="text-2xl  font-bold text-foreground mb-6">Which sites would you like to visit?</h2>
 
       <div className="grid md:grid-cols-2 gap-6">
         {HERITAGE_SITES.map((site) => (
@@ -32,7 +32,7 @@ export function SiteSelection({ selectedSites, onSelect }: SiteSelectionProps) {
             <div className="flex gap-4 p-4">
               <Checkbox checked={selectedSites.includes(site.id)} onCheckedChange={() => handleToggle(site.id)} />
               <div className="flex-1">
-                <h3 className="font-serif font-bold text-foreground">{site.name}</h3>
+                <h3 className=" font-bold text-foreground">{site.name}</h3>
                 <p className="text-sm text-muted-foreground mb-2">{site.location}</p>
                 <p className="text-sm text-muted-foreground line-clamp-2">{site.description}</p>
               </div>

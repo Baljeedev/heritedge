@@ -69,7 +69,7 @@ export function RestaurantRecommendations({ sites, selectedRestaurants, onSelect
 
   return (
     <div>
-      <h2 className="text-2xl font-serif font-bold text-foreground mb-2">Culinary Experiences</h2>
+      <h2 className="text-2xl  font-bold text-foreground mb-2">Culinary Experiences</h2>
       <p className="text-muted-foreground mb-6">Dine like a local - Restaurants near your heritage sites</p>
 
       <div className="grid md:grid-cols-2 gap-6">
@@ -89,7 +89,7 @@ export function RestaurantRecommendations({ sites, selectedRestaurants, onSelect
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <div>
-                  <h3 className="font-serif font-bold text-foreground">{restaurant.name}</h3>
+                  <h3 className=" font-bold text-foreground">{restaurant.name}</h3>
                   <p className="text-xs text-muted-foreground">{restaurant.cuisine}</p>
                 </div>
                 <Checkbox
