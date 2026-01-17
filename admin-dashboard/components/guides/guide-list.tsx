@@ -1,47 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Edit, Trash2, Plus, Search } from "lucide-react"
+import { Edit, Trash2, Plus, Search, Loader2 } from "lucide-react"
 import type { IGuide } from "@/lib/types"
 import { GuideForm } from "./guide-form"
-
-const mockGuides: IGuide[] = [
-  {
-    _id: "1",
-    clerkUserId: "clerk_1",
-    name: "Rajesh Kumar",
-    image: "/guide-placeholder.png",
-    specialization: "Mughal Architecture",
-    sites: ["1"],
-    rating: 4.7,
-    reviewCount: 234,
-    pricePerDay: 3000,
-    languages: ["English", "Hindi"],
-    experience: 12,
-    bio: "Expert guide with 12 years of experience in heritage tourism",
-    certifications: [
-      {
-        name: "Heritage Tourism Specialist",
-        issuingAuthority: "Ministry of Tourism",
-        certificateNumber: "HTS-2018-001",
-        issueDate: "2018-06-15",
-        expiryDate: "2025-06-15",
-        verified: true,
-        verificationDate: "2024-01-01",
-      },
-    ],
-    isIntern: false,
-    isActive: true,
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-15",
-  },
-]
+import { guidesApi } from "@/lib/api"
+import { toast } from "sonner"
 
 const internshipStatusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -51,12 +21,30 @@ const internshipStatusColors: Record<string, string> = {
 }
 
 export function GuideList() {
-  const [guides, setGuides] = useState<IGuide[]>(mockGuides)
+  const [guides, setGuides] = useState<IGuide[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [internFilter, setInternFilter] = useState("all")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingGuide, setEditingGuide] = useState<IGuide | null>(null)
+
+  // Fetch guides from API
+  useEffect(() => {
+    loadGuides()
+  }, [])
+
+  const loadGuides = async () => {
+    try {
+      setLoading(true)
+      const response = await guidesApi.getAll({ limit: 1000, all: true })
+      setGuides(response.guides)
+    } catch (error: any) {
+      toast.error(`Failed to load guides: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredGuides = useMemo(() => {
     return guides.filter((guide) => {
@@ -72,18 +60,33 @@ export function GuideList() {
     })
   }, [guides, searchTerm, statusFilter, internFilter])
 
-  const handleSave = (guide: IGuide) => {
-    if (editingGuide) {
-      setGuides(guides.map((g) => (g._id === editingGuide._id ? guide : g)))
-    } else {
-      setGuides([...guides, { ...guide, _id: Date.now().toString() }])
+  const handleSave = async (guide: Partial<IGuide>) => {
+    try {
+      if (editingGuide) {
+        await guidesApi.update(editingGuide._id, guide)
+        toast.success("Guide updated successfully")
+      } else {
+        await guidesApi.create(guide)
+        toast.success("Guide created successfully")
+      }
+      setIsFormOpen(false)
+      setEditingGuide(null)
+      await loadGuides()
+    } catch (error: any) {
+      toast.error(`Failed to save guide: ${error.message}`)
     }
-    setIsFormOpen(false)
-    setEditingGuide(null)
   }
 
-  const handleDelete = (id: string) => {
-    setGuides(guides.filter((g) => g._id !== id))
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this guide?")) return
+    
+    try {
+      await guidesApi.delete(id)
+      toast.success("Guide deleted successfully")
+      await loadGuides()
+    } catch (error: any) {
+      toast.error(`Failed to delete guide: ${error.message}`)
+    }
   }
 
   const handleEdit = (guide: IGuide) => {
@@ -158,7 +161,15 @@ export function GuideList() {
       {/* Results Count */}
       <p className="text-sm text-muted-foreground">Showing {filteredGuides.length} guides</p>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
       {/* Guides Grid */}
+      {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredGuides.map((guide) => (
           <Card key={guide._id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -205,6 +216,14 @@ export function GuideList() {
           </Card>
         ))}
       </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredGuides.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No guides found</p>
+        </div>
+      )}
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -212,7 +231,14 @@ export function GuideList() {
           <DialogHeader>
             <DialogTitle>{editingGuide ? "Edit Guide" : "Create New Guide"}</DialogTitle>
           </DialogHeader>
-          <GuideForm guide={editingGuide} onSave={handleSave} onCancel={() => setIsFormOpen(false)} />
+          <GuideForm 
+            guide={editingGuide} 
+            onSave={handleSave} 
+            onCancel={() => {
+              setIsFormOpen(false)
+              setEditingGuide(null)
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

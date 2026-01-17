@@ -15,7 +15,7 @@ import type { IHotel } from "@/lib/types"
 
 interface HotelFormProps {
   hotel?: IHotel | null
-  onSave: (hotel: IHotel) => void
+  onSave: (hotel: Partial<IHotel>) => void
   onCancel: () => void
 }
 

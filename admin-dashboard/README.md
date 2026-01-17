@@ -24,6 +24,7 @@ A comprehensive admin dashboard for managing heritage tourism platform operation
 - **Notifications**: Sonner toast
 - **Analytics**: Vercel Analytics
 - **Icons**: Lucide React
+- **Authentication**: Clerk (Next.js integration)
 
 ## Getting Started
 
@@ -49,17 +50,31 @@ yarn install
 pnpm install
 ```
 
-3. Setup environment variables
+3. Install dependencies (including Clerk)
+```bash
+npm install
+# or
+yarn install
+# or
+pnpm install
+```
+
+4. Setup environment variables
 ```bash
 cp .env.example .env.local
 ```
 
-Edit `.env.local` with your API URL and other configuration:
+Edit `.env.local` with your Clerk credentials and API URL:
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:3000
-API_SECRET_KEY=your_secret_key
-NODE_ENV=development
+# Clerk Authentication (Required)
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+
+# API Base URL (Optional)
+NEXT_PUBLIC_API_BASE_URL=http://localhost:3000
 ```
+
+**Important**: You need to create a Clerk account at [clerk.com](https://clerk.com) and get your publishable key and secret key. The admin dashboard is restricted to the email: `harshit.rai.verma@gmail.com`
 
 ### Development
 
@@ -121,7 +136,8 @@ npm run lint
 │   ├── trips/                 # Trips components
 │   ├── reviews/               # Reviews components
 │   ├── sidebar.tsx           # Navigation sidebar
-│   ├── header.tsx            # Top header
+│   ├── header.tsx            # Top header with Clerk UserButton
+│   ├── admin-guard.tsx       # Email-based access control
 │   └── theme-provider.tsx    # Theme provider
 │
 ├── lib/
@@ -151,8 +167,7 @@ npm run lint
 │   ├── music-show.jpg
 │   └── heritage-hotel.jpg
 │
-├── proxy.ts                   # Middleware for routing
-├── middleware.ts              # (deprecated - use proxy.ts)
+├── middleware.ts              # Clerk authentication middleware
 ├── next.config.mjs           # Next.js configuration
 ├── postcss.config.mjs        # PostCSS configuration
 ├── tsconfig.json             # TypeScript configuration
@@ -269,12 +284,36 @@ setFilter('status', 'inactive')
 
 ## Authentication
 
-Currently configured for development mode. For production:
+The admin dashboard uses **Clerk** for authentication with email-based access control.
 
-1. Implement JWT token validation in `proxy.ts`
-2. Add authentication provider (Clerk, Auth0, etc.)
-3. Update `lib/auth.ts` with real authentication logic
-4. Add protected route checks in middleware
+### Setup
+
+1. **Create a Clerk Account**
+   - Go to [clerk.com](https://clerk.com) and sign up
+   - Create a new application
+   - Copy your `Publishable Key` and `Secret Key`
+
+2. **Configure Environment Variables**
+   - Add `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and `CLERK_SECRET_KEY` to `.env.local`
+   - The keys should start with `pk_` and `sk_` respectively
+
+3. **Access Control**
+   - The dashboard is restricted to: **harshit.rai.verma@gmail.com**
+   - Users with other email addresses will not see any content
+   - Unauthenticated users are redirected to `/sign-in`
+
+### How It Works
+
+- **Middleware** (`middleware.ts`): Protects all `/admin/*` routes
+- **AdminGuard** (`components/admin-guard.tsx`): Checks email address and shows content only for authorized users
+- **Sign In Page** (`app/sign-in/page.tsx`): Clerk's built-in sign-in component
+- **Header** (`components/header.tsx`): Shows Clerk's UserButton for profile and sign-out
+
+### Security
+
+- All admin routes require authentication
+- Email address verification happens client-side (can be enhanced with server-side checks)
+- Clerk handles session management and token refresh automatically
 
 ## Styling
 

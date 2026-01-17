@@ -1,38 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Edit, Trash2, Plus, Search } from "lucide-react"
+import { Edit, Trash2, Plus, Search, Loader2 } from "lucide-react"
 import type { IExperience } from "@/lib/types"
 import { ExperienceForm } from "./experience-form"
-
-const mockExperiences: IExperience[] = [
-  {
-    _id: "1",
-    type: "music",
-    name: "Classical Hindustani Music Show",
-    image: "/music-show-placeholder.png",
-    video: "",
-    sites: [],
-    rating: 4.6,
-    reviewCount: 89,
-    price: 500,
-    description: "Live classical music performance by renowned artists",
-    duration: "90 minutes",
-    venue: "Taj Convention Hall",
-    genre: "Hindustani Classical",
-    performers: ["Ravi Shankar Jr.", "Zakir Hussain"],
-    schedule: ["Every Friday 7 PM", "Every Saturday 8 PM"],
-    isActive: true,
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-15",
-  },
-]
+import { experiencesApi } from "@/lib/api"
+import { toast } from "sonner"
 
 const typeColors: Record<string, string> = {
   music: "bg-purple-100 text-purple-700",
@@ -41,12 +20,29 @@ const typeColors: Record<string, string> = {
 }
 
 export function ExperienceList() {
-  const [experiences, setExperiences] = useState<IExperience[]>(mockExperiences)
+  const [experiences, setExperiences] = useState<IExperience[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [typeFilter, setTypeFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingExperience, setEditingExperience] = useState<IExperience | null>(null)
+
+  useEffect(() => {
+    loadExperiences()
+  }, [])
+
+  const loadExperiences = async () => {
+    try {
+      setLoading(true)
+      const response = await experiencesApi.getAll({ limit: 1000, all: true })
+      setExperiences(response.experiences)
+    } catch (error: any) {
+      toast.error(`Failed to load experiences: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredExperiences = useMemo(() => {
     return experiences.filter((exp) => {
@@ -58,18 +54,33 @@ export function ExperienceList() {
     })
   }, [experiences, searchTerm, typeFilter, statusFilter])
 
-  const handleSave = (experience: IExperience) => {
-    if (editingExperience) {
-      setExperiences(experiences.map((e) => (e._id === editingExperience._id ? experience : e)))
-    } else {
-      setExperiences([...experiences, { ...experience, _id: Date.now().toString() }])
+  const handleSave = async (experience: Partial<IExperience>) => {
+    try {
+      if (editingExperience) {
+        await experiencesApi.update(editingExperience._id, experience)
+        toast.success("Experience updated successfully")
+      } else {
+        await experiencesApi.create(experience)
+        toast.success("Experience created successfully")
+      }
+      setIsFormOpen(false)
+      setEditingExperience(null)
+      await loadExperiences()
+    } catch (error: any) {
+      toast.error(`Failed to save experience: ${error.message}`)
     }
-    setIsFormOpen(false)
-    setEditingExperience(null)
   }
 
-  const handleDelete = (id: string) => {
-    setExperiences(experiences.filter((e) => e._id !== id))
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this experience?")) return
+    
+    try {
+      await experiencesApi.delete(id)
+      toast.success("Experience deleted successfully")
+      await loadExperiences()
+    } catch (error: any) {
+      toast.error(`Failed to delete experience: ${error.message}`)
+    }
   }
 
   const handleEdit = (experience: IExperience) => {
@@ -114,7 +125,7 @@ export function ExperienceList() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value="music">Music Show</SelectItem>
+              <SelectItem value="music">Music</SelectItem>
               <SelectItem value="workshop">Workshop</SelectItem>
             </SelectContent>
           </Select>
@@ -144,7 +155,15 @@ export function ExperienceList() {
       {/* Results Count */}
       <p className="text-sm text-muted-foreground">Showing {filteredExperiences.length} experiences</p>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
       {/* Experiences Grid */}
+      {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredExperiences.map((experience) => (
           <Card key={experience._id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -158,44 +177,22 @@ export function ExperienceList() {
             <div className="p-4">
               <div className="flex items-start justify-between mb-2">
                 <h3 className="font-bold text-lg">{experience.name}</h3>
-              </div>
-
-              <div className="mb-3">
                 <Badge className={typeColors[experience.type]}>
-                  {experience.type === "music" ? "🎵 Music" : "🎨 Workshop"}
+                  {experience.type.charAt(0).toUpperCase() + experience.type.slice(1)}
                 </Badge>
               </div>
 
-              <p className="text-sm text-muted-foreground mb-3">{experience.description}</p>
+              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{experience.description}</p>
 
-              {experience.type === "music" && (
-                <div className="text-sm text-muted-foreground mb-2">
-                  <div>
-                    {experience.duration} • {experience.venue}
-                  </div>
-                  <div className="text-xs mt-1">Genre: {experience.genre}</div>
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-muted-foreground">★ {experience.rating.toFixed(1)}</span>
+                  <span className="text-muted-foreground">₹{experience.price}</span>
                 </div>
-              )}
-
-              {experience.type === "workshop" && (
-                <div className="text-sm text-muted-foreground mb-2">
-                  <div>Instructor: {experience.instructor}</div>
-                  <div className="text-xs mt-1">Level: {experience.skillLevel}</div>
-                </div>
-              )}
-
-              <div className="flex items-center justify-between text-sm my-3 py-3 border-t border-border">
-                <span className="text-muted-foreground">★ {experience.rating.toFixed(1)}</span>
-                <span className="font-bold">₹{experience.price}</span>
               </div>
 
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="flex-1 bg-transparent"
-                  onClick={() => handleEdit(experience)}
-                >
+                <Button size="sm" variant="outline" className="flex-1 bg-transparent" onClick={() => handleEdit(experience)}>
                   <Edit className="h-4 w-4" />
                 </Button>
                 <Button size="sm" variant="destructive" className="flex-1" onClick={() => handleDelete(experience._id)}>
@@ -206,6 +203,14 @@ export function ExperienceList() {
           </Card>
         ))}
       </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredExperiences.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No experiences found</p>
+        </div>
+      )}
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -213,7 +218,14 @@ export function ExperienceList() {
           <DialogHeader>
             <DialogTitle>{editingExperience ? "Edit Experience" : "Create New Experience"}</DialogTitle>
           </DialogHeader>
-          <ExperienceForm experience={editingExperience} onSave={handleSave} onCancel={() => setIsFormOpen(false)} />
+          <ExperienceForm 
+            experience={editingExperience} 
+            onSave={handleSave} 
+            onCancel={() => {
+              setIsFormOpen(false)
+              setEditingExperience(null)
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

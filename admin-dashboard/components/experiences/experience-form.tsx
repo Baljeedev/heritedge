@@ -13,7 +13,7 @@ import type { IExperience } from "@/lib/types"
 
 interface ExperienceFormProps {
   experience?: IExperience | null
-  onSave: (experience: IExperience) => void
+  onSave: (experience: Partial<IExperience>) => void
   onCancel: () => void
 }
 

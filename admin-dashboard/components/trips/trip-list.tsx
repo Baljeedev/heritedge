@@ -1,50 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Edit, Trash2, Plus, Search, Star } from "lucide-react"
+import { Edit, Trash2, Plus, Search, Star, Loader2 } from "lucide-react"
 import type { ITrip } from "@/lib/types"
 import { TripForm } from "./trip-form"
-
-const mockTrips: ITrip[] = [
-  {
-    _id: "1",
-    clerkUserId: "system",
-    name: "Golden Triangle Heritage Tour",
-    location: "Delhi, Agra, Jaipur",
-    duration: "5 Days",
-    image: "/trip-placeholder.png",
-    description: "Classic heritage tour visiting India's most iconic monuments",
-    highlights: ["Taj Mahal", "Red Fort", "City Palace"],
-    itinerary: [
-      {
-        day: 1,
-        title: "Delhi Arrival",
-        activities: [
-          { time: "2:00 PM", activity: "Arrive in Delhi", location: "Hotel", description: "Check-in and rest" },
-        ],
-      },
-    ],
-    budget: "Moderate",
-    bestTimeToVisit: "October to March",
-    isFeatured: true,
-    selectedSites: [],
-    selectedHotels: [],
-    selectedGuides: [],
-    selectedExperiences: [],
-    isAIGenerated: false,
-    status: "planned",
-    startDate: "2024-02-01",
-    endDate: "2024-02-05",
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-15",
-  },
-]
+import { tripsApi } from "@/lib/api"
+import { toast } from "sonner"
 
 const budgetColors: Record<string, string> = {
   Budget: "bg-green-100 text-green-700",
@@ -61,12 +28,29 @@ const statusColors: Record<string, string> = {
 }
 
 export function TripList() {
-  const [trips, setTrips] = useState<ITrip[]>(mockTrips)
+  const [trips, setTrips] = useState<ITrip[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [budgetFilter, setBudgetFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingTrip, setEditingTrip] = useState<ITrip | null>(null)
+
+  useEffect(() => {
+    loadTrips()
+  }, [])
+
+  const loadTrips = async () => {
+    try {
+      setLoading(true)
+      const response = await tripsApi.getAll({ limit: 1000 })
+      setTrips(response.trips)
+    } catch (error: any) {
+      toast.error(`Failed to load trips: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredTrips = useMemo(() => {
     return trips.filter((trip) => {
@@ -81,18 +65,33 @@ export function TripList() {
     })
   }, [trips, searchTerm, budgetFilter, statusFilter])
 
-  const handleSave = (trip: ITrip) => {
-    if (editingTrip) {
-      setTrips(trips.map((t) => (t._id === editingTrip._id ? trip : t)))
-    } else {
-      setTrips([...trips, { ...trip, _id: Date.now().toString() }])
+  const handleSave = async (trip: Partial<ITrip>) => {
+    try {
+      if (editingTrip) {
+        await tripsApi.update(editingTrip._id, trip)
+        toast.success("Trip updated successfully")
+      } else {
+        await tripsApi.create(trip)
+        toast.success("Trip created successfully")
+      }
+      setIsFormOpen(false)
+      setEditingTrip(null)
+      await loadTrips()
+    } catch (error: any) {
+      toast.error(`Failed to save trip: ${error.message}`)
     }
-    setIsFormOpen(false)
-    setEditingTrip(null)
   }
 
-  const handleDelete = (id: string) => {
-    setTrips(trips.filter((t) => t._id !== id))
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this trip?")) return
+    
+    try {
+      await tripsApi.delete(id)
+      toast.success("Trip deleted successfully")
+      await loadTrips()
+    } catch (error: any) {
+      toast.error(`Failed to delete trip: ${error.message}`)
+    }
   }
 
   const handleEdit = (trip: ITrip) => {
@@ -106,7 +105,7 @@ export function TripList() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold">Trips</h1>
-          <p className="text-muted-foreground mt-1">Manage heritage tours and itineraries</p>
+          <p className="text-muted-foreground mt-1">Manage trips and itineraries</p>
         </div>
         <Button
           onClick={() => {
@@ -171,41 +170,35 @@ export function TripList() {
       {/* Results Count */}
       <p className="text-sm text-muted-foreground">Showing {filteredTrips.length} trips</p>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
       {/* Trips Grid */}
+      {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTrips.map((trip) => (
           <Card key={trip._id} className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="aspect-video bg-muted overflow-hidden relative">
+            <div className="aspect-video bg-muted overflow-hidden">
               <img src={trip.image || "/placeholder.svg"} alt={trip.name} className="w-full h-full object-cover" />
-              {trip.isFeatured && (
-                <div className="absolute top-2 right-2">
-                  <Badge className="bg-yellow-100 text-yellow-700">
-                    <Star className="h-3 w-3 mr-1 fill-current" />
-                    Featured
-                  </Badge>
-                </div>
-              )}
             </div>
             <div className="p-4">
-              <h3 className="font-bold text-lg">{trip.name}</h3>
+              <div className="flex items-start justify-between mb-2">
+                <h3 className="font-bold text-lg">{trip.name}</h3>
+                {trip.isFeatured && <Star className="h-5 w-5 text-amber-500 fill-amber-500" />}
+              </div>
               <p className="text-sm text-muted-foreground mb-3">{trip.location}</p>
 
               <div className="space-y-2 mb-4">
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex gap-2">
                   <Badge className={budgetColors[trip.budget]}>{trip.budget}</Badge>
                   <Badge className={statusColors[trip.status]}>{trip.status}</Badge>
                 </div>
-
                 <div className="text-sm text-muted-foreground">{trip.duration}</div>
-                {trip.startDate && (
-                  <div className="text-xs text-muted-foreground">
-                    {new Date(trip.startDate).toLocaleDateString()} -
-                    {trip.endDate && new Date(trip.endDate).toLocaleDateString()}
-                  </div>
-                )}
               </div>
-
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">{trip.description}</p>
 
               <div className="flex gap-2">
                 <Button size="sm" variant="outline" className="flex-1 bg-transparent" onClick={() => handleEdit(trip)}>
@@ -219,6 +212,14 @@ export function TripList() {
           </Card>
         ))}
       </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredTrips.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No trips found</p>
+        </div>
+      )}
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -226,7 +227,14 @@ export function TripList() {
           <DialogHeader>
             <DialogTitle>{editingTrip ? "Edit Trip" : "Create New Trip"}</DialogTitle>
           </DialogHeader>
-          <TripForm trip={editingTrip} onSave={handleSave} onCancel={() => setIsFormOpen(false)} />
+          <TripForm 
+            trip={editingTrip} 
+            onSave={handleSave} 
+            onCancel={() => {
+              setIsFormOpen(false)
+              setEditingTrip(null)
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

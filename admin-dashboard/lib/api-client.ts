@@ -1,7 +1,10 @@
+"use client"
+
 import axios from "axios"
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.yourdomain.com"
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
 
+// Create axios instance
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -9,26 +12,42 @@ const apiClient = axios.create({
   },
 })
 
-// Add token to requests
-apiClient.interceptors.request.use(async (config) => {
-  // In a real app, get the token from Clerk, Auth0, or your auth provider
-  const token = localStorage.getItem("authToken")
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
-  }
-  return config
-})
+// Token getter function - will be set by the auth hook
+let getTokenFn: (() => Promise<string | null>) | null = null
 
+export const setTokenGetter = (fn: () => Promise<string | null>) => {
+  getTokenFn = fn
+}
+
+// Request interceptor to add auth token
+apiClient.interceptors.request.use(
+  async (config) => {
+    // Get token from Clerk if available
+    if (getTokenFn) {
+      const token = await getTokenFn()
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`
+      }
+    }
+    return config
+  },
+  (error) => {
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor for error handling
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized - clear token and redirect to login
-      localStorage.removeItem("authToken")
-      window.location.href = "/login"
+      // Handle unauthorized - redirect to sign-in
+      if (typeof window !== "undefined") {
+        window.location.href = "/sign-in"
+      }
     }
     return Promise.reject(error)
-  },
+  }
 )
 
 export default apiClient

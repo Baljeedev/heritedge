@@ -1,62 +1,164 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { MapPin, Users, Zap, Building2, Map, Star, Clock, ArrowRight } from "lucide-react"
+import { MapPin, Users, Zap, Building2, Map, Star, Clock, ArrowRight, Loader2 } from "lucide-react"
 import Link from "next/link"
+import { heritageSitesApi, guidesApi, experiencesApi, hotelsApi, tripsApi, reviewsApi } from "@/lib/api"
 
-const stats = [
-  {
-    label: "Total Heritage Sites",
-    value: "324",
-    icon: MapPin,
-    color: "bg-amber-100 text-amber-700",
-    href: "/admin/heritage-sites",
-  },
-  {
-    label: "Total Guides",
-    value: "156",
-    icon: Users,
-    color: "bg-blue-100 text-blue-700",
-    href: "/admin/guides",
-  },
-  {
-    label: "Total Experiences",
-    value: "89",
-    icon: Zap,
-    color: "bg-purple-100 text-purple-700",
-    href: "/admin/experiences",
-  },
-  {
-    label: "Total Hotels",
-    value: "42",
-    icon: Building2,
-    color: "bg-green-100 text-green-700",
-    href: "/admin/hotels",
-  },
-  {
-    label: "Total Trips",
-    value: "234",
-    icon: Map,
-    color: "bg-red-100 text-red-700",
-    href: "/admin/trips",
-  },
-  {
-    label: "Total Reviews",
-    value: "1,289",
-    icon: Star,
-    color: "bg-yellow-100 text-yellow-700",
-    href: "/admin/reviews",
-  },
-  {
-    label: "Pending Applications",
-    value: "12",
-    icon: Clock,
-    color: "bg-orange-100 text-orange-700",
-    href: "/admin/guides",
-  },
-]
+interface Stat {
+  label: string
+  value: string | number
+  icon: any
+  color: string
+  href: string
+  loading?: boolean
+}
 
 export default function DashboardPage() {
+  const [stats, setStats] = useState<Stat[]>([
+    {
+      label: "Total Heritage Sites",
+      value: 0,
+      icon: MapPin,
+      color: "bg-amber-100 text-amber-700",
+      href: "/admin/heritage-sites",
+      loading: true,
+    },
+    {
+      label: "Total Guides",
+      value: 0,
+      icon: Users,
+      color: "bg-blue-100 text-blue-700",
+      href: "/admin/guides",
+      loading: true,
+    },
+    {
+      label: "Total Experiences",
+      value: 0,
+      icon: Zap,
+      color: "bg-purple-100 text-purple-700",
+      href: "/admin/experiences",
+      loading: true,
+    },
+    {
+      label: "Total Hotels",
+      value: 0,
+      icon: Building2,
+      color: "bg-green-100 text-green-700",
+      href: "/admin/hotels",
+      loading: true,
+    },
+    {
+      label: "Total Trips",
+      value: 0,
+      icon: Map,
+      color: "bg-red-100 text-red-700",
+      href: "/admin/trips",
+      loading: true,
+    },
+    {
+      label: "Total Reviews",
+      value: 0,
+      icon: Star,
+      color: "bg-yellow-100 text-yellow-700",
+      href: "/admin/reviews",
+      loading: true,
+    },
+    {
+      label: "Pending Applications",
+      value: 0,
+      icon: Clock,
+      color: "bg-orange-100 text-orange-700",
+      href: "/admin/guides",
+      loading: true,
+    },
+  ])
+
+  useEffect(() => {
+    loadStats()
+  }, [])
+
+  const loadStats = async () => {
+    try {
+      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes] = await Promise.all([
+        heritageSitesApi.getAll({ limit: 1 }),
+        guidesApi.getAll({ limit: 1, all: true }),
+        experiencesApi.getAll({ limit: 1, all: true }),
+        hotelsApi.getAll({ limit: 1, all: true }),
+        tripsApi.getAll({ limit: 1 }),
+        reviewsApi.getAll({ limit: 1, all: true }),
+      ])
+
+      // Count pending internship applications
+      const allGuides = await guidesApi.getAll({ limit: 1000, all: true })
+      const pendingInterns = allGuides.guides.filter(
+        (g) => g.isIntern && g.internshipStatus === "pending"
+      ).length
+
+      setStats([
+        {
+          label: "Total Heritage Sites",
+          value: sitesRes.total,
+          icon: MapPin,
+          color: "bg-amber-100 text-amber-700",
+          href: "/admin/heritage-sites",
+          loading: false,
+        },
+        {
+          label: "Total Guides",
+          value: guidesRes.total,
+          icon: Users,
+          color: "bg-blue-100 text-blue-700",
+          href: "/admin/guides",
+          loading: false,
+        },
+        {
+          label: "Total Experiences",
+          value: experiencesRes.total,
+          icon: Zap,
+          color: "bg-purple-100 text-purple-700",
+          href: "/admin/experiences",
+          loading: false,
+        },
+        {
+          label: "Total Hotels",
+          value: hotelsRes.total,
+          icon: Building2,
+          color: "bg-green-100 text-green-700",
+          href: "/admin/hotels",
+          loading: false,
+        },
+        {
+          label: "Total Trips",
+          value: tripsRes.total,
+          icon: Map,
+          color: "bg-red-100 text-red-700",
+          href: "/admin/trips",
+          loading: false,
+        },
+        {
+          label: "Total Reviews",
+          value: reviewsRes.total,
+          icon: Star,
+          color: "bg-yellow-100 text-yellow-700",
+          href: "/admin/reviews",
+          loading: false,
+        },
+        {
+          label: "Pending Applications",
+          value: pendingInterns,
+          icon: Clock,
+          color: "bg-orange-100 text-orange-700",
+          href: "/admin/guides",
+          loading: false,
+        },
+      ])
+    } catch (error: any) {
+      console.error("Failed to load dashboard stats:", error)
+    }
+  }
+
   return (
     <div className="space-y-8">
       {/* Page Header */}
@@ -67,13 +169,19 @@ export default function DashboardPage() {
 
       {/* Statistics Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map(({ label, value, icon: Icon, color, href }) => (
+        {stats.map(({ label, value, icon: Icon, color, href, loading }) => (
           <Link key={label} href={href}>
             <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer h-full">
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">{label}</p>
-                  <p className="text-3xl font-bold text-foreground mt-2">{value}</p>
+                  {loading ? (
+                    <Loader2 className="h-8 w-8 animate-spin text-primary mt-2" />
+                  ) : (
+                    <p className="text-3xl font-bold text-foreground mt-2">
+                      {typeof value === "number" ? value.toLocaleString() : value}
+                    </p>
+                  )}
                 </div>
                 <div className={`p-3 rounded-lg ${color}`}>
                   <Icon className="h-6 w-6" />

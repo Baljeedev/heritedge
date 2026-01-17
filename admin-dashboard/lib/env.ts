@@ -19,7 +19,7 @@ export function validateEnv() {
 }
 
 export const env = {
-  apiUrl: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000",
+  apiUrl: process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
   apiSecret: process.env.API_SECRET_KEY || "",
   databaseUrl: process.env.DATABASE_URL || "",
   nodeEnv: (process.env.NODE_ENV || "development") as "development" | "production" | "test",

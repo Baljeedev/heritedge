@@ -16,7 +16,7 @@ import type { ITrip, IDayPlan } from "@/lib/types"
 
 interface TripFormProps {
   trip?: ITrip | null
-  onSave: (trip: ITrip) => void
+  onSave: (trip: Partial<ITrip>) => void
   onCancel: () => void
 }
 
@@ -110,15 +110,18 @@ export function TripForm({ trip, onSave, onCancel }: TripFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const newTrip: ITrip = {
-      _id: trip?._id || "",
-      clerkUserId: formData.clerkUserId || "system",
+    // For featured trips created by admin, use "system" as clerkUserId
+    const clerkUserId = formData.isFeatured ? "system" : (formData.clerkUserId || "system")
+
+    const newTrip: Partial<ITrip> = {
+      ...(trip?._id && { _id: trip._id }),
+      clerkUserId,
       name: formData.name || "",
       location: formData.location || "",
       duration: formData.duration || "",
       image: formData.image || "",
       description: formData.description || "",
-      highlights: highlightsInput.split(",").map((h) => h.trim()),
+      highlights: highlightsInput.split(",").map((h) => h.trim()).filter(Boolean),
       itinerary,
       budget: (formData.budget as "Budget" | "Moderate" | "Luxury") || "Moderate",
       bestTimeToVisit: formData.bestTimeToVisit || "",
@@ -132,8 +135,6 @@ export function TripForm({ trip, onSave, onCancel }: TripFormProps) {
       status: (formData.status as "draft" | "planned" | "booked" | "completed" | "cancelled") || "draft",
       startDate: formData.startDate,
       endDate: formData.endDate,
-      createdAt: formData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
 
     onSave(newTrip)

@@ -1,56 +1,17 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Edit, Trash2, Plus, Search } from "lucide-react"
+import { Edit, Trash2, Plus, Search, Loader2 } from "lucide-react"
 import type { IHotel } from "@/lib/types"
 import { HotelForm } from "./hotel-form"
-
-const mockHotels: IHotel[] = [
-  {
-    _id: "1",
-    name: "Neemrana Fort Palace",
-    chain: "Neemrana Hotels",
-    location: "Neemrana",
-    city: "Alwar",
-    state: "Rajasthan",
-    country: "India",
-    coordinates: { latitude: 27.6, longitude: 76.5 },
-    images: ["/hotel-placeholder.png"],
-    rating: 4.8,
-    reviewCount: 234,
-    pricePerNight: { min: 5000, max: 15000, currency: "INR" },
-    description: "Historic fort palace with heritage experiences",
-    amenities: ["WiFi", "Restaurant", "Pool", "Spa"],
-    roomTypes: [
-      {
-        name: "Heritage Room",
-        description: "Traditional themed room",
-        pricePerNight: 5000,
-        maxOccupancy: 2,
-        isLivingHistory: true,
-        theme: "Mughal Era",
-      },
-    ],
-    heritageFeatures: {
-      hasLivingHistoryRooms: true,
-      hasHistoryLectures: true,
-      hasCulturalMeals: true,
-      hasStorytellingEvenings: true,
-    },
-    nearbySites: [],
-    partnershipType: "premium",
-    discountPercentage: 10,
-    isActive: true,
-    createdAt: "2024-01-01",
-    updatedAt: "2024-01-15",
-  },
-]
+import { hotelsApi } from "@/lib/api"
+import { toast } from "sonner"
 
 const partnershipColors: Record<string, string> = {
   listing: "bg-gray-100 text-gray-700",
@@ -59,12 +20,31 @@ const partnershipColors: Record<string, string> = {
 }
 
 export function HotelList() {
-  const [hotels, setHotels] = useState<IHotel[]>(mockHotels)
+  const [hotels, setHotels] = useState<IHotel[]>([])
+  const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [partnershipFilter, setPartnershipFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingHotel, setEditingHotel] = useState<IHotel | null>(null)
+
+  // Fetch hotels from API
+  useEffect(() => {
+    loadHotels()
+  }, [])
+
+  const loadHotels = async () => {
+    try {
+      setLoading(true)
+      // Get all hotels including inactive ones for admin
+      const response = await hotelsApi.getAll({ limit: 1000, all: true })
+      setHotels(response.hotels)
+    } catch (error: any) {
+      toast.error(`Failed to load hotels: ${error.message}`)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const filteredHotels = useMemo(() => {
     return hotels.filter((hotel) => {
@@ -80,18 +60,33 @@ export function HotelList() {
     })
   }, [hotels, searchTerm, partnershipFilter, statusFilter])
 
-  const handleSave = (hotel: IHotel) => {
-    if (editingHotel) {
-      setHotels(hotels.map((h) => (h._id === editingHotel._id ? hotel : h)))
-    } else {
-      setHotels([...hotels, { ...hotel, _id: Date.now().toString() }])
+  const handleSave = async (hotel: Partial<IHotel>) => {
+    try {
+      if (editingHotel) {
+        await hotelsApi.update(editingHotel._id, hotel)
+        toast.success("Hotel updated successfully")
+      } else {
+        await hotelsApi.create(hotel)
+        toast.success("Hotel created successfully")
+      }
+      setIsFormOpen(false)
+      setEditingHotel(null)
+      await loadHotels()
+    } catch (error: any) {
+      toast.error(`Failed to save hotel: ${error.message}`)
     }
-    setIsFormOpen(false)
-    setEditingHotel(null)
   }
 
-  const handleDelete = (id: string) => {
-    setHotels(hotels.filter((h) => h._id !== id))
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this hotel?")) return
+    
+    try {
+      await hotelsApi.delete(id)
+      toast.success("Hotel deleted successfully")
+      await loadHotels()
+    } catch (error: any) {
+      toast.error(`Failed to delete hotel: ${error.message}`)
+    }
   }
 
   const handleEdit = (hotel: IHotel) => {
@@ -167,7 +162,15 @@ export function HotelList() {
       {/* Results Count */}
       <p className="text-sm text-muted-foreground">Showing {filteredHotels.length} hotels</p>
 
+      {/* Loading State */}
+      {loading && (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
+
       {/* Hotels Grid */}
+      {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredHotels.map((hotel) => (
           <Card key={hotel._id} className="overflow-hidden hover:shadow-lg transition-shadow">
@@ -215,6 +218,14 @@ export function HotelList() {
           </Card>
         ))}
       </div>
+      )}
+
+      {/* Empty State */}
+      {!loading && filteredHotels.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">No hotels found</p>
+        </div>
+      )}
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -222,7 +233,14 @@ export function HotelList() {
           <DialogHeader>
             <DialogTitle>{editingHotel ? "Edit Hotel" : "Create New Hotel"}</DialogTitle>
           </DialogHeader>
-          <HotelForm hotel={editingHotel} onSave={handleSave} onCancel={() => setIsFormOpen(false)} />
+          <HotelForm 
+            hotel={editingHotel} 
+            onSave={handleSave} 
+            onCancel={() => {
+              setIsFormOpen(false)
+              setEditingHotel(null)
+            }} 
+          />
         </DialogContent>
       </Dialog>
     </div>

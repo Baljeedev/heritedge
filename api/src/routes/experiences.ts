@@ -13,11 +13,16 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       minRating,
       maxPrice,
       skillLevel,
+      all, // If true, include inactive experiences (for admin)
       limit = 50,
       skip = 0,
     } = req.query;
 
-    const query: any = { isActive: true };
+    const query: any = {};
+    // Only filter by isActive if 'all' parameter is not set
+    if (all !== "true") {
+      query.isActive = true;
+    }
 
     if (type) query.type = type;
     if (siteId) query.sites = siteId;

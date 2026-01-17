@@ -36,7 +36,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border pt-20 md:pt-0 transition-transform md:relative md:translate-x-0 z-30",
+          "fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border pt-20 md:pt-0 transition-transform md:fixed md:translate-x-0 z-30",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >

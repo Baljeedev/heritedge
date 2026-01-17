@@ -17,11 +17,16 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       hasLivingHistory,
       hasHistoryLectures,
       hasCulturalMeals,
+      all, // If true, include inactive hotels (for admin)
       limit = 50,
       skip = 0,
     } = req.query;
 
-    const query: any = { isActive: true };
+    const query: any = {};
+    // Only filter by isActive if 'all' parameter is not set
+    if (all !== "true") {
+      query.isActive = true;
+    }
 
     if (city) query.city = city;
     if (state) query.state = state;

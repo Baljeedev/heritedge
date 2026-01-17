@@ -15,7 +15,7 @@ import type { IGuide } from "@/lib/types"
 
 interface GuideFormProps {
   guide?: IGuide | null
-  onSave: (guide: IGuide) => void
+  onSave: (guide: Partial<IGuide>) => void
   onCancel: () => void
 }
 

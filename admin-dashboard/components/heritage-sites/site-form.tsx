@@ -13,7 +13,7 @@ import type { IHeritageSite } from "@/lib/types"
 
 interface SiteFormProps {
   site?: IHeritageSite | null
-  onSave: (site: IHeritageSite) => void
+  onSave: (site: Partial<IHeritageSite>) => void
   onCancel: () => void
 }
 
