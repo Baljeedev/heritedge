@@ -19,8 +19,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Classical Indian Music at Taj Mahal",
-    image: "/placeholder-music-1.jpg",
-    video: "https://www.youtube.com/embed/example-taj-mahal-music",
+    image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Taj_Mahal_%28Edited%29.jpeg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.8,
     reviewCount: 142,
     price: 45,
@@ -35,8 +35,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Qawwali Evening at Humayun's Tomb",
-    image: "/placeholder-music-2.jpg",
-    video: "https://www.youtube.com/embed/example-qawwali-humayun",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgwTqZJa4eQEYhb6J6P3c8bBNCCKUX0VavxQ&s",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.7,
     reviewCount: 98,
     price: 40,
@@ -51,8 +51,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Rajasthani Folk Music at Hawa Mahal",
-    image: "/placeholder-music-3.jpg",
-    video: "https://www.youtube.com/embed/example-rajasthani-folk-music",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDD8CIjBDuVukV24jBDSDnW6-DUu3qrzpeQ&s",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.6,
     reviewCount: 203,
     price: 35,
@@ -67,8 +67,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Carnatic Music at Mysore Palace",
-    image: "/placeholder-music-4.jpg",
-    video: "https://www.youtube.com/embed/example-carnatic-mysore",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLyADkHVmysdaYefNY8J3KecQDfgvhkdlyqg&s",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.5,
     reviewCount: 156,
     price: 50,
@@ -83,8 +83,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Temple Music at Khajuraho",
-    image: "/placeholder-music-5.jpg",
-    video: "https://www.youtube.com/embed/example-temple-music-khajuraho",
+    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNemzzVQ4UCMR-JvvNhQcDqnq2FYJ2oi2weA&s",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.4,
     reviewCount: 87,
     price: 30,
@@ -99,8 +99,8 @@ const MUSIC_SHOWS = [
   {
     type: "music" as const,
     name: "Odissi Music & Dance at Konark",
-    image: "/placeholder-music-6.jpg",
-    video: "https://www.youtube.com/embed/example-odissi-konark",
+    image: "https://s7ap1.scene7.com/is/image/incredibleindia/konark-temple-puri-odisha-2-attr-hero?qlt=82&ts=1726674676369",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.6,
     reviewCount: 112,
     price: 40,
@@ -119,8 +119,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Marble Inlay Art Workshop",
-    image: "/placeholder-workshop-1.jpg",
-    video: "https://www.youtube.com/embed/example-marble-inlay-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.9,
     reviewCount: 87,
     price: 120,
@@ -141,8 +141,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Mughal Calligraphy Workshop",
-    image: "/placeholder-workshop-2.jpg",
-    video: "https://www.youtube.com/embed/example-calligraphy-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.7,
     reviewCount: 64,
     price: 85,
@@ -163,8 +163,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Traditional Textile Weaving",
-    image: "/placeholder-workshop-3.jpg",
-    video: "https://www.youtube.com/embed/example-textile-weaving-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.7,
     reviewCount: 71,
     price: 90,
@@ -185,8 +185,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Stone Carving Workshop",
-    image: "/placeholder-workshop-4.jpg",
-    video: "https://www.youtube.com/embed/example-stone-carving-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.8,
     reviewCount: 112,
     price: 95,
@@ -207,8 +207,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Traditional Pottery & Ceramics",
-    image: "/placeholder-workshop-5.jpg",
-    video: "https://www.youtube.com/embed/example-pottery-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.6,
     reviewCount: 93,
     price: 75,
@@ -229,8 +229,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Indian Miniature Painting",
-    image: "/placeholder-workshop-6.jpg",
-    video: "https://www.youtube.com/embed/example-miniature-painting-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.8,
     reviewCount: 78,
     price: 100,
@@ -251,8 +251,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Traditional Jewelry Making",
-    image: "/placeholder-workshop-7.jpg",
-    video: "https://www.youtube.com/embed/example-jewelry-making-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.5,
     reviewCount: 56,
     price: 110,
@@ -273,8 +273,8 @@ const WORKSHOPS = [
   {
     type: "workshop" as const,
     name: "Block Printing Workshop",
-    image: "/placeholder-workshop-8.jpg",
-    video: "https://www.youtube.com/embed/example-block-printing-workshop",
+    image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
+    video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     rating: 4.7,
     reviewCount: 89,
     price: 80,
@@ -378,7 +378,7 @@ const seedExperiences = async () => {
     // Insert all experiences
     const allExperiences = [...musicShowsWithSites, ...workshopsWithSites];
     const createdExperiences = await Experience.insertMany(allExperiences);
-    
+
     console.log(`✅ Successfully seeded ${createdExperiences.length} experiences`);
     console.log(`   - ${musicShowsWithSites.length} music shows`);
     console.log(`   - ${workshopsWithSites.length} workshops`);

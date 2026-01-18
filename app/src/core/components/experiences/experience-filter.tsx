@@ -1,11 +1,11 @@
 "use client"
 
-import { HERITAGE_SITES } from "@/data/heritage-sites"
 import { Star } from "lucide-react"
+import { useHeritageSites } from "@/lib/api"
 
 interface ExperienceFilterProps {
-  selectedSite: number | null
-  onSiteChange: (siteId: number | null) => void
+  selectedSite: string | null
+  onSiteChange: (siteId: string | null) => void
   priceFilter: "all" | "budget" | "mid" | "premium"
   onPriceChange: (filter: "all" | "budget" | "mid" | "premium") => void
   ratingFilter: number
@@ -20,6 +20,9 @@ export function ExperienceFilter({
   ratingFilter,
   onRatingChange,
 }: ExperienceFilterProps) {
+  const { data, isLoading } = useHeritageSites({ limit: 100 })
+  const sites = data?.sites || []
+
   return (
     <div className="bg-card border border-border rounded-lg p-6 sticky top-24 h-fit space-y-6">
       <h3 className=" font-bold text-foreground text-lg">Filters</h3>
@@ -38,20 +41,24 @@ export function ExperienceFilter({
           >
             All Sites
           </button>
-          {HERITAGE_SITES.map((site) => (
-            <button
-              key={site.id}
-              onClick={() => onSiteChange(site.id)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm truncate ${
-                selectedSite === site.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80 text-foreground"
-              }`}
-              title={site.name}
-            >
-              {site.name}
-            </button>
-          ))}
+          {isLoading ? (
+            <div className="text-sm text-muted-foreground px-3 py-2">Loading sites...</div>
+          ) : (
+            sites.map((site) => (
+              <button
+                key={site._id}
+                onClick={() => onSiteChange(site._id)}
+                className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm truncate ${
+                  selectedSite === site._id
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted hover:bg-muted/80 text-foreground"
+                }`}
+                title={site.name}
+              >
+                {site.name}
+              </button>
+            ))
+          )}
         </div>
       </div>
 

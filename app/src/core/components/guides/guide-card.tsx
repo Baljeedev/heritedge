@@ -1,9 +1,8 @@
 "use client"
 
-import { Star, MapPin, Award, Users, MessageSquare, Heart } from "lucide-react"
+import { Star, MapPin, Award, Users, MessageSquare, Heart, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { HERITAGE_SITES } from "@/data/heritage-sites"
+import { useState, useRef } from "react"
 import type { Guide as ApiGuide } from "@/lib/api/guides"
 
 interface StaticGuide {
@@ -29,9 +28,37 @@ interface GuideCardProps {
 export function GuideCard({ guide }: GuideCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
-
-  // Check if this is API data or static data
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  
+  const handlePlayClick = () => {
+    if (videoRef.current) {
+      videoRef.current.play()
+      setIsVideoPlaying(true)
+    }
+  }
+  
+  // Check if this is API data or static data (must be defined first)
   const isApiData = '_id' in guide
+  
+  // Get video URL
+  const getVideoUrl = () => {
+    if (isApiData) {
+      return (guide as ApiGuide).video
+    }
+    return undefined
+  }
+  
+  // Get image URL
+  const getImageUrl = () => {
+    if (isApiData) {
+      return (guide as ApiGuide).image || "/placeholder.svg"
+    }
+    return (guide as StaticGuide).image || "/placeholder.svg"
+  }
+  
+  const videoUrl = getVideoUrl()
+  const imageUrl = getImageUrl()
   
   // Handle sites data - could be populated objects or just IDs
   const getSiteNames = () => {
@@ -46,10 +73,9 @@ export function GuideCard({ guide }: GuideCardProps) {
       }
       return ['Heritage Site'] // fallback for unpopulated sites
     } else {
-      // Static data - use HERITAGE_SITES lookup
+      // Static data - return generic site names
       const staticGuide = guide as StaticGuide
-      const guideSites = HERITAGE_SITES.filter((site) => staticGuide.sites.includes(site.id))
-      return guideSites.map(site => site.name)
+      return staticGuide.sites.map(() => 'Heritage Site')
     }
   }
 
@@ -96,20 +122,48 @@ export function GuideCard({ guide }: GuideCardProps) {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all">
-      {/* Header with Image */}
-      <div className="relative h-48 bg-muted overflow-hidden group">
-        <img
-          src={
-            isApiData 
-              ? (guide as ApiGuide).image || "/placeholder.svg"
-              : (guide as StaticGuide).image || "/placeholder.svg"
-          }
-          alt={guide.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-        />
+      {/* Header with Image and Video */}
+      <div className="relative h-48 bg-muted overflow-hidden group flex">
+        {/* Image */}
+        {imageUrl && (
+          <div className="flex-1 relative overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={guide.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            />
+          </div>
+        )}
+        
+        {/* Video */}
+        {videoUrl && (
+          <div className="flex-1 relative overflow-hidden group/video">
+            <video
+              ref={videoRef}
+              src={videoUrl}
+              controls
+              className="w-full h-full object-cover"
+              poster={imageUrl} // Use image as video thumbnail
+              onPlay={() => setIsVideoPlaying(true)}
+              onPause={() => setIsVideoPlaying(false)}
+              onEnded={() => setIsVideoPlaying(false)}
+            />
+            {!isVideoPlaying && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer group-hover/video:bg-black/30 transition-colors"
+                onClick={handlePlayClick}
+              >
+                <div className="bg-white/90 hover:bg-white rounded-full p-4 shadow-lg transition-all group-hover/video:scale-110">
+                  <Play className="w-8 h-8 text-foreground fill-foreground" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
         <button
           onClick={() => setIsFavorited(!isFavorited)}
-          className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
+          className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all z-10"
         >
           <Heart className={`w-5 h-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-foreground"}`} />
         </button>

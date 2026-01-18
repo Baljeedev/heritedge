@@ -69,10 +69,12 @@ export interface InternshipApplicationData {
 export const guidesApi = {
   // Get all guides with optional filters
   getAll: async (params?: GuidesQueryParams) => {
+    console.log("guidesApi.getAll - Calling /api/guides with params:", params);
     const response = await apiClient.get<{ guides: Guide[]; total: number; limit: number; skip: number }>(
       '/api/guides',
       { params }
     );
+    console.log("guidesApi.getAll - Response:", response.data);
     return response.data;
   },
 

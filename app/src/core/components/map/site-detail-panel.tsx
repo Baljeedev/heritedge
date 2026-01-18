@@ -14,7 +14,7 @@ interface SiteDetailPanelProps {
 }
 
 interface SiteInfoFromBackend {
-  creator: string 
+  creator: string
   era: string
   location: string
   status: string
@@ -27,14 +27,14 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
   const { data: site, isLoading, error } = useHeritageSite(siteId)
   const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "history">("overview")
 
-  const [ information, setInformation ] = useState<SiteInfoFromBackend | null>(null)
+  const [information, setInformation] = useState<SiteInfoFromBackend | null>(null)
 
   const getInformationFromBackend = async () => {
-    const response = await axios.get("http://localhost:3000/information")
+    const response = await axios.get("http://localhost:3001/information")
 
     setInformation(response.data)
   }
-  
+
   useEffect(() => {
     // console.log("useeffect was run")
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -63,15 +63,15 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
     )
   }
 
-  
+
   return (
     <div className="flex flex-col h-full">
       {/* Image Gallery */}
       <div className="relative h-64 bg-muted overflow-hidden">
-        <img 
-          src={site.image || "/placeholder.svg"} 
-          alt={site.name} 
-          className="w-full h-full object-cover" 
+        <img
+          src={site.image || "/placeholder.svg"}
+          alt={site.name}
+          className="w-full h-full object-cover"
         />
         <button className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all">
           <Heart className={`w-5 h-5 ${isSelected ? "fill-red-500 text-red-500" : "text-foreground"}`} />
@@ -134,31 +134,28 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
         <div className="flex gap-2 border-b border-border mb-4">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`pb-3 px-1 font-medium transition-colors ${
-              activeTab === "overview"
+            className={`pb-3 px-1 font-medium transition-colors ${activeTab === "overview"
                 ? "text-primary border-b-2 border-primary"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Overview
           </button>
           <button
             onClick={() => setActiveTab("history")}
-            className={`pb-3 px-1 font-medium transition-colors ${
-              activeTab === "history"
+            className={`pb-3 px-1 font-medium transition-colors ${activeTab === "history"
                 ? "text-primary border-b-2 border-primary"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             History
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
-            className={`pb-3 px-1 font-medium transition-colors ${
-              activeTab === "reviews"
+            className={`pb-3 px-1 font-medium transition-colors ${activeTab === "reviews"
                 ? "text-primary border-b-2 border-primary"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+              }`}
           >
             Reviews
           </button>
@@ -216,11 +213,10 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
       <div className="border-t border-border p-6 space-y-3 bg-card">
         <Button
           onClick={onToggleSelect}
-          className={`w-full ${
-            isSelected
+          className={`w-full ${isSelected
               ? "bg-accent text-accent-foreground hover:bg-accent/90"
               : "bg-primary text-primary-foreground hover:bg-primary/90"
-          }`}
+            }`}
         >
           {isSelected ? "✓ Selected for Trip" : "+ Add to Trip"}
         </Button>

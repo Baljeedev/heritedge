@@ -1,10 +1,11 @@
 "use client"
 import { Calendar, Users, MapPin, DollarSign, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { HERITAGE_SITES } from "@/data/heritage-sites"
+import { useHeritageSites } from "@/lib/api"
+import { useMemo } from "react"
 
 interface FinalItineraryProps {
-  sites: number[]
+  sites: string[]
   hotels: number[]
   restaurants: number[]
   flight: number | null
@@ -13,7 +14,11 @@ interface FinalItineraryProps {
 }
 
 export function FinalItinerary({ sites, hotels, restaurants, flight, dates, travelers }: FinalItineraryProps) {
-  const selectedSites = HERITAGE_SITES.filter((s) => sites.includes(s.id))
+  const { data, isLoading } = useHeritageSites({ limit: 100 })
+  const selectedSites = useMemo(() => {
+    if (!data?.sites) return []
+    return data.sites.filter((s) => sites.includes(s._id))
+  }, [data?.sites, sites])
 
   const calculateDays = () => {
     if (!dates.start || !dates.end) return 0
@@ -55,25 +60,31 @@ export function FinalItinerary({ sites, hotels, restaurants, flight, dates, trav
       {/* Detailed Itinerary */}
       <div className="bg-card border border-border rounded-lg p-6">
         <h3 className="text-lg  font-bold text-foreground mb-4">Day-by-Day Plan</h3>
-        <div className="space-y-4">
-          {selectedSites.map((site, index) => (
-            <div key={site.id} className="flex gap-4 pb-4 border-b border-border last:border-0">
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
-                  Day {index + 1}
+        {isLoading ? (
+          <div className="text-center py-8 text-muted-foreground">Loading itinerary...</div>
+        ) : selectedSites.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">No sites selected</div>
+        ) : (
+          <div className="space-y-4">
+            {selectedSites.map((site, index) => (
+              <div key={site._id} className="flex gap-4 pb-4 border-b border-border last:border-0">
+                <div className="shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-semibold">
+                    Day {index + 1}
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <h4 className=" font-bold text-foreground mb-1">{site.name}</h4>
+                  <p className="text-sm text-muted-foreground mb-2">{site.location}</p>
+                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <span>📍 {site.era}</span>
+                    <span>⭐ {site.rating} rating</span>
+                  </div>
                 </div>
               </div>
-              <div className="flex-1">
-                <h4 className=" font-bold text-foreground mb-1">{site.name}</h4>
-                <p className="text-sm text-muted-foreground mb-2">{site.location}</p>
-                <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                  <span>📍 {site.era}</span>
-                  <span>⭐ {site.rating} rating</span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Download & Share */}

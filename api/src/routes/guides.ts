@@ -26,7 +26,10 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       query.isActive = true;
     }
 
-    if (siteId) query.sites = siteId;
+    if (siteId) {
+      // sites is an array of ObjectIds, check if it contains the siteId
+      query.sites = siteId;
+    }
     if (specialization) {
       query.$text = { $search: specialization as string };
     }
@@ -41,6 +44,9 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       query["certifications.verified"] = true;
     }
 
+    // Debug: Log the query (remove in production)
+    console.log("Guides query:", JSON.stringify(query, null, 2));
+
     const guides = await Guide.find(query)
       .populate("sites", "name location")
       .limit(Number(limit))
@@ -49,6 +55,9 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
 
     const total = await Guide.countDocuments(query);
 
+    // Debug: Log results
+    console.log(`Found ${guides.length} guides (total: ${total})`);
+
     res.json({
       guides,
       total,
@@ -56,6 +65,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       skip: Number(skip),
     });
   } catch (error: any) {
+    console.error("Error fetching guides:", error);
     res.status(500).json({ error: error.message });
   }
 });

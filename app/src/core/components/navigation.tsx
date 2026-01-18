@@ -46,7 +46,14 @@ export function Navigation() {
 
 
         <SignedIn>
-          <UserButton />
+          <UserButton 
+            afterSignOutUrl="/"
+            appearance={{
+              elements: {
+                userButtonPopoverCard: "shadow-lg"
+              }
+            }}
+          />
         </SignedIn>
         
         <SignedOut>

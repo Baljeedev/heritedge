@@ -1,4 +1,5 @@
-import { Route, Routes } from "react-router-dom"
+import { Route, Routes, useLocation } from "react-router-dom"
+import { useEffect } from "react"
 import Home from "./pages/Home"
 import TripPlanner from "./pages/TripPlanner"
 import TripDetail from "./pages/TripDetail"
@@ -10,18 +11,24 @@ import SigninPage from "./pages/SigninPage"
 import SignupPage from "./pages/SignupPage"
 
 function App() {
+  const location = useLocation()
+
+  // Debug: Log all route changes
+  useEffect(() => {
+    console.log("App route changed:", location.pathname, location.search)
+  }, [location])
 
   return (
     <>
       <Routes>
-        <Route path="/" element={<Home/>} />
-        <Route path="/sign-in" element={<SigninPage/>} />
-        <Route path="/sign-up" element={<SignupPage/>} />
-        <Route path="/map" element={<MapPage/>} />
-        <Route path="/experiences" element={<ExperiencesPage/>} />
-        <Route path="/guides" element={<GuidesPage/>} />
-        <Route path="/trip-planner" element={<TripPlanner/>} />
-        <Route path="/trip-planner/:tripId" element={<TripDetail/>} />
+        <Route path="/" element={<Home />} />
+        <Route path="/sign-in" element={<SigninPage />} />
+        <Route path="/sign-up" element={<SignupPage />} />
+        <Route path="/map" element={<MapPage />} />
+        <Route path="/experiences" element={<ExperiencesPage />} />
+        <Route path="/guides" element={<GuidesPage />} />
+        <Route path="/trip-planner" element={<TripPlanner />} />
+        <Route path="/trip-planner/:tripId" element={<TripDetail />} />
         <Route path="/donate" element={<DonatePage />} />
       </Routes>
     </>

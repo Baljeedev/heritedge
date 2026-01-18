@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useLocation } from "react-router-dom"
 import { useGuides } from "@/lib/api"
 import { GuideFilter } from "@/core/components/guides/guide-filter"
 import { Navigation } from "@/core/components/navigation"
@@ -8,27 +9,37 @@ import { GuideCard } from "@/core/components/guides/guide-card"
 import { Loader2 } from "lucide-react"
 
 export default function GuidesPage() {
+  const location = useLocation()
+
+  // Debug: Log when component mounts and location changes
+  useEffect(() => {
+    console.log("GuidesPage mounted/updated - pathname:", location.pathname)
+  }, [location.pathname])
   const [selectedSite, setSelectedSite] = useState<string | null>(null)
   const [priceFilter, setPriceFilter] = useState<"all" | "budget" | "mid" | "premium">("all")
   const [ratingFilter, setRatingFilter] = useState<number>(0)
 
   // Build query parameters for API
-  const getQueryParams = () => {
-    const params: any = {}
-    
+  const getQueryParams = (): Record<string, string | number> => {
+    const params: Record<string, string | number> = {}
+
     if (selectedSite) params.siteId = selectedSite
     if (ratingFilter > 0) params.minRating = ratingFilter
-    
+
     if (priceFilter !== "all") {
       if (priceFilter === "budget") params.maxPrice = 100
       else if (priceFilter === "mid") params.maxPrice = 200
       // premium has no maxPrice limit
     }
-    
+
     return params
   }
 
-  const { data, isLoading, error } = useGuides(getQueryParams())
+  const queryParams = getQueryParams()
+  const { data, isLoading, error } = useGuides(queryParams)
+
+  // Debug: Log the query params being sent
+  console.log("Guides page - Query params:", queryParams)
 
   return (
     <div className="min-h-screen bg-background">

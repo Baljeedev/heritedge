@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from "react"
 import { useSearchParams } from "react-router-dom"
-import { useExperiences } from "@/lib/api"
+import { useExperiences, useGuides } from "@/lib/api"
 import type { ExperienceType } from "@/data/experiences"
 import { ExperienceFilter } from "@/core/components/experiences/experience-filter"
 import { Navigation } from "@/core/components/navigation"
 import { ExperienceCard } from "@/core/components/experiences/experience-card"
+import { GuideCard } from "@/core/components/guides/guide-card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Users, Music, Hammer, Loader2 } from "lucide-react"
 
@@ -32,7 +33,7 @@ export default function ExperiencesPage() {
 
   // Build query parameters for API
   const getQueryParams = (type: ExperienceType) => {
-    const params: any = { type }
+    const params: Record<string, string | number> = { type }
     
     if (selectedSite) params.siteId = selectedSite
     if (ratingFilter > 0) params.minRating = ratingFilter
@@ -46,8 +47,25 @@ export default function ExperiencesPage() {
     return params
   }
 
-  // Fetch experiences based on current filters
-  const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useExperiences(getQueryParams("guide"))
+  // Build query parameters for guides API (different from experiences)
+  const getGuidesQueryParams = () => {
+    const params: Record<string, string | number> = {}
+    
+    if (selectedSite) params.siteId = selectedSite
+    if (ratingFilter > 0) params.minRating = ratingFilter
+    
+    if (priceFilter !== "all") {
+      if (priceFilter === "budget") params.maxPrice = 100
+      else if (priceFilter === "mid") params.maxPrice = 200
+      // premium has no maxPrice limit
+    }
+    
+    return params
+  }
+
+  // Fetch guides using the guides API (not experiences API)
+  const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(getGuidesQueryParams())
+  // Fetch experiences for music and workshops
   const { data: musicData, isLoading: musicLoading, error: musicError } = useExperiences(getQueryParams("music"))
   const { data: workshopsData, isLoading: workshopsLoading, error: workshopsError } = useExperiences(getQueryParams("workshop"))
 
@@ -73,8 +91,53 @@ export default function ExperiencesPage() {
     }
   }
 
-  // Component for rendering experience tabs with API data
-  function ExperienceTabContent({ type }: { type: ExperienceType }) {
+  // Component for rendering guides tab (uses guides API)
+  function GuidesTabContent() {
+    if (guidesLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <span className="ml-2 text-muted-foreground">Loading guides...</span>
+        </div>
+      )
+    }
+
+    if (guidesError) {
+      return (
+        <div className="text-center py-12 bg-card border border-border rounded-lg">
+          <p className="text-muted-foreground mb-2">Error loading guides</p>
+          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+        </div>
+      )
+    }
+
+    const guides = guidesData?.guides || []
+
+    return (
+      <>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-lg font-semibold text-foreground">
+            {guides.length} guide{guides.length !== 1 ? "s" : ""} available
+          </h2>
+        </div>
+        {guides.length > 0 ? (
+          <div className="grid md:grid-cols-2 gap-6">
+            {guides.map((guide) => (
+              <GuideCard key={guide._id} guide={guide} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-card border border-border rounded-lg">
+            <p className="text-muted-foreground mb-2">No guides found matching your criteria</p>
+            <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+          </div>
+        )}
+      </>
+    )
+  }
+
+  // Component for rendering experience tabs with API data (music and workshops)
+  function ExperienceTabContent({ type }: { type: "music" | "workshop" }) {
     const { data, isLoading, error } = getExperiencesForType(type)
     
     if (isLoading) {
@@ -164,7 +227,7 @@ export default function ExperiencesPage() {
               {/* Experience Cards Grid */}
               <div className="lg:col-span-3">
                 <TabsContent value="guide" className="mt-0">
-                  <ExperienceTabContent type="guide" />
+                  <GuidesTabContent />
                 </TabsContent>
 
                 <TabsContent value="music" className="mt-0">

@@ -1,9 +1,8 @@
 "use client"
 
-import { Star, MapPin, Heart, Music, Hammer, Users, Clock, Calendar } from "lucide-react"
+import { Star, MapPin, Heart, Music, Hammer, Users, Clock, Play } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { useState } from "react"
-import { HERITAGE_SITES } from "@/data/heritage-sites"
+import { useState, useRef } from "react"
 import type { Experience as ApiExperience } from "@/lib/api/experiences"
 import type { Experience as StaticExperience, GuideExperience, MusicShowExperience, WorkshopExperience } from "@/data/experiences"
 
@@ -14,9 +13,37 @@ interface ExperienceCardProps {
 export function ExperienceCard({ experience }: ExperienceCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
-
-  // Check if this is API data or static data
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const videoRef = useRef<HTMLVideoElement>(null)
+  
+  const handlePlayClick = () => {
+    if (videoRef.current) {
+      videoRef.current.play()
+      setIsVideoPlaying(true)
+    }
+  }
+  
+  // Check if this is API data or static data (must be defined first)
   const isApiData = '_id' in experience
+  
+  // Get video URL
+  const getVideoUrl = () => {
+    if (isApiData) {
+      return (experience as ApiExperience).video
+    }
+    return undefined
+  }
+  
+  // Get image URL
+  const getImageUrl = () => {
+    if (isApiData) {
+      return (experience as ApiExperience).image || "/placeholder.svg"
+    }
+    return (experience as StaticExperience).image || "/placeholder.svg"
+  }
+  
+  const videoUrl = getVideoUrl()
+  const imageUrl = getImageUrl()
   
   // Handle sites data - could be populated objects or just IDs
   const getSiteNames = () => {
@@ -25,77 +52,122 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
     if (isApiData) {
       const apiExp = experience as ApiExperience
       if (Array.isArray(apiExp.sites) && apiExp.sites.length > 0) {
-        if (typeof apiExp.sites[0] === 'object' && 'name' in apiExp.sites[0]) {
-          return (apiExp.sites as any[]).map(site => site.name)
+        if (typeof apiExp.sites[0] === 'object' && apiExp.sites[0] !== null && 'name' in apiExp.sites[0]) {
+          return (apiExp.sites as Array<{ name: string }>).map(site => site.name)
         }
       }
       return ['Heritage Site'] // fallback for unpopulated sites
     } else {
-      // Static data - use HERITAGE_SITES lookup
+      // Static data - return generic site names
       const staticExp = experience as StaticExperience
-      const experienceSites = HERITAGE_SITES.filter((site) => staticExp.sites.includes(site.id))
-      return experienceSites.map(site => site.name)
+      return staticExp.sites.map(() => 'Heritage Site')
     }
   }
 
   const siteNames = getSiteNames()
 
   const getTypeIcon = () => {
-    const type = isApiData ? (experience as ApiExperience).type : (experience as StaticExperience).type
-    switch (type) {
-      case "guide":
-      case "tour":
+    if (isApiData) {
+      const type = (experience as ApiExperience).type
+      switch (type) {
+        case "guide":
+          return <Users className="w-5 h-5" />
+        case "music":
+          return <Music className="w-5 h-5" />
+        case "workshop":
+          return <Hammer className="w-5 h-5" />
+        default:
+          return <Users className="w-5 h-5" />
+      }
+    } else {
+      const type = (experience as StaticExperience).type as string
+      if (type === "guide" || type === "tour") {
         return <Users className="w-5 h-5" />
-      case "music":
-      case "event":
+      } else if (type === "music" || type === "event") {
         return <Music className="w-5 h-5" />
-      case "workshop":
-      case "activity":
+      } else if (type === "workshop" || type === "activity") {
         return <Hammer className="w-5 h-5" />
-      default:
-        return <Users className="w-5 h-5" />
+      }
+      return <Users className="w-5 h-5" />
     }
   }
 
   const getTypeLabel = () => {
-    const type = isApiData ? (experience as ApiExperience).type : (experience as StaticExperience).type
-    switch (type) {
-      case "guide":
-      case "tour":
+    if (isApiData) {
+      const type = (experience as ApiExperience).type
+      switch (type) {
+        case "guide":
+          return "Local Guide"
+        case "music":
+          return "Music Show"
+        case "workshop":
+          return "Workshop"
+        default:
+          return "Experience"
+      }
+    } else {
+      const type = (experience as StaticExperience).type as string
+      if (type === "guide" || type === "tour") {
         return "Local Guide"
-      case "music":
-      case "event":
+      } else if (type === "music" || type === "event") {
         return "Music Show"
-      case "workshop":
-      case "activity":
+      } else if (type === "workshop" || type === "activity") {
         return "Workshop"
-      default:
-        return "Experience"
+      }
+      return "Experience"
     }
   }
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-all">
-      {/* Header with Image */}
-      <div className="relative h-48 bg-muted overflow-hidden group">
-        <img
-          src={
-            isApiData 
-              ? (experience as ApiExperience).images?.[0] || "/placeholder.svg"
-              : (experience as StaticExperience).image || "/placeholder.svg"
-          }
-          alt={experience.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-        />
-        <div className="absolute top-3 left-3">
-          <span className="bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
-            {getTypeIcon()}
-            {getTypeLabel()}
-          </span>
-        </div>
+      {/* Header with Image and Video */}
+      <div className="relative h-48 bg-muted overflow-hidden group flex">
+        {/* Image */}
+        {imageUrl && (
+          <div className="flex-1 relative overflow-hidden">
+            <img
+              src={imageUrl}
+              alt={experience.name}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+            />
+            <div className="absolute top-3 left-3">
+              <span className="bg-primary/90 text-primary-foreground px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1">
+                {getTypeIcon()}
+                {getTypeLabel()}
+              </span>
+            </div>
+          </div>
+        )}
+        
+        {/* Video */}
+        {videoUrl && (
+          <div className="flex-1 relative overflow-hidden group/video">
+            <video
+              ref={videoRef}
+              src={videoUrl}
+              controls
+              className="w-full h-full object-cover"
+              poster={imageUrl} // Use image as video thumbnail
+              onPlay={() => setIsVideoPlaying(true)}
+              onPause={() => setIsVideoPlaying(false)}
+              onEnded={() => setIsVideoPlaying(false)}
+            />
+            {!isVideoPlaying && (
+              <div 
+                className="absolute inset-0 flex items-center justify-center bg-black/20 cursor-pointer group-hover/video:bg-black/30 transition-colors"
+                onClick={handlePlayClick}
+              >
+                <div className="bg-white/90 hover:bg-white rounded-full p-4 shadow-lg transition-all group-hover/video:scale-110">
+                  <Play className="w-8 h-8 text-foreground fill-foreground" />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
         <button
           onClick={() => setIsFavorited(!isFavorited)}
-          className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all"
+          className="absolute top-3 right-3 bg-white/90 hover:bg-white p-2 rounded-full shadow-md transition-all z-10"
         >
           <Heart className={`w-5 h-5 ${isFavorited ? "fill-red-500 text-red-500" : "text-foreground"}`} />
         </button>
@@ -202,19 +274,31 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
                   <div>
                     <span className="font-semibold text-foreground">Duration:</span>{" "}
                     <span className="text-muted-foreground">
-                      {Math.floor((experience as ApiExperience).duration / 60)}h {(experience as ApiExperience).duration % 60}m
+                      {(() => {
+                        const duration = (experience as ApiExperience).duration
+                        if (typeof duration === 'number' && duration !== undefined && !isNaN(duration)) {
+                          return `${Math.floor(duration / 60)}h ${duration % 60}m`
+                        }
+                        return duration || 'N/A'
+                      })()}
                     </span>
                   </div>
                 </div>
                 
-                {(experience as ApiExperience).guideId && typeof (experience as ApiExperience).guideId === 'object' && (
-                  <div>
-                    <h4 className="font-semibold text-foreground text-sm mb-2">Guide</h4>
-                    <p className="text-sm text-muted-foreground">
-                      {((experience as ApiExperience).guideId as any).name} - {((experience as ApiExperience).guideId as any).specialization}
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const guideId = (experience as ApiExperience).guideId
+                  if (guideId && typeof guideId === 'object' && guideId !== null && 'name' in guideId && 'specialization' in guideId) {
+                    return (
+                      <div>
+                        <h4 className="font-semibold text-foreground text-sm mb-2">Guide</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {guideId.name} - {guideId.specialization}
+                        </p>
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
               </>
             )}
 
@@ -245,12 +329,15 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
               </>
             )}
 
-            {!isApiData && experience.type === "workshop" && (
+            {!isApiData && (() => {
+              const type = (experience as StaticExperience).type as string
+              return type === "workshop" || type === "activity"
+            })() && (
               <div className="grid grid-cols-2 gap-2 text-xs">
                 <div>
                   <span className="font-semibold text-foreground">Skill Level:</span>{" "}
                   <span className="text-muted-foreground capitalize">
-                    {(experience as WorkshopExperience).skillLevel}
+                    {(experience as WorkshopExperience).skillLevel || 'N/A'}
                   </span>
                 </div>
                 <div>
