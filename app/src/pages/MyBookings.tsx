@@ -207,11 +207,13 @@ export default function MyBookingsPage() {
                             {new Date(booking.bookingDate).toLocaleString()}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Users className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Number of People:</span>
-                          <span className="font-medium">{booking.numberOfPeople}</span>
-                        </div>
+                        {booking.bookingType !== "guide" && (
+                          <div className="flex items-center gap-2 text-sm">
+                            <Users className="w-4 h-4 text-muted-foreground" />
+                            <span className="text-muted-foreground">Number of People:</span>
+                            <span className="font-medium">{booking.numberOfPeople}</span>
+                          </div>
+                        )}
                         <div className="text-sm">
                           <span className="text-muted-foreground">Price:</span>{" "}
                           <span className="font-medium">{getItemPrice(booking)}</span>

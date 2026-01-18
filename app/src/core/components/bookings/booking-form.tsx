@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -50,6 +50,13 @@ export function BookingForm({
     notes: "",
   })
 
+  // Reset numberOfPeople to 1 when booking type is guide
+  useEffect(() => {
+    if (bookingType === "guide") {
+      setFormData((prev) => ({ ...prev, numberOfPeople: 1 }))
+    }
+  }, [bookingType])
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({
@@ -75,7 +82,7 @@ export function BookingForm({
         guideId: bookingType === "guide" ? guideId : undefined,
         experienceId: bookingType !== "guide" ? experienceId : undefined,
         bookingDate: new Date(formData.bookingDate).toISOString(),
-        numberOfPeople: formData.numberOfPeople,
+        numberOfPeople: bookingType === "guide" ? 1 : formData.numberOfPeople,
         contactName: formData.contactName,
         contactEmail: formData.contactEmail,
         contactPhone: formData.contactPhone,
@@ -84,8 +91,9 @@ export function BookingForm({
 
       await bookingsApi.create(bookingData)
       setShowSuccess(true)
-    } catch (err: any) {
-      setError(err.message || "Failed to create booking. Please try again.")
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to create booking. Please try again."
+      setError(errorMessage)
     } finally {
       setIsSubmitting(false)
     }
@@ -96,7 +104,7 @@ export function BookingForm({
       onOpenChange(false)
       setFormData({
         bookingDate: "",
-        numberOfPeople: 1,
+        numberOfPeople: bookingType === "guide" ? 1 : 1,
         contactName: "",
         contactEmail: "",
         contactPhone: "",
@@ -111,7 +119,7 @@ export function BookingForm({
     onOpenChange(false)
     setFormData({
       bookingDate: "",
-      numberOfPeople: 1,
+      numberOfPeople: bookingType === "guide" ? 1 : 1,
       contactName: "",
       contactEmail: "",
       contactPhone: "",
@@ -141,7 +149,7 @@ export function BookingForm({
           <div className="space-y-4 py-4">
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-amber-800">
                   <p className="font-semibold mb-1">Payment Information</p>
                   <p>
@@ -159,11 +167,14 @@ export function BookingForm({
                 <span className="font-semibold">Booking Date:</span>{" "}
                 {new Date(formData.bookingDate).toLocaleDateString()}
               </p>
+              {bookingType !== "guide" && (
+                <p>
+                  <span className="font-semibold">Number of People:</span> {formData.numberOfPeople}
+                </p>
+              )}
               <p>
-                <span className="font-semibold">Number of People:</span> {formData.numberOfPeople}
-              </p>
-              <p>
-                <span className="font-semibold">Estimated Total:</span> ${itemPrice * formData.numberOfPeople}
+                <span className="font-semibold">Estimated Total:</span> $
+                {bookingType === "guide" ? itemPrice : itemPrice * formData.numberOfPeople}
               </p>
             </div>
 
@@ -199,7 +210,7 @@ export function BookingForm({
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className={bookingType === "guide" ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
             <div>
               <label htmlFor="bookingDate" className="block text-sm font-medium mb-1">
                 Booking Date & Time *
@@ -215,21 +226,23 @@ export function BookingForm({
                 className="w-full"
               />
             </div>
-            <div>
-              <label htmlFor="numberOfPeople" className="block text-sm font-medium mb-1">
-                Number of People *
-              </label>
-              <Input
-                id="numberOfPeople"
-                name="numberOfPeople"
-                type="number"
-                min="1"
-                value={formData.numberOfPeople}
-                onChange={handleChange}
-                required
-                className="w-full"
-              />
-            </div>
+            {bookingType !== "guide" && (
+              <div>
+                <label htmlFor="numberOfPeople" className="block text-sm font-medium mb-1">
+                  Number of People *
+                </label>
+                <Input
+                  id="numberOfPeople"
+                  name="numberOfPeople"
+                  type="number"
+                  min="1"
+                  value={formData.numberOfPeople}
+                  onChange={handleChange}
+                  required
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
 
           <div>
@@ -294,18 +307,33 @@ export function BookingForm({
           </div>
 
           <div className="bg-muted p-3 rounded-lg">
-            <div className="flex justify-between text-sm">
-              <span className="text-muted-foreground">Price per person:</span>
-              <span className="font-semibold">${itemPrice}</span>
-            </div>
-            <div className="flex justify-between text-sm mt-1">
-              <span className="text-muted-foreground">Number of people:</span>
-              <span className="font-semibold">{formData.numberOfPeople}</span>
-            </div>
-            <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
-              <span>Estimated Total:</span>
-              <span>${itemPrice * formData.numberOfPeople}</span>
-            </div>
+            {bookingType === "guide" ? (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Price per day:</span>
+                  <span className="font-semibold">${itemPrice}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
+                  <span>Estimated Total:</span>
+                  <span>${itemPrice}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Price per person:</span>
+                  <span className="font-semibold">${itemPrice}</span>
+                </div>
+                <div className="flex justify-between text-sm mt-1">
+                  <span className="text-muted-foreground">Number of people:</span>
+                  <span className="font-semibold">{formData.numberOfPeople}</span>
+                </div>
+                <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
+                  <span>Estimated Total:</span>
+                  <span>${itemPrice * formData.numberOfPeople}</span>
+                </div>
+              </>
+            )}
             <p className="text-xs text-muted-foreground mt-2">
               * Final payment will be handled at the venue
             </p>
