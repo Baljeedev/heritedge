@@ -12,6 +12,7 @@ import experiencesRouter from "./routes/experiences";
 import tripsRouter from "./routes/trips";
 import reviewsRouter from "./routes/reviews";
 import uploadRouter from "./routes/upload";
+import bookingsRouter from "./routes/bookings";
 
 const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/experiences", experiencesRouter);
 app.use("/api/trips", tripsRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/upload", uploadRouter);
+app.use("/api/bookings", bookingsRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -70,4 +72,5 @@ app.listen(PORT, () => {
   console.log(`   GET    /api/trips`);
   console.log(`   GET    /api/trips/featured (open to all)`);
   console.log(`   GET    /api/reviews`);
+  console.log(`   GET    /api/bookings`);
 });

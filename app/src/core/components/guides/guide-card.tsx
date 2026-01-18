@@ -4,6 +4,7 @@ import { Star, MapPin, Award, Users, MessageSquare, Heart, Play } from "lucide-r
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
 import type { Guide as ApiGuide } from "@/lib/api/guides"
+import { BookingForm } from "@/core/components/bookings/booking-form"
 
 interface StaticGuide {
   id: number
@@ -29,6 +30,7 @@ export function GuideCard({ guide }: GuideCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [showBookingForm, setShowBookingForm] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const handlePlayClick = () => {
@@ -227,13 +229,29 @@ export function GuideCard({ guide }: GuideCardProps) {
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" size="sm">
+          <Button 
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" 
+            size="sm"
+            onClick={() => setShowBookingForm(true)}
+          >
             Book Now
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowDetails(!showDetails)} className="flex-1">
             {showDetails ? "Hide" : "View"} Details
           </Button>
         </div>
+
+        {/* Booking Form Dialog */}
+        {isApiData && (
+          <BookingForm
+            open={showBookingForm}
+            onOpenChange={setShowBookingForm}
+            bookingType="guide"
+            guideId={(guide as ApiGuide)._id}
+            itemName={guide.name}
+            itemPrice={guide.pricePerDay}
+          />
+        )}
 
         {/* Expandable Details */}
         {showDetails && (

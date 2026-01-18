@@ -37,6 +37,11 @@ export function Navigation() {
           <Link to="/donate" className="text-foreground hover:text-primary transition-colors">
             Donate
           </Link>
+          <SignedIn>
+            <Link to="/my-bookings" className="text-foreground hover:text-primary transition-colors">
+              My Bookings
+            </Link>
+          </SignedIn>
         </div>
 
         {/* Mobile Menu Button */}
@@ -80,6 +85,11 @@ export function Navigation() {
             <Link to="/donate" className="block text-foreground hover:text-primary py-2">
               Donate
             </Link>
+            <SignedIn>
+              <Link to="/my-bookings" className="block text-foreground hover:text-primary py-2">
+                My Bookings
+              </Link>
+            </SignedIn>
           </div>
         </div>
       )}

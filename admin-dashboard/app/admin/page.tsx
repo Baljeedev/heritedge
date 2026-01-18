@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
-import { MapPin, Users, Zap, Building2, Map, Star, Clock, ArrowRight, Loader2 } from "lucide-react"
+import { MapPin, Users, Zap, Building2, Map, Star, Clock, ArrowRight, Loader2, Calendar } from "lucide-react"
 import Link from "next/link"
-import { heritageSitesApi, guidesApi, experiencesApi, hotelsApi, tripsApi, reviewsApi } from "@/lib/api"
+import { heritageSitesApi, guidesApi, experiencesApi, hotelsApi, tripsApi, reviewsApi, bookingsApi } from "@/lib/api"
 
 interface Stat {
   label: string
@@ -73,6 +73,14 @@ export default function DashboardPage() {
       href: "/admin/guides",
       loading: true,
     },
+    {
+      label: "Total Bookings",
+      value: 0,
+      icon: Calendar,
+      color: "bg-indigo-100 text-indigo-700",
+      href: "/admin/bookings",
+      loading: true,
+    },
   ])
 
   useEffect(() => {
@@ -81,13 +89,14 @@ export default function DashboardPage() {
 
   const loadStats = async () => {
     try {
-      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes] = await Promise.all([
+      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes, bookingsRes] = await Promise.all([
         heritageSitesApi.getAll({ limit: 1 }),
         guidesApi.getAll({ limit: 1, all: true }),
         experiencesApi.getAll({ limit: 1, all: true }),
         hotelsApi.getAll({ limit: 1, all: true }),
         tripsApi.getAll({ limit: 1 }),
         reviewsApi.getAll({ limit: 1, all: true }),
+        bookingsApi.getAll({ all: true }),
       ])
 
       // Count pending internship applications
@@ -151,6 +160,14 @@ export default function DashboardPage() {
           icon: Clock,
           color: "bg-orange-100 text-orange-700",
           href: "/admin/guides",
+          loading: false,
+        },
+        {
+          label: "Total Bookings",
+          value: bookingsRes.bookings.length,
+          icon: Calendar,
+          color: "bg-indigo-100 text-indigo-700",
+          href: "/admin/bookings",
           loading: false,
         },
       ])

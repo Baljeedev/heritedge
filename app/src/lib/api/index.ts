@@ -6,6 +6,7 @@ export * from './hotels';
 export * from './experiences';
 export * from './trips';
 export * from './reviews';
+export * from './bookings';
 
 // Export hooks
 export * from './hooks';

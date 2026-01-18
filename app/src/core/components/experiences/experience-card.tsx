@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
 import type { Experience as ApiExperience } from "@/lib/api/experiences"
 import type { Experience as StaticExperience, GuideExperience, MusicShowExperience, WorkshopExperience } from "@/data/experiences"
+import { BookingForm } from "@/core/components/bookings/booking-form"
 
 interface ExperienceCardProps {
   experience: ApiExperience | StaticExperience
@@ -14,6 +15,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
   const [isFavorited, setIsFavorited] = useState(false)
   const [showDetails, setShowDetails] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
+  const [showBookingForm, setShowBookingForm] = useState(false)
   const videoRef = useRef<HTMLVideoElement>(null)
   
   const handlePlayClick = () => {
@@ -244,13 +246,29 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" size="sm">
+          <Button 
+            className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90" 
+            size="sm"
+            onClick={() => setShowBookingForm(true)}
+          >
             Book Now
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowDetails(!showDetails)} className="flex-1">
             {showDetails ? "Hide" : "View"} Details
           </Button>
         </div>
+
+        {/* Booking Form Dialog */}
+        {isApiData && (experience as ApiExperience).type !== "guide" && (
+          <BookingForm
+            open={showBookingForm}
+            onOpenChange={setShowBookingForm}
+            bookingType={(experience as ApiExperience).type as "music" | "workshop"}
+            experienceId={(experience as ApiExperience)._id}
+            itemName={experience.name}
+            itemPrice={experience.price}
+          />
+        )}
 
         {/* Expandable Details */}
         {showDetails && (

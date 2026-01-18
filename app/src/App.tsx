@@ -9,6 +9,7 @@ import MapPage from "./pages/Map"
 import DonatePage from "./pages/Donate"
 import SigninPage from "./pages/SigninPage"
 import SignupPage from "./pages/SignupPage"
+import MyBookingsPage from "./pages/MyBookings"
 
 function App() {
   const location = useLocation()
@@ -30,6 +31,7 @@ function App() {
         <Route path="/trip-planner" element={<TripPlanner />} />
         <Route path="/trip-planner/:tripId" element={<TripDetail />} />
         <Route path="/donate" element={<DonatePage />} />
+        <Route path="/my-bookings" element={<MyBookingsPage />} />
       </Routes>
     </>
   )
