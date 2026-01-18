@@ -3,7 +3,8 @@
 import { MapControls } from "@/core/components/map/map-controls"
 import { SiteDetailPanel } from "@/core/components/map/site-detail-panel"
 import { Navigation } from "@/core/components/navigation"
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { useSearchParams } from "react-router-dom"
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -20,10 +21,18 @@ L.Icon.Default.mergeOptions({
 
 interface MapComponentProps {
   onSiteSelect: (siteId: string) => void;
+  initialCenter?: [number, number];
+  initialZoom?: number;
 }
 
-const MapComponent = ({ onSiteSelect }: MapComponentProps) => {
-  const { data, isLoading, error } = useHeritageSites({ limit: 20 });
+const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponentProps) => {
+  const [searchParams] = useSearchParams()
+  const searchQuery = searchParams.get("search")
+  
+  const { data, isLoading, error } = useHeritageSites({ 
+    limit: 100,
+    search: searchQuery || undefined,
+  });
   const sites = data?.sites || [];
 
   if (isLoading) {
@@ -48,13 +57,14 @@ const MapComponent = ({ onSiteSelect }: MapComponentProps) => {
     );
   }
 
-  // Center the map on India (approximate center)
-  const indiaCenter: [number, number] = [20.5937, 78.9629];
+  // Use initial center if provided, otherwise center on India
+  const mapCenter: [number, number] = initialCenter || [20.5937, 78.9629];
+  const mapZoom = initialZoom || 5;
 
   return (
     <MapContainer 
-      center={indiaCenter as [number, number]} 
-      zoom={5} 
+      center={mapCenter as [number, number]} 
+      zoom={mapZoom} 
       scrollWheelZoom={true} 
       style={{ height: "100%", width: "100%" }}
     >
@@ -120,8 +130,34 @@ const MapComponent = ({ onSiteSelect }: MapComponentProps) => {
 };
 
 export default function MapPage() {
+  const [searchParams] = useSearchParams()
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null)
   const [selectedSites, setSelectedSites] = useState<string[]>([])
+  const [mapCenter, setMapCenter] = useState<[number, number] | undefined>(undefined)
+  const [mapZoom, setMapZoom] = useState<number | undefined>(undefined)
+  
+  const { data: sitesData } = useHeritageSites({ limit: 100 })
+
+  // Read site query parameter and select the site on mount
+  useEffect(() => {
+    const siteIdFromUrl = searchParams.get("site")
+    const searchQuery = searchParams.get("search")
+    
+    if (siteIdFromUrl && sitesData?.sites) {
+      const site = sitesData.sites.find(s => s._id === siteIdFromUrl)
+      if (site) {
+        setSelectedSiteId(siteIdFromUrl)
+        // Center map on the selected site
+        setMapCenter([site.coordinates.latitude, site.coordinates.longitude])
+        setMapZoom(12) // Zoom in closer when a specific site is selected
+      }
+    } else if (searchQuery) {
+      // If there's a search query, filter sites and show results
+      // The MapComponent will handle displaying filtered results
+      // For now, we'll just keep the search query in the URL
+      // You could add a search results panel here if needed
+    }
+  }, [searchParams, sitesData])
 
   const handleToggleSite = (siteId: string) => {
     setSelectedSites((prev) => (prev.includes(siteId) ? prev.filter((id) => id !== siteId) : [...prev, siteId]))
@@ -141,8 +177,11 @@ export default function MapPage() {
       <div className="flex h-[calc(100vh-60px)]">
         {/* Map Section */}
         <div className="flex-1 relative">
-          <MapComponent onSiteSelect={setSelectedSiteId} />
-          {/* <HeritageMap selectedSiteId={selectedSiteId} onSiteSelect={setSelectedSiteId} /> */}
+          <MapComponent 
+            onSiteSelect={setSelectedSiteId} 
+            initialCenter={mapCenter}
+            initialZoom={mapZoom}
+          />
 
           {/* Map Controls */}
           <MapControls

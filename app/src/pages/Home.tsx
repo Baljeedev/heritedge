@@ -1,10 +1,10 @@
 import type React from "react"
-import { Search, MapPin, Users, Heart, Music, Hammer } from "lucide-react"
+import { MapPin, Users, Heart, Music, Hammer } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import { Link } from "react-router-dom"
 import { Navigation } from "@/core/components/navigation"
 import { FeaturedSites } from "@/core/components/home/featured-sites"
+import { SearchBar } from "@/core/components/home/search-bar"
 
 export default function HomePage() {
   return (
@@ -22,16 +22,7 @@ export default function HomePage() {
           </p>
 
           {/* Search Bar */}
-          <div className="flex gap-3 mb-8">
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Input
-                placeholder="Search monuments, historical sites, destinations..."
-                className="pl-12 py-6 text-base"
-              />
-            </div>
-            <Button className="bg-primary text-primary-foreground px-8 py-6">Search</Button>
-          </div>
+          <SearchBar />
         </div>
       </section>
 
