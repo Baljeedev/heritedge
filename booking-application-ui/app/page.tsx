@@ -1,103 +1,13 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, MapPin, Users, Mail, Phone, FileText } from 'lucide-react';
-
-interface IBooking {
-  _id: string;
-  userId: string;
-  bookingType: 'guide' | 'music' | 'workshop';
-  guideId?: string;
-  experienceId?: string;
-  bookingDate: Date;
-  numberOfPeople: number;
-  contactName: string;
-  contactEmail: string;
-  contactPhone: string;
-  notes?: string;
-  status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt: Date;
-  updatedAt: Date;
-}
-
-// Mock booking data
-const mockBookings: IBooking[] = [
-  {
-    _id: '1',
-    userId: 'user_123',
-    bookingType: 'guide',
-    guideId: 'guide_456',
-    bookingDate: new Date('2024-02-15T10:00:00'),
-    numberOfPeople: 4,
-    contactName: 'Sarah Johnson',
-    contactEmail: 'sarah@example.com',
-    contactPhone: '+1 (555) 123-4567',
-    notes: 'Interested in historical sites. Please arrange early morning tour.',
-    status: 'confirmed',
-    createdAt: new Date('2024-01-20'),
-    updatedAt: new Date('2024-01-20'),
-  },
-  {
-    _id: '2',
-    userId: 'user_789',
-    bookingType: 'music',
-    experienceId: 'exp_101',
-    bookingDate: new Date('2024-02-18T19:00:00'),
-    numberOfPeople: 2,
-    contactName: 'Michael Chen',
-    contactEmail: 'michael.chen@example.com',
-    contactPhone: '+1 (555) 234-5678',
-    notes: 'Prefer jazz music. Anniversary celebration.',
-    status: 'pending',
-    createdAt: new Date('2024-01-18'),
-    updatedAt: new Date('2024-01-18'),
-  },
-  {
-    _id: '3',
-    userId: 'user_456',
-    bookingType: 'workshop',
-    experienceId: 'exp_202',
-    bookingDate: new Date('2024-02-20T14:00:00'),
-    numberOfPeople: 8,
-    contactName: 'Emma Rodriguez',
-    contactEmail: 'emma.r@example.com',
-    contactPhone: '+1 (555) 345-6789',
-    status: 'confirmed',
-    createdAt: new Date('2024-01-15'),
-    updatedAt: new Date('2024-01-15'),
-  },
-  {
-    _id: '4',
-    userId: 'user_321',
-    bookingType: 'guide',
-    guideId: 'guide_789',
-    bookingDate: new Date('2024-02-10T09:00:00'),
-    numberOfPeople: 6,
-    contactName: 'James Wilson',
-    contactEmail: 'james.w@example.com',
-    contactPhone: '+1 (555) 456-7890',
-    notes: 'Group tour. Wheelchair accessible route needed.',
-    status: 'cancelled',
-    createdAt: new Date('2024-01-10'),
-    updatedAt: new Date('2024-01-12'),
-  },
-  {
-    _id: '5',
-    userId: 'user_654',
-    bookingType: 'music',
-    experienceId: 'exp_303',
-    bookingDate: new Date('2024-02-25T18:00:00'),
-    numberOfPeople: 15,
-    contactName: 'Lisa Anderson',
-    contactEmail: 'lisa.anderson@example.com',
-    contactPhone: '+1 (555) 567-8901',
-    notes: 'Corporate event. Need sound system setup.',
-    status: 'confirmed',
-    createdAt: new Date('2024-01-16'),
-    updatedAt: new Date('2024-01-17'),
-  },
-];
+import { Calendar, Users, Mail, Phone, FileText, Loader2 } from 'lucide-react';
+import { bookingsApi, type Booking } from '@/lib/api/bookings';
+import { AuthGuard } from '@/components/auth-guard';
+import { UserButton as ClerkUserButton } from '@clerk/nextjs';
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -135,14 +45,71 @@ function formatDate(date: Date): string {
   });
 }
 
-export default function BookingsPage() {
+function BookingsContent() {
+  const { user } = useUser();
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchBookings = async () => {
+      if (!user?.primaryEmailAddress?.emailAddress) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        const email = user.primaryEmailAddress.emailAddress;
+        const data = await bookingsApi.getByProviderEmail(email);
+        setBookings(data.bookings);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load bookings');
+        console.error('Error fetching bookings:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBookings();
+  }, [user]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="min-h-screen bg-background p-6 sm:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive p-4 rounded-lg">
+            <p>Error: {error}</p>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-background p-6 sm:p-8">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Bookings</h1>
-          <p className="text-muted-foreground">Manage and view all your bookings</p>
+        <div className="mb-8 flex items-start justify-between">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Bookings</h1>
+            <p className="text-muted-foreground">Manage and view all your bookings</p>
+          </div>
+          <div className="flex items-center gap-4">
+            <p className="text-sm text-muted-foreground">
+              {user?.primaryEmailAddress?.emailAddress}
+            </p>
+            <ClerkUserButton afterSignOutUrl="/" />
+          </div>
         </div>
 
         {/* Stats */}
@@ -150,14 +117,14 @@ export default function BookingsPage() {
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-1">Total Bookings</p>
-              <p className="text-3xl font-bold">{mockBookings.length}</p>
+              <p className="text-3xl font-bold">{bookings.length}</p>
             </CardContent>
           </Card>
           <Card>
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-1">Confirmed</p>
               <p className="text-3xl font-bold text-green-600">
-                {mockBookings.filter((b) => b.status === 'confirmed').length}
+                {bookings.filter((b) => b.status === 'confirmed').length}
               </p>
             </CardContent>
           </Card>
@@ -165,7 +132,7 @@ export default function BookingsPage() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-1">Pending</p>
               <p className="text-3xl font-bold text-yellow-600">
-                {mockBookings.filter((b) => b.status === 'pending').length}
+                {bookings.filter((b) => b.status === 'pending').length}
               </p>
             </CardContent>
           </Card>
@@ -173,15 +140,25 @@ export default function BookingsPage() {
             <CardContent className="pt-6">
               <p className="text-sm text-muted-foreground mb-1">Cancelled</p>
               <p className="text-3xl font-bold text-red-600">
-                {mockBookings.filter((b) => b.status === 'cancelled').length}
+                {bookings.filter((b) => b.status === 'cancelled').length}
               </p>
             </CardContent>
           </Card>
         </div>
 
         {/* Bookings List */}
-        <div className="space-y-4">
-          {mockBookings.map((booking) => (
+        {bookings.length === 0 ? (
+          <Card>
+            <CardContent className="pt-6 text-center py-12">
+              <p className="text-muted-foreground">No bookings found for your email address.</p>
+              <p className="text-sm text-muted-foreground mt-2">
+                Make sure your email is set in your guide, experience, or hotel profile.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {bookings.map((booking) => (
             <Card key={booking._id} className="hover:shadow-md transition-shadow">
               <CardContent className="pt-6">
                 <div className="grid gap-6">
@@ -210,20 +187,22 @@ export default function BookingsPage() {
                       <div>
                         <p className="text-sm text-muted-foreground">Booking Date</p>
                         <p className="text-sm font-medium text-foreground">
-                          {formatDate(booking.bookingDate)}
+                          {formatDate(new Date(booking.bookingDate))}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-3">
-                      <Users className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">Number of People</p>
-                        <p className="text-sm font-medium text-foreground">
-                          {booking.numberOfPeople} {booking.numberOfPeople === 1 ? 'person' : 'people'}
-                        </p>
+                    {booking.bookingType !== 'guide' && (
+                      <div className="flex items-start gap-3">
+                        <Users className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="text-sm text-muted-foreground">Number of People</p>
+                          <p className="text-sm font-medium text-foreground">
+                            {booking.numberOfPeople} {booking.numberOfPeople === 1 ? 'person' : 'people'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
+                    )}
 
                     <div className="flex items-start gap-3">
                       <Mail className="w-5 h-5 text-muted-foreground flex-shrink-0 mt-0.5" />
@@ -265,9 +244,18 @@ export default function BookingsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
+  );
+}
+
+export default function BookingsPage() {
+  return (
+    <AuthGuard>
+      <BookingsContent />
+    </AuthGuard>
   );
 }

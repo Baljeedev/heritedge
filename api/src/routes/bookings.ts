@@ -7,9 +7,42 @@ const router = express.Router();
 // GET /api/bookings - Get all bookings (user's own bookings or all for admin)
 router.get("/", authenticateUser, async (req: Request, res: Response) => {
   try {
-    const { status, bookingType, all } = req.query;
+    const { status, bookingType, all, providerEmail } = req.query;
 
     const query: any = {};
+    
+    // If providerEmail is provided, fetch bookings for that provider
+    if (providerEmail) {
+      // We'll need to populate and filter after fetching
+      const allBookings = await Booking.find({})
+        .populate("guideId", "name specialization image rating email")
+        .populate("experienceId", "name type image price email")
+        .sort({ createdAt: -1 });
+
+      // Filter bookings where the provider's email matches
+      const filteredBookings = allBookings.filter((booking) => {
+        if (booking.bookingType === "guide" && booking.guideId) {
+          const guide = booking.guideId as any;
+          return guide.email === providerEmail;
+        }
+        if ((booking.bookingType === "music" || booking.bookingType === "workshop") && booking.experienceId) {
+          const experience = booking.experienceId as any;
+          return experience.email === providerEmail;
+        }
+        return false;
+      });
+
+      // Apply additional filters
+      let result = filteredBookings;
+      if (status) {
+        result = result.filter((b) => b.status === status);
+      }
+      if (bookingType) {
+        result = result.filter((b) => b.bookingType === bookingType);
+      }
+
+      return res.json({ bookings: result });
+    }
     
     // If 'all' is not set, only return user's own bookings
     if (all !== "true") {
@@ -20,8 +53,8 @@ router.get("/", authenticateUser, async (req: Request, res: Response) => {
     if (bookingType) query.bookingType = bookingType;
 
     const bookings = await Booking.find(query)
-      .populate("guideId", "name specialization image rating")
-      .populate("experienceId", "name type image price")
+      .populate("guideId", "name specialization image rating email")
+      .populate("experienceId", "name type image price email")
       .sort({ createdAt: -1 });
 
     res.json({ bookings });
