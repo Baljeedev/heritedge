@@ -107,6 +107,7 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       age: guide?.age,
       internshipStatus: guide?.internshipStatus,
       internshipTestScore: guide?.internshipTestScore,
+      email: formData.email,
       isActive: formData.isActive ?? true,
       rating: formData.rating || 0,
       reviewCount: formData.reviewCount || 0,
@@ -217,6 +218,18 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
           placeholder="Guide biography"
           rows={3}
           required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email || ""}
+          onChange={handleChange}
+          placeholder="guide@example.com"
         />
       </div>
 

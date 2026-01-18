@@ -56,6 +56,7 @@ export interface IGuide {
   age?: number
   internshipStatus?: "pending" | "approved" | "rejected" | "completed"
   internshipTestScore?: number
+  email?: string
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -86,6 +87,7 @@ export interface IExperience {
   materialsIncluded?: boolean
   maxParticipants?: number
   topics?: string[]
+  email?: string
   isActive: boolean
   createdAt: string
   updatedAt: string
@@ -134,6 +136,7 @@ export interface IHotel {
   listingFee?: number
   referralFee?: number
   discountPercentage: number
+  email?: string
   isActive: boolean
   createdAt: string
   updatedAt: string

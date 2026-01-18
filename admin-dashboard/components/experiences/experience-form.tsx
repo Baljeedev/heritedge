@@ -144,6 +144,7 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
       materialsIncluded: experienceData.materialsIncluded,
       maxParticipants: experienceData.maxParticipants,
       topics: experienceData.topics,
+      email: experienceData.email,
       isActive: experienceData.isActive ?? true,
     }
 
@@ -222,6 +223,18 @@ export function ExperienceForm({ experience, onSave, onCancel }: ExperienceFormP
           placeholder="Experience description"
           rows={3}
           required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email || ""}
+          onChange={handleChange}
+          placeholder="contact@example.com"
         />
       </div>
 

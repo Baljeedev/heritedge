@@ -28,6 +28,9 @@ export interface IExperience extends Document {
   maxParticipants?: number;
   topics?: string[];
   
+  // Contact information
+  email?: string;
+  
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -68,6 +71,9 @@ const ExperienceSchema = new Schema<IExperience>(
     materialsIncluded: { type: Boolean },
     maxParticipants: { type: Number },
     topics: [{ type: String }],
+    
+    // Contact information
+    email: { type: String },
     
     isActive: { type: Boolean, default: true },
   },

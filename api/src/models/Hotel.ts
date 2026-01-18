@@ -41,6 +41,7 @@ export interface IHotel extends Document {
   listingFee?: number;
   referralFee?: number; // Percentage
   discountPercentage: number; // Discount when booked through HeritEdge
+  email?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -94,6 +95,7 @@ const HotelSchema = new Schema<IHotel>(
     listingFee: { type: Number },
     referralFee: { type: Number }, // Percentage
     discountPercentage: { type: Number, default: 0, min: 0, max: 100 },
+    email: { type: String },
     isActive: { type: Boolean, default: true },
   },
   {

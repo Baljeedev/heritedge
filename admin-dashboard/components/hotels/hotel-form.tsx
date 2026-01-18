@@ -170,6 +170,7 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
       listingFee: formData.listingFee,
       referralFee: formData.referralFee,
       discountPercentage: formData.discountPercentage || 0,
+      email: formData.email,
       isActive: formData.isActive ?? true,
       rating: formData.rating || 0,
       reviewCount: formData.reviewCount || 0,
@@ -276,6 +277,18 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
           placeholder="Hotel description"
           rows={3}
           required
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="email">Email</Label>
+        <Input
+          id="email"
+          name="email"
+          type="email"
+          value={formData.email || ""}
+          onChange={handleChange}
+          placeholder="hotel@example.com"
         />
       </div>
 

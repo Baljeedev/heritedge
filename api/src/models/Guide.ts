@@ -26,6 +26,7 @@ export interface IGuide extends Document {
   age?: number;
   internshipStatus?: "pending" | "approved" | "rejected" | "completed";
   internshipTestScore?: number;
+  email?: string;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -63,6 +64,7 @@ const GuideSchema = new Schema<IGuide>(
       enum: ["pending", "approved", "rejected", "completed"],
     },
     internshipTestScore: { type: Number, min: 0, max: 100 },
+    email: { type: String },
     isActive: { type: Boolean, default: true },
   },
   {
