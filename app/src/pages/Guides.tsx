@@ -7,8 +7,10 @@ import { GuideFilter } from "@/core/components/guides/guide-filter"
 import { Navigation } from "@/core/components/navigation"
 import { GuideCard } from "@/core/components/guides/guide-card"
 import { Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function GuidesPage() {
+  const { t } = useI18n()
   const location = useLocation()
 
   // Debug: Log when component mounts and location changes
@@ -47,9 +49,9 @@ export default function GuidesPage() {
 
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl  font-bold text-foreground mb-2">Local Tour Guides & Artisans</h1>
+          <h1 className="text-4xl  font-bold text-foreground mb-2">{t('localTourGuides')}</h1>
           <p className="text-muted-foreground mb-8">
-            Connect with certified guides who bring history to life while supporting local communities
+            {t('guidesDescription')}
           </p>
 
           <div className="grid lg:grid-cols-4 gap-8">
@@ -70,14 +72,14 @@ export default function GuidesPage() {
               {isLoading && (
                 <div className="flex items-center justify-center py-12">
                   <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                  <span className="ml-2 text-muted-foreground">Loading guides...</span>
+                  <span className="ml-2 text-muted-foreground">{t('loadingGuides')}</span>
                 </div>
               )}
 
               {error && (
                 <div className="text-center py-12 bg-card border border-border rounded-lg">
-                  <p className="text-muted-foreground mb-2">Error loading guides</p>
-                  <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+                  <p className="text-muted-foreground mb-2">{t('errorLoadingGuides')}</p>
+                  <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
                 </div>
               )}
 
@@ -85,7 +87,7 @@ export default function GuidesPage() {
                 <>
                   <div className="flex items-center justify-between mb-6">
                     <h2 className="text-lg font-semibold text-foreground">
-                      {data.guides.length} guide{data.guides.length !== 1 ? "s" : ""} available
+                      {data.guides.length} {data.guides.length === 1 ? t('guidesAvailable') : t('guidesAvailablePlural')}
                     </h2>
                   </div>
 
@@ -97,8 +99,8 @@ export default function GuidesPage() {
                     </div>
                   ) : (
                     <div className="text-center py-12 bg-card border border-border rounded-lg">
-                      <p className="text-muted-foreground mb-2">No guides found matching your criteria</p>
-                      <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+                      <p className="text-muted-foreground mb-2">{t('noGuidesFound')}</p>
+                      <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
                     </div>
                   )}
                 </>

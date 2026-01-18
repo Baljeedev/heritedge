@@ -5,11 +5,14 @@ import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { SignedIn, UserButton, SignInButton, SignedOut } from '@clerk/clerk-react'
 import { Button } from "@/components/ui/button"
+import { useI18n } from "@/lib/i18n/context"
+import { LanguageToggle } from "@/components/language-toggle"
 
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
   const navigate = useNavigate()
+  const { t } = useI18n()
 
   return (
     <nav className="border-b border-border bg-card sticky top-0 z-50">
@@ -23,23 +26,23 @@ export function Navigation() {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center gap-8">
           <Link to="/map" className="text-foreground hover:text-primary transition-colors">
-            Explore Map
+            {t('exploreMap')}
           </Link>
           <Link to="/trip-planner" className="text-foreground hover:text-primary transition-colors">
-            Trip Planner
+            {t('tripPlanner')}
           </Link>
           <Link to="/experiences" className="text-foreground hover:text-primary transition-colors">
-            Experiences
+            {t('experiences')}
           </Link>
           <Link to="/guides" className="text-foreground hover:text-primary transition-colors">
-            Guides
+            {t('guides')}
           </Link>
           <Link to="/donate" className="text-foreground hover:text-primary transition-colors">
-            Donate
+            {t('donate')}
           </Link>
           <SignedIn>
             <Link to="/my-bookings" className="text-foreground hover:text-primary transition-colors">
-              My Bookings
+              {t('myBookings')}
             </Link>
           </SignedIn>
         </div>
@@ -50,20 +53,23 @@ export function Navigation() {
         </button>
 
 
-        <SignedIn>
-          <UserButton 
-            afterSignOutUrl="/"
-            appearance={{
-              elements: {
-                userButtonPopoverCard: "shadow-lg"
-              }
-            }}
-          />
-        </SignedIn>
-        
-        <SignedOut>
-          <Button onClick={() => navigate("/sign-in")}>Sign In</Button>
-        </SignedOut>
+        <div className="flex items-center gap-2">
+          <LanguageToggle />
+          <SignedIn>
+            <UserButton 
+              afterSignOutUrl="/"
+              appearance={{
+                elements: {
+                  userButtonPopoverCard: "shadow-lg"
+                }
+              }}
+            />
+          </SignedIn>
+          
+          <SignedOut>
+            <Button onClick={() => navigate("/sign-in")}>{t('signIn')}</Button>
+          </SignedOut>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -71,23 +77,23 @@ export function Navigation() {
         <div className="md:hidden border-t border-border bg-background">
           <div className="px-4 py-4 space-y-3">
             <Link to="/map" className="block text-foreground hover:text-primary py-2">
-              Explore Map
+              {t('exploreMap')}
             </Link>
             <Link to="/trip-planner" className="block text-foreground hover:text-primary py-2">
-              Trip Planner
+              {t('tripPlanner')}
             </Link>
             <Link to="/experiences" className="block text-foreground hover:text-primary py-2">
-              Experiences
+              {t('experiences')}
             </Link>
             <Link to="/guides" className="block text-foreground hover:text-primary py-2">
-              Guides
+              {t('guides')}
             </Link>
             <Link to="/donate" className="block text-foreground hover:text-primary py-2">
-              Donate
+              {t('donate')}
             </Link>
             <SignedIn>
               <Link to="/my-bookings" className="block text-foreground hover:text-primary py-2">
-                My Bookings
+                {t('myBookings')}
               </Link>
             </SignedIn>
           </div>

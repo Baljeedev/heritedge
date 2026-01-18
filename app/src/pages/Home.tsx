@@ -5,8 +5,10 @@ import { Link } from "react-router-dom"
 import { Navigation } from "@/core/components/navigation"
 import { FeaturedSites } from "@/core/components/home/featured-sites"
 import { SearchBar } from "@/core/components/home/search-bar"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function HomePage() {
+  const { t } = useI18n()
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -15,10 +17,10 @@ export default function HomePage() {
       <section className="pt-20 pb-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
           <h1 className="text-5xl md:text-6xl  font-bold text-foreground mb-6 text-balance">
-            Preserve the Past, Experience Tomorrow
+            {t('heroTitle')}
           </h1>
           <p className="text-xl text-muted-foreground mb-12 text-pretty">
-            Discover world heritage sites through immersive trips and experiences. Book local guides, attend cultural shows, join workshops, and help restore our shared cultural treasures.
+            {t('heroDescription')}
           </p>
 
           {/* Search Bar */}
@@ -29,8 +31,8 @@ export default function HomePage() {
       {/* Featured Sites */}
       <section className="py-16 px-4 bg-card">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl  font-bold text-foreground mb-4">Featured Experiences</h2>
-          <p className="text-muted-foreground mb-8">Handpicked destinations waiting for your discovery</p>
+          <h2 className="text-3xl  font-bold text-foreground mb-4">{t('featuredExperiences')}</h2>
+          <p className="text-muted-foreground mb-8">{t('featuredDescription')}</p>
           <FeaturedSites />
         </div>
       </section>
@@ -40,30 +42,30 @@ export default function HomePage() {
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h2 className="text-3xl  font-bold text-foreground mb-2">Trips & Experiences</h2>
-              <p className="text-muted-foreground">Immerse yourself in culture through curated experiences</p>
+              <h2 className="text-3xl  font-bold text-foreground mb-2">{t('tripsAndExperiences')}</h2>
+              <p className="text-muted-foreground">{t('tripsDescription')}</p>
             </div>
             <Link to="/experiences">
-              <Button variant="outline">View All</Button>
+              <Button variant="outline">{t('viewAll')}</Button>
             </Link>
           </div>
           <div className="grid md:grid-cols-3 gap-6">
             <ExperienceTypeCard
               icon={<Users className="w-6 h-6" />}
-              title="Local Guides"
-              description="Connect with certified guides who bring history to life with authentic stories and deep cultural knowledge."
+              title={t('localGuides')}
+              description={t('localGuidesDescription')}
               link="/experiences?category=guides"
             />
             <ExperienceTypeCard
               icon={<Music className="w-6 h-6" />}
-              title="Music Shows"
-              description="Experience traditional music performances and cultural shows that celebrate the heritage of each region."
+              title={t('musicShows')}
+              description={t('musicShowsDescription')}
               link="/experiences?category=music"
             />
             <ExperienceTypeCard
               icon={<Hammer className="w-6 h-6" />}
-              title="Workshops"
-              description="Learn traditional crafts, artisanal techniques, and cultural practices from master craftspeople."
+              title={t('workshops')}
+              description={t('workshopsDescription')}
               link="/experiences?category=workshops"
             />
           </div>
@@ -73,22 +75,22 @@ export default function HomePage() {
       {/* Features List */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl  font-bold text-foreground mb-12 text-center">Why Choose HeritEdge</h2>
+          <h2 className="text-3xl  font-bold text-foreground mb-12 text-center">{t('whyChooseHeritEdge')}</h2>
           <div className="space-y-6">
             <FeatureListItem
               icon={<MapPin className="w-6 h-6" />}
-              title="Curated Heritage Map"
-              description="Explore carefully selected heritage sites with rich historical context and verified information."
+              title={t('curatedHeritageMap')}
+              description={t('curatedHeritageMapDescription')}
             />
             <FeatureListItem
               icon={<Users className="w-6 h-6" />}
-              title="Curated Experiences"
-              description="Discover local guides, cultural music shows, artisan workshops, and immersive experiences that bring heritage to life."
+              title={t('curatedExperiences')}
+              description={t('curatedExperiencesDescription')}
             />
             <FeatureListItem
               icon={<Heart className="w-6 h-6" />}
-              title="Support Restoration"
-              description="Contribute to active heritage restoration projects and help preserve these treasures."
+              title={t('supportRestoration')}
+              description={t('supportRestorationDescription')}
             />
           </div>
         </div>
@@ -97,13 +99,13 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="py-16 px-4 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl  font-bold mb-4">Start Your Heritage Journey</h2>
+          <h2 className="text-3xl  font-bold mb-4">{t('startYourJourney')}</h2>
           <p className="text-lg mb-8 opacity-90">
-            Plan your next adventure with AI-powered recommendations tailored to your interests.
+            {t('startYourJourneyDescription')}
           </p>
           <Link to="/trip-planner">
             <Button variant="secondary" className="px-8 py-6 text-base">
-              Plan Your Trip Now
+              {t('getStarted')}
             </Button>
           </Link>
         </div>

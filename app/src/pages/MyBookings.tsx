@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge"
 import { bookingsApi, type Booking } from "@/lib/api/bookings"
 import { Loader2, Calendar, Users, Phone, Mail, MapPin, Music, Hammer, User, AlertCircle } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/core/components/ui/alert-dialog"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function MyBookingsPage() {
+  const { t } = useI18n()
   const { isSignedIn } = useAuth()
   const navigate = useNavigate()
   const [bookings, setBookings] = useState<Booking[]>([])
@@ -34,7 +36,7 @@ export default function MyBookingsPage() {
       setBookings(data.bookings)
       setError(null)
     } catch (err: any) {
-      setError(err.message || "Failed to load bookings")
+      setError(err.message || t('failedToLoadBookings'))
     } finally {
       setIsLoading(false)
     }
@@ -45,7 +47,7 @@ export default function MyBookingsPage() {
       await bookingsApi.cancel(bookingId)
       await loadBookings()
     } catch (err: any) {
-      setError(err.message || "Failed to cancel booking")
+      setError(err.message || t('failedToCancelBooking'))
     }
   }
 
@@ -65,13 +67,26 @@ export default function MyBookingsPage() {
   const getBookingTypeLabel = (type: string) => {
     switch (type) {
       case "guide":
-        return "Local Guide"
+        return t('guide')
       case "music":
-        return "Music Show"
+        return t('music')
       case "workshop":
-        return "Workshop"
+        return t('workshop')
       default:
         return "Booking"
+    }
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "confirmed":
+        return t('confirmed')
+      case "pending":
+        return t('pending')
+      case "cancelled":
+        return t('cancelled')
+      default:
+        return status
     }
   }
 
@@ -116,7 +131,7 @@ export default function MyBookingsPage() {
         <Navigation />
         <div className="flex items-center justify-center py-20">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">Loading your bookings...</span>
+          <span className="ml-2 text-muted-foreground">{t('loading')}</span>
         </div>
       </div>
     )
@@ -127,9 +142,9 @@ export default function MyBookingsPage() {
       <Navigation />
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl font-bold text-foreground mb-2">My Bookings</h1>
+          <h1 className="text-4xl font-bold text-foreground mb-2">{t('bookings')}</h1>
           <p className="text-muted-foreground mb-8">
-            View and manage all your bookings for guides, music shows, and workshops
+            {t('manageBookings')}
           </p>
 
           {error && (
@@ -142,12 +157,12 @@ export default function MyBookingsPage() {
             <Card>
               <CardContent className="py-12 text-center">
                 <Calendar className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-foreground mb-2">No bookings yet</h3>
+                <h3 className="text-lg font-semibold text-foreground mb-2">{t('noBookingsYet')}</h3>
                 <p className="text-muted-foreground mb-4">
-                  Start exploring and book your first guide, music show, or workshop!
+                  {t('startExploring')}
                 </p>
                 <Button onClick={() => navigate("/experiences")}>
-                  Browse Experiences
+                  {t('browseExperiences')}
                 </Button>
               </CardContent>
             </Card>
@@ -162,7 +177,7 @@ export default function MyBookingsPage() {
                           {getBookingTypeIcon(booking.bookingType)}
                           <CardTitle className="text-xl">{getItemName(booking)}</CardTitle>
                           <Badge className={getStatusColor(booking.status)}>
-                            {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                            {getStatusLabel(booking.status)}
                           </Badge>
                         </div>
                         <p className="text-sm text-muted-foreground">
@@ -173,23 +188,23 @@ export default function MyBookingsPage() {
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="outline" size="sm">
-                              Cancel
+                              {t('cancelBooking')}
                             </Button>
                           </AlertDialogTrigger>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Cancel Booking?</AlertDialogTitle>
+                              <AlertDialogTitle>{t('cancelBookingTitle')}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                Are you sure you want to cancel this booking? This action cannot be undone.
+                                {t('cancelBookingDescription')}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                              <AlertDialogCancel>Keep Booking</AlertDialogCancel>
+                              <AlertDialogCancel>{t('keepBooking')}</AlertDialogCancel>
                               <AlertDialogAction
                                 onClick={() => handleCancel(booking._id)}
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                               >
-                                Cancel Booking
+                                {t('cancelBookingConfirm')}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -202,7 +217,7 @@ export default function MyBookingsPage() {
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-sm">
                           <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span className="text-muted-foreground">Booking Date:</span>
+                          <span className="text-muted-foreground">{t('bookingDate')}:</span>
                           <span className="font-medium">
                             {new Date(booking.bookingDate).toLocaleString()}
                           </span>
@@ -210,7 +225,7 @@ export default function MyBookingsPage() {
                         {booking.bookingType !== "guide" && (
                           <div className="flex items-center gap-2 text-sm">
                             <Users className="w-4 h-4 text-muted-foreground" />
-                            <span className="text-muted-foreground">Number of People:</span>
+                            <span className="text-muted-foreground">{t('numberOfPeople')}:</span>
                             <span className="font-medium">{booking.numberOfPeople}</span>
                           </div>
                         )}
@@ -238,7 +253,7 @@ export default function MyBookingsPage() {
                     {booking.notes && (
                       <div className="mt-4 pt-4 border-t border-border">
                         <p className="text-sm text-muted-foreground">
-                          <span className="font-semibold">Notes:</span> {booking.notes}
+                          <span className="font-semibold">{t('notes')}:</span> {booking.notes}
                         </p>
                       </div>
                     )}
@@ -248,10 +263,9 @@ export default function MyBookingsPage() {
                           <div className="flex items-start gap-2">
                             <AlertCircle className="h-4 w-4 text-amber-600 mt-0.5 flex-shrink-0" />
                             <div className="text-xs text-amber-800">
-                              <p className="font-semibold mb-1">Payment Information</p>
+                              <p className="font-semibold mb-1">{t('paymentInformation')}</p>
                               <p>
-                                Payment will be handled at the venue. Your booking is subject to payment confirmation.
-                                Please arrive with payment ready.
+                                {t('paymentNote')}
                               </p>
                             </div>
                           </div>

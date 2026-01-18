@@ -10,8 +10,10 @@ import { ExperienceCard } from "@/core/components/experiences/experience-card"
 import { GuideCard } from "@/core/components/guides/guide-card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Users, Music, Hammer, Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 export default function ExperiencesPage() {
+  const { t } = useI18n()
   const [searchParams] = useSearchParams()
   const categoryParam = searchParams.get("category")
 
@@ -83,11 +85,11 @@ export default function ExperiencesPage() {
   const getTypeLabel = (type: ExperienceType) => {
     switch (type) {
       case "guide":
-        return "Local Guides"
+        return t('localGuides')
       case "music":
-        return "Music Shows"
+        return t('musicShows')
       case "workshop":
-        return "Workshops"
+        return t('workshops')
     }
   }
 
@@ -97,7 +99,7 @@ export default function ExperiencesPage() {
       return (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">Loading guides...</span>
+          <span className="ml-2 text-muted-foreground">{t('loadingGuides')}</span>
         </div>
       )
     }
@@ -105,8 +107,8 @@ export default function ExperiencesPage() {
     if (guidesError) {
       return (
         <div className="text-center py-12 bg-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-2">Error loading guides</p>
-          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+          <p className="text-muted-foreground mb-2">{t('errorLoadingGuides')}</p>
+          <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
         </div>
       )
     }
@@ -117,7 +119,7 @@ export default function ExperiencesPage() {
       <>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-foreground">
-            {guides.length} guide{guides.length !== 1 ? "s" : ""} available
+            {guides.length} {guides.length === 1 ? t('guidesAvailable') : t('guidesAvailablePlural')}
           </h2>
         </div>
         {guides.length > 0 ? (
@@ -128,8 +130,8 @@ export default function ExperiencesPage() {
           </div>
         ) : (
           <div className="text-center py-12 bg-card border border-border rounded-lg">
-            <p className="text-muted-foreground mb-2">No guides found matching your criteria</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+            <p className="text-muted-foreground mb-2">{t('noGuidesFound')}</p>
+            <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
           </div>
         )}
       </>
@@ -144,7 +146,7 @@ export default function ExperiencesPage() {
       return (
         <div className="flex items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">Loading {getTypeLabel(type).toLowerCase()}...</span>
+          <span className="ml-2 text-muted-foreground">{t('loadingExperiences')}</span>
         </div>
       )
     }
@@ -152,8 +154,8 @@ export default function ExperiencesPage() {
     if (error) {
       return (
         <div className="text-center py-12 bg-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-2">Error loading {getTypeLabel(type).toLowerCase()}</p>
-          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+          <p className="text-muted-foreground mb-2">{t('errorLoadingExperiences')}</p>
+          <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
         </div>
       )
     }
@@ -164,7 +166,7 @@ export default function ExperiencesPage() {
       <>
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-lg font-semibold text-foreground">
-            {experiences.length} {getTypeLabel(type).toLowerCase()} available
+            {experiences.length} {getTypeLabel(type)} {t('experiencesAvailable')}
           </h2>
         </div>
         {experiences.length > 0 ? (
@@ -175,8 +177,8 @@ export default function ExperiencesPage() {
           </div>
         ) : (
           <div className="text-center py-12 bg-card border border-border rounded-lg">
-            <p className="text-muted-foreground mb-2">No {getTypeLabel(type).toLowerCase()} found matching your criteria</p>
-            <p className="text-sm text-muted-foreground">Try adjusting your filters</p>
+            <p className="text-muted-foreground mb-2">{t('noExperiencesFound')} {getTypeLabel(type)} {t('noExperiencesFoundPlural')}</p>
+            <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
           </div>
         )}
       </>
@@ -189,25 +191,24 @@ export default function ExperiencesPage() {
 
       <div className="py-8 px-4">
         <div className="max-w-7xl mx-auto">
-          <h1 className="text-4xl  font-bold text-foreground mb-2">Trips & Experiences</h1>
+          <h1 className="text-4xl  font-bold text-foreground mb-2">{t('tripsAndExperiencesTitle')}</h1>
           <p className="text-muted-foreground mb-8">
-            Discover immersive cultural experiences including local guides, music shows, workshops, and more. Support local
-            communities while exploring world heritage sites.
+            {t('experiencesDescription')}
           </p>
 
           <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as ExperienceType)} className="w-full">
             <TabsList className="mb-8">
               <TabsTrigger value="guide" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
-                Local Guides
+                {t('localGuides')}
               </TabsTrigger>
               <TabsTrigger value="music" className="flex items-center gap-2">
                 <Music className="w-4 h-4" />
-                Music Shows
+                {t('musicShows')}
               </TabsTrigger>
               <TabsTrigger value="workshop" className="flex items-center gap-2">
                 <Hammer className="w-4 h-4" />
-                Workshops
+                {t('workshops')}
               </TabsTrigger>
             </TabsList>
 

@@ -15,6 +15,7 @@ import { bookingsApi, type CreateBookingData } from "@/lib/api/bookings"
 import { useAuth } from "@clerk/clerk-react"
 import { useNavigate } from "react-router-dom"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 interface BookingFormProps {
   open: boolean
@@ -37,6 +38,7 @@ export function BookingForm({
 }: BookingFormProps) {
   const { isSignedIn } = useAuth()
   const navigate = useNavigate()
+  const { t } = useI18n()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [showSuccess, setShowSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -141,9 +143,9 @@ export function BookingForm({
                 <CheckCircle2 className="h-8 w-8 text-green-600" />
               </div>
             </div>
-            <DialogTitle className="text-center">Booking Confirmed!</DialogTitle>
+            <DialogTitle className="text-center">{t('bookingConfirmed')}</DialogTitle>
             <DialogDescription className="text-center">
-              Your booking request has been submitted successfully.
+              {t('bookingSubmitted')}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
@@ -151,36 +153,35 @@ export function BookingForm({
               <div className="flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
                 <div className="text-sm text-amber-800">
-                  <p className="font-semibold mb-1">Payment Information</p>
+                  <p className="font-semibold mb-1">{t('paymentInformation')}</p>
                   <p>
-                    Please note that payment will be handled at the venue. Your booking is subject to payment confirmation.
-                    Please arrive at the venue with the payment ready.
+                    {t('paymentNote')}
                   </p>
                 </div>
               </div>
             </div>
             <div className="text-sm text-muted-foreground space-y-1">
               <p>
-                <span className="font-semibold">Item:</span> {itemName}
+                <span className="font-semibold">{t('item')}:</span> {itemName}
               </p>
               <p>
-                <span className="font-semibold">Booking Date:</span>{" "}
+                <span className="font-semibold">{t('bookingDate')}:</span>{" "}
                 {new Date(formData.bookingDate).toLocaleDateString()}
               </p>
               {bookingType !== "guide" && (
                 <p>
-                  <span className="font-semibold">Number of People:</span> {formData.numberOfPeople}
+                  <span className="font-semibold">{t('numberOfPeople')}:</span> {formData.numberOfPeople}
                 </p>
               )}
               <p>
-                <span className="font-semibold">Estimated Total:</span> $
+                <span className="font-semibold">{t('estimatedTotalLabel')}:</span> $
                 {bookingType === "guide" ? itemPrice : itemPrice * formData.numberOfPeople}
               </p>
             </div>
 
             <div className="w-full flex ">
               <Button onClick={handleSuccessClose} className="w-1/2">
-                Close
+                {t('close')}
               </Button>
               <Button
                 variant="outline"
@@ -190,7 +191,7 @@ export function BookingForm({
                 }}
                 className="w-1/2"
               >
-                View My Bookings
+                {t('viewMyBookings')}
               </Button>
             </div>
           </div>
@@ -204,16 +205,16 @@ export function BookingForm({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Book {itemName}</DialogTitle>
+          <DialogTitle>{t('book')} {itemName}</DialogTitle>
           <DialogDescription>
-            Fill in the details below to complete your booking. Payment will be handled at the venue.
+            {t('fillDetails')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className={bookingType === "guide" ? "grid grid-cols-1 gap-4" : "grid grid-cols-2 gap-4"}>
             <div>
               <label htmlFor="bookingDate" className="block text-sm font-medium mb-1">
-                Booking Date & Time *
+                {t('bookingDateTime')} *
               </label>
               <Input
                 id="bookingDate"
@@ -229,7 +230,7 @@ export function BookingForm({
             {bookingType !== "guide" && (
               <div>
                 <label htmlFor="numberOfPeople" className="block text-sm font-medium mb-1">
-                  Number of People *
+                  {t('numberOfPeople')} *
                 </label>
                 <Input
                   id="numberOfPeople"
@@ -247,7 +248,7 @@ export function BookingForm({
 
           <div>
             <label htmlFor="contactName" className="block text-sm font-medium mb-1">
-              Full Name *
+              {t('fullName')} *
             </label>
             <Input
               id="contactName"
@@ -263,7 +264,7 @@ export function BookingForm({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label htmlFor="contactEmail" className="block text-sm font-medium mb-1">
-                Email *
+                {t('email')} *
               </label>
               <Input
                 id="contactEmail"
@@ -277,7 +278,7 @@ export function BookingForm({
             </div>
             <div>
               <label htmlFor="contactPhone" className="block text-sm font-medium mb-1">
-                Phone *
+                {t('phone')} *
               </label>
               <Input
                 id="contactPhone"
@@ -293,7 +294,7 @@ export function BookingForm({
 
           <div>
             <label htmlFor="notes" className="block text-sm font-medium mb-1">
-              Special Requirements or Notes (Optional)
+              {t('specialRequirements')}
             </label>
             <textarea
               id="notes"
@@ -310,32 +311,32 @@ export function BookingForm({
             {bookingType === "guide" ? (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Price per day:</span>
+                  <span className="text-muted-foreground">{t('pricePerDay')}:</span>
                   <span className="font-semibold">${itemPrice}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
-                  <span>Estimated Total:</span>
+                  <span>{t('estimatedTotal')}:</span>
                   <span>${itemPrice}</span>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Price per person:</span>
+                  <span className="text-muted-foreground">{t('pricePerPerson')}:</span>
                   <span className="font-semibold">${itemPrice}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
-                  <span className="text-muted-foreground">Number of people:</span>
+                  <span className="text-muted-foreground">{t('numberOfPeople')}:</span>
                   <span className="font-semibold">{formData.numberOfPeople}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
-                  <span>Estimated Total:</span>
+                  <span>{t('estimatedTotal')}:</span>
                   <span>${itemPrice * formData.numberOfPeople}</span>
                 </div>
               </>
             )}
             <p className="text-xs text-muted-foreground mt-2">
-              * Final payment will be handled at the venue
+              {t('finalPaymentNote')}
             </p>
           </div>
 
@@ -347,10 +348,10 @@ export function BookingForm({
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
-              Cancel
+              {t('close')}
             </Button>
             <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : "Confirm Booking"}
+              {isSubmitting ? t('submitting') : t('confirmBooking')}
             </Button>
           </DialogFooter>
         </form>

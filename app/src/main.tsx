@@ -6,6 +6,7 @@ import { BrowserRouter } from 'react-router-dom'
 import { ClerkProvider } from '@clerk/clerk-react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthTokenProvider } from './components/AuthTokenProvider'
+import { I18nProvider } from './lib/i18n/context'
 
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY
 
@@ -28,11 +29,13 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ClerkProvider publishableKey={PUBLISHABLE_KEY}>
       <QueryClientProvider client={queryClient}>
-        <AuthTokenProvider>
-          <BrowserRouter>
-            <App />
-          </BrowserRouter>
-        </AuthTokenProvider>
+        <I18nProvider>
+          <AuthTokenProvider>
+            <BrowserRouter>
+              <App />
+            </BrowserRouter>
+          </AuthTokenProvider>
+        </I18nProvider>
       </QueryClientProvider>
     </ClerkProvider>
   </StrictMode>,
