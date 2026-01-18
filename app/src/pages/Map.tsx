@@ -10,6 +10,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useHeritageSites } from "@/lib/api"
 import { Loader2 } from "lucide-react"
+import { useI18n } from "@/lib/i18n/context"
 
 // Fix for default markers in React Leaflet
 delete (L.Icon.Default.prototype as { _getIconUrl?: unknown })._getIconUrl;
@@ -28,6 +29,7 @@ interface MapComponentProps {
 const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponentProps) => {
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get("search")
+  const { t } = useI18n()
   
   const { data, isLoading, error } = useHeritageSites({ 
     limit: 100,
@@ -40,7 +42,7 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
       <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
         <div className="text-center">
           <Loader2 className="h-12 w-12 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading heritage sites...</p>
+          <p className="text-muted-foreground">{t('loadingHeritageSites')}</p>
         </div>
       </div>
     );
@@ -50,8 +52,8 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
     return (
       <div className="w-full h-full flex items-center justify-center bg-gradient-to-b from-background to-muted">
         <div className="text-center">
-          <p className="text-muted-foreground mb-2">Unable to load heritage sites</p>
-          <p className="text-sm text-muted-foreground">Please make sure the backend API is running</p>
+          <p className="text-muted-foreground mb-2">{t('unableToLoadHeritageSites')}</p>
+          <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
         </div>
       </div>
     );
@@ -135,6 +137,7 @@ export default function MapPage() {
   const [selectedSites, setSelectedSites] = useState<string[]>([])
   const [mapCenter, setMapCenter] = useState<[number, number] | undefined>(undefined)
   const [mapZoom, setMapZoom] = useState<number | undefined>(undefined)
+  const { t } = useI18n()
   
   const { data: sitesData } = useHeritageSites({ limit: 100 })
 
@@ -201,7 +204,7 @@ export default function MapPage() {
             />
           ) : (
             <div className="p-6 flex items-center justify-center h-full text-center text-muted-foreground">
-              <p>Select a site on the map to view details</p>
+              <p>{t('selectSiteOnMap')}</p>
             </div>
           )}
         </div>

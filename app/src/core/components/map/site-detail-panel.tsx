@@ -3,8 +3,8 @@
 import { Star, Heart, Share2, MapPin, Calendar, Users, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useHeritageSite } from "@/lib/api"
-import { useState, useEffect } from "react"
-import axios from "axios"
+import { useState } from "react"
+import { useI18n } from "@/lib/i18n/context"
 
 
 interface SiteDetailPanelProps {
@@ -13,40 +13,17 @@ interface SiteDetailPanelProps {
   onToggleSelect: () => void
 }
 
-interface SiteInfoFromBackend {
-  creator: string
-  era: string
-  location: string
-  status: string
-  stoneUsed: string
-  visitors: number
-  yearOfConstruction: number
-}
-
 export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDetailPanelProps) {
   const { data: site, isLoading, error } = useHeritageSite(siteId)
+  const { t } = useI18n()
   const [activeTab, setActiveTab] = useState<"overview" | "reviews" | "history">("overview")
-
-  const [information, setInformation] = useState<SiteInfoFromBackend | null>(null)
-
-  const getInformationFromBackend = async () => {
-    const response = await axios.get("http://localhost:3001/information")
-
-    setInformation(response.data)
-  }
-
-  useEffect(() => {
-    // console.log("useeffect was run")
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    getInformationFromBackend()
-  }, [])
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
           <Loader2 className="h-8 w-8 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading site details...</p>
+          <p className="text-muted-foreground">{t('loadingSiteDetails')}</p>
         </div>
       </div>
     )
@@ -56,8 +33,8 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
     return (
       <div className="flex items-center justify-center h-full">
         <div className="text-center">
-          <p className="text-muted-foreground mb-2">Unable to load site details</p>
-          <p className="text-sm text-muted-foreground">Please try selecting another site</p>
+          <p className="text-muted-foreground mb-2">{t('unableToLoadSiteDetails')}</p>
+          <p className="text-sm text-muted-foreground">{t('trySelectingAnotherSite')}</p>
         </div>
       </div>
     )
@@ -103,31 +80,23 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
           </div>
 
           {/* Quick Info */}
-          {/* ternary operator */}
-          {/* condition ? component to show if condition is true : component to show if condition is false */}
-          {
-            information == null ? (
-              <div>loading...</div>
-            ) : (
-              <div className="grid grid-cols-3 gap-3 mb-6">
-                <div className="bg-muted p-3 rounded-lg text-center">
-                  <Calendar className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-xs text-muted-foreground">Era</p>
-                  <p className="text-sm font-semibold text-foreground">{site.historicalPeriod || information?.era || 'N/A'}</p>
-                </div>
-                <div className="bg-muted p-3 rounded-lg text-center">
-                  <Users className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-xs text-muted-foreground">Visitors</p>
-                  <p className="text-sm font-semibold text-foreground">{site.annualVisitors || information?.visitors || 'N/A'}</p>
-                </div>
-                <div className="bg-muted p-3 rounded-lg text-center">
-                  <MapPin className="w-5 h-5 text-primary mx-auto mb-1" />
-                  <p className="text-xs text-muted-foreground">Status</p>
-                  <p className="text-sm font-semibold text-foreground">{site.status || information?.status || 'Active'}</p>
-                </div>
-              </div>
-            )
-          }
+          <div className="grid grid-cols-3 gap-3 mb-6">
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <Calendar className="w-5 h-5 text-primary mx-auto mb-1" />
+              <p className="text-xs text-muted-foreground">{t('era')}</p>
+              <p className="text-sm font-semibold text-foreground">{site.historicalPeriod || t('unknown')}</p>
+            </div>
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <Users className="w-5 h-5 text-primary mx-auto mb-1" />
+              <p className="text-xs text-muted-foreground">{t('visitors')}</p>
+              <p className="text-sm font-semibold text-foreground">{site.annualVisitors || t('unknown')}</p>
+            </div>
+            <div className="bg-muted p-3 rounded-lg text-center">
+              <MapPin className="w-5 h-5 text-primary mx-auto mb-1" />
+              <p className="text-xs text-muted-foreground">{t('status')}</p>
+              <p className="text-sm font-semibold text-foreground">{site.status || t('active')}</p>
+            </div>
+          </div>
         </div>
 
         {/* Tabs */}
@@ -139,7 +108,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
                 : "text-muted-foreground hover:text-foreground"
               }`}
           >
-            Overview
+            {t('overview')}
           </button>
           <button
             onClick={() => setActiveTab("history")}
@@ -148,7 +117,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
                 : "text-muted-foreground hover:text-foreground"
               }`}
           >
-            History
+            {t('history')}
           </button>
           <button
             onClick={() => setActiveTab("reviews")}
@@ -157,7 +126,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
                 : "text-muted-foreground hover:text-foreground"
               }`}
           >
-            Reviews
+            {t('reviews')}
           </button>
         </div>
 
@@ -166,23 +135,23 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
           <div className="space-y-4 mb-6">
             <p className="text-foreground leading-relaxed">{site.description}</p>
             <div className="bg-muted p-4 rounded-lg">
-              <h4 className="font-semibold text-foreground mb-2">Key Facts</h4>
+              <h4 className="font-semibold text-foreground mb-2">{t('keyFacts')}</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
-                  <span>UNESCO World Heritage: {site.unescoWorldHeritage ? 'Yes' : 'No'}</span>
+                  <span>{t('unescoWorldHeritage')}: {site.unescoWorldHeritage ? t('yes') : t('no')}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
-                  <span>Historical Period: {site.historicalPeriod || 'Unknown'}</span>
+                  <span>{t('historicalPeriod')}: {site.historicalPeriod || t('unknown')}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
-                  <span>Annual Visitors: {site.annualVisitors || 'Not available'}</span>
+                  <span>{t('annualVisitors')}: {site.annualVisitors || t('notAvailable')}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
-                  <span>Status: {site.status || 'Active'}</span>
+                  <span>{t('status')}: {site.status || t('active')}</span>
                 </li>
               </ul>
             </div>
@@ -192,7 +161,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
         {activeTab === "history" && (
           <div className="mb-6">
             <p className="text-foreground leading-relaxed">
-              {site.historicalSignificance || site.description || 'Historical information not available.'}
+              {site.historicalSignificance || site.description || t('historicalInformationNotAvailable')}
             </p>
           </div>
         )}
@@ -200,9 +169,9 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
         {activeTab === "reviews" && (
           <div className="space-y-4 mb-6">
             <div className="text-center py-8">
-              <p className="text-muted-foreground">Reviews feature coming soon!</p>
+              <p className="text-muted-foreground">{t('reviewsFeatureComingSoon')}</p>
               <p className="text-sm text-muted-foreground mt-2">
-                Connect with our reviews API to see visitor experiences
+                {t('connectWithReviewsApi')}
               </p>
             </div>
           </div>
@@ -218,11 +187,11 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
               : "bg-primary text-primary-foreground hover:bg-primary/90"
             }`}
         >
-          {isSelected ? "✓ Selected for Trip" : "+ Add to Trip"}
+          {isSelected ? t('selectedForTrip') : t('addToTrip')}
         </Button>
         <Button variant="outline" className="w-full bg-transparent">
           <Share2 className="w-4 h-4 mr-2" />
-          Share Site
+          {t('shareSite')}
         </Button>
       </div>
     </div>
