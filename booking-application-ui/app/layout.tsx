@@ -4,6 +4,7 @@ import { Analytics } from '@vercel/analytics/next'
 import { Toaster } from 'sonner'
 import { Providers } from './providers'
 import { ThemeProvider } from '@/components/theme-provider'
+import { I18nProvider } from '@/lib/i18n/context'
 import './globals.css'
 
 const _geist = Geist({ subsets: ["latin"] });
@@ -41,10 +42,12 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`font-sans antialiased`}>
         <Providers>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            {children}
-            <Toaster position="top-right" />
-          </ThemeProvider>
+          <I18nProvider>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+              <Toaster position="top-right" />
+            </ThemeProvider>
+          </I18nProvider>
         </Providers>
         <Analytics />
       </body>
