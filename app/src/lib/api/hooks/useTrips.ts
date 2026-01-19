@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { tripsApi, type Trip, type TripsQueryParams, type CreateTripData, type GenerateItineraryData } from '../trips';
+import { tripsApi, type TripsQueryParams, type CreateTripData, type GenerateItineraryData } from '../trips';
 
 // Query keys
 export const tripsKeys = {
@@ -39,7 +39,7 @@ export const useTrip = (id: string, enabled = true) => {
 // Create trip mutation
 export const useCreateTrip = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: CreateTripData) => tripsApi.create(data),
     onSuccess: () => {
@@ -51,7 +51,7 @@ export const useCreateTrip = () => {
 // Update trip mutation
 export const useUpdateTrip = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateTripData> }) =>
       tripsApi.update(id, data),
@@ -65,7 +65,7 @@ export const useUpdateTrip = () => {
 // Delete trip mutation
 export const useDeleteTrip = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => tripsApi.delete(id),
     onSuccess: () => {
@@ -77,7 +77,7 @@ export const useDeleteTrip = () => {
 // Generate itinerary mutation
 export const useGenerateItinerary = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data?: GenerateItineraryData }) =>
       tripsApi.generateItinerary(id, data),

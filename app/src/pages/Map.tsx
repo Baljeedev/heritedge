@@ -64,70 +64,73 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
   const mapZoom = initialZoom || 5;
 
   return (
-    <MapContainer
-      center={mapCenter as [number, number]}
-      zoom={mapZoom}
-      scrollWheelZoom={true}
-      style={{ height: "100%", width: "100%" }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+    <>
+      <MapContainer
+        {...({
+          center: mapCenter as [number, number],
+          zoom: mapZoom,
+          scrollWheelZoom: true,
+          style: { height: "100%", width: "100%" },
+        } as Record<string, unknown>)}
+      >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-      {sites.map((site) => {
-        const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
+        {sites.map((site) => {
+          const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
 
-        return (
-          <Marker
-            key={site._id}
-            position={position}
-            eventHandlers={{
-              click: () => onSiteSelect(site._id)
-            }}
-          >
-            <Popup>
-              <div className="p-2 min-w-[200px]">
-                <div className="flex items-center gap-2 mb-2">
-                  <img
-                    src={site.image || "/placeholder.svg"}
-                    alt={site.name}
-                    className="w-16 h-16 object-cover rounded"
-                  />
-                  <div>
-                    <h3 className="font-bold text-sm">{site.name}</h3>
-                    <p className="text-xs text-gray-600">
-                      {site.city || ''}{site.city && site.state ? ', ' : ''}{site.state || ''}
-                    </p>
+          return (
+            <Marker
+              key={site._id}
+              position={position}
+              eventHandlers={{
+                click: () => onSiteSelect(site._id)
+              }}
+            >
+              <Popup>
+                <div className="p-2 min-w-[200px]">
+                  <div className="flex items-center gap-2 mb-2">
+                    <img
+                      src={site.image || "/placeholder.svg"}
+                      alt={site.name}
+                      className="w-16 h-16 object-cover rounded"
+                    />
+                    <div>
+                      <h3 className="font-bold text-sm">{site.name}</h3>
+                      <p className="text-xs text-gray-600">
+                        {site.city || ''}{site.city && site.state ? ', ' : ''}{site.state || ''}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-1 mb-2">
+                    <span className="text-yellow-500">★</span>
+                    <span className="text-xs">{site.rating?.toFixed(1) || 'N/A'}</span>
+                    <span className="text-xs text-gray-500">({site.reviewCount || 0} reviews)</span>
+                  </div>
+
+                  <p className="text-xs text-gray-700 line-clamp-2 mb-2">
+                    {site.description}
+                  </p>
+
+                  <div className="flex gap-1 flex-wrap">
+                    <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
+                      {site.era}
+                    </span>
+                    {site.unescoWorldHeritage && (
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        UNESCO
+                      </span>
+                    )}
                   </div>
                 </div>
-
-                <div className="flex items-center gap-1 mb-2">
-                  <span className="text-yellow-500">★</span>
-                  <span className="text-xs">{site.rating?.toFixed(1) || 'N/A'}</span>
-                  <span className="text-xs text-gray-500">({site.reviewCount || 0} reviews)</span>
-                </div>
-
-                <p className="text-xs text-gray-700 line-clamp-2 mb-2">
-                  {site.description}
-                </p>
-
-                <div className="flex gap-1 flex-wrap">
-                  <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                    {site.era}
-                  </span>
-                  {site.unescoWorldHeritage && (
-                    <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                      UNESCO
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Popup>
-          </Marker>
-        );
-      })}
-    </MapContainer>
+              </Popup>
+            </Marker>
+          );
+        })}
+      </MapContainer>
+    </>
   );
 };
 
@@ -149,10 +152,12 @@ export default function MapPage() {
     if (siteIdFromUrl && sitesData?.sites) {
       const site = sitesData.sites.find(s => s._id === siteIdFromUrl)
       if (site) {
-        setSelectedSiteId(siteIdFromUrl)
-        // Center map on the selected site
-        setMapCenter([site.coordinates.latitude, site.coordinates.longitude])
-        setMapZoom(12) // Zoom in closer when a specific site is selected
+        // Defer state updates out of the effect body to avoid React Compiler warnings
+        Promise.resolve().then(() => {
+          setSelectedSiteId(siteIdFromUrl)
+          setMapCenter([site.coordinates.latitude, site.coordinates.longitude])
+          setMapZoom(12) // Zoom in closer when a specific site is selected
+        })
       }
     } else if (searchQuery) {
       // If there's a search query, filter sites and show results
