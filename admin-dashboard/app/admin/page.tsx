@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { Card } from "@/components/ui/card"
 import { MapPin, Users, Zap, Building2, Map, Star, Clock, ArrowRight, Loader2, Calendar } from "lucide-react"
 import Link from "next/link"
-import { heritageSitesApi, guidesApi, experiencesApi, hotelsApi, tripsApi, reviewsApi, bookingsApi } from "@/lib/api"
+import { heritageSitesApi, guidesApi, experiencesApi, hotelsApi, tripsApi, reviewsApi, bookingsApi, applicationsApi } from "@/lib/api"
 
 interface Stat {
   label: string
@@ -30,7 +30,7 @@ export default function DashboardPage() {
       value: 0,
       icon: Users,
       color: "bg-blue-100 text-blue-700",
-      href: "/admin/guides",
+      href: "/admin/applications",
       loading: true,
     },
     {
@@ -70,7 +70,7 @@ export default function DashboardPage() {
       value: 0,
       icon: Clock,
       color: "bg-orange-100 text-orange-700",
-      href: "/admin/guides",
+      href: "/admin/applications",
       loading: true,
     },
     {
@@ -89,7 +89,7 @@ export default function DashboardPage() {
 
   const loadStats = async () => {
     try {
-      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes, bookingsRes] = await Promise.all([
+      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes, bookingsRes, applicationsRes] = await Promise.all([
         heritageSitesApi.getAll({ limit: 1 }),
         guidesApi.getAll({ limit: 1, all: true }),
         experiencesApi.getAll({ limit: 1, all: true }),
@@ -97,6 +97,7 @@ export default function DashboardPage() {
         tripsApi.getAll({ limit: 1 }),
         reviewsApi.getAll({ limit: 1, all: true }),
         bookingsApi.getAll({ all: true }),
+        applicationsApi.getAll("pending"),
       ])
 
       // Count pending internship applications
@@ -104,6 +105,8 @@ export default function DashboardPage() {
       const pendingInterns = allGuides.guides.filter(
         (g) => g.isIntern && g.internshipStatus === "pending"
       ).length
+      
+      const pendingApplications = applicationsRes.applications.length
 
       setStats([
         {
@@ -119,7 +122,7 @@ export default function DashboardPage() {
           value: guidesRes.total,
           icon: Users,
           color: "bg-blue-100 text-blue-700",
-          href: "/admin/guides",
+          href: "/admin/applications",
           loading: false,
         },
         {
@@ -156,10 +159,10 @@ export default function DashboardPage() {
         },
         {
           label: "Pending Applications",
-          value: pendingInterns,
+          value: pendingApplications,
           icon: Clock,
           color: "bg-orange-100 text-orange-700",
-          href: "/admin/guides",
+          href: "/admin/applications",
           loading: false,
         },
         {
