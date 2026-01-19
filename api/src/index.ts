@@ -13,6 +13,7 @@ import tripsRouter from "./routes/trips";
 import reviewsRouter from "./routes/reviews";
 import uploadRouter from "./routes/upload";
 import bookingsRouter from "./routes/bookings";
+import applicationsRouter from "./routes/applications";
 
 const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/trips", tripsRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/bookings", bookingsRouter);
+app.use("/api/applications", applicationsRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -73,4 +75,6 @@ app.listen(PORT, () => {
   console.log(`   GET    /api/trips/featured (open to all)`);
   console.log(`   GET    /api/reviews`);
   console.log(`   GET    /api/bookings`);
+  console.log(`   GET    /api/applications`);
+  console.log(`   POST   /api/applications`);
 });
