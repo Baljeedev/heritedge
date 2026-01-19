@@ -1,11 +1,12 @@
 'use client'
 
-import * as React from 'react'
-import {
-  ThemeProvider as NextThemesProvider,
-  type ThemeProviderProps,
-} from 'next-themes'
+import type { ReactNode } from 'react'
 
-export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>
+export interface ThemeProviderProps {
+  children: ReactNode
+}
+
+// Simple pass-through theme provider for Vite/React; customize as needed
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  return <>{children}</>
 }

@@ -102,7 +102,7 @@ export default function TripDetail() {
               </CardHeader>
               <CardContent>
                 <ul className="space-y-2">
-                  {trip.highlights.map((highlight, index) => (
+                  {trip.highlights?.map((highlight, index) => (
                     <li key={index} className="flex items-start gap-3">
                       <CheckCircle2 className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                       <span className="text-foreground">{highlight}</span>
@@ -115,7 +115,7 @@ export default function TripDetail() {
             {/* Day-by-Day Itinerary */}
             <div className="space-y-6">
               <h2 className="text-3xl  font-bold text-foreground">Day-by-Day Itinerary</h2>
-              {trip.itinerary.map((dayPlan) => (
+              {trip.itinerary?.map((dayPlan) => (
                 <Card key={dayPlan.day} className="overflow-hidden">
                   <CardHeader className="bg-primary/5 border-b border-border">
                     <CardTitle className="flex items-center gap-3">

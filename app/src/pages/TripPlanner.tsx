@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane, Clock, DollarSign, ArrowRight, Loader2 } from "lucide-react";
+import { Sparkles, Calendar, Hotel, Utensils, MapPin, Plane, Clock, ArrowRight, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Navigation } from "@/core/components/navigation";
@@ -10,7 +10,7 @@ import { useFeaturedTrips, type Trip } from "@/lib/api";
 const TripPlanner = () => {
   const [showCustomPlanner, setShowCustomPlanner] = useState(false);
   const [selectedMonuments, setSelectedMonuments] = useState<string[]>([]);
-  
+
   // Fetch featured trips from API
   const { data: featuredTripsData, isLoading, error } = useFeaturedTrips();
 
@@ -32,7 +32,7 @@ const TripPlanner = () => {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        
+
         <div className="container mx-auto px-4 py-8">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-3">
@@ -49,14 +49,14 @@ const TripPlanner = () => {
           {/* Premade Trips Grid */}
           <div className="mb-12">
             <h2 className="text-2xl  font-bold text-foreground mb-6">Featured Heritage Trips</h2>
-            
+
             {isLoading && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="h-8 w-8 animate-spin text-primary" />
                 <span className="ml-2 text-muted-foreground">Loading featured trips...</span>
               </div>
             )}
-            
+
             {error && (
               <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-4 mb-6">
                 <p className="text-destructive">Error loading trips: {error.message}</p>
@@ -65,7 +65,7 @@ const TripPlanner = () => {
                 </p>
               </div>
             )}
-            
+
             {!isLoading && !error && featuredTripsData && (
               <>
                 {featuredTripsData.trips.length === 0 ? (
@@ -114,14 +114,14 @@ const TripPlanner = () => {
           </div>
 
           {/* CTA to Create Custom Trip */}
-          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+          <Card className="from-primary/10 to-primary/5 border-primary/20">
             <CardContent className="p-8 text-center">
               <Sparkles className="w-12 h-12 text-primary mx-auto mb-4" />
               <h3 className="text-2xl  font-bold text-foreground mb-2">
                 Want Something Different?
               </h3>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Create your own personalized heritage itinerary with our AI-powered trip planner. 
+                Create your own personalized heritage itinerary with our AI-powered trip planner.
                 Select monuments, choose preferences, and get a custom day-by-day plan tailored to your interests.
               </p>
               <Button
@@ -142,7 +142,7 @@ const TripPlanner = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
@@ -177,11 +177,10 @@ const TripPlanner = () => {
                     <button
                       key={monument.id}
                       onClick={() => toggleMonument(monument.id)}
-                      className={`p-4 rounded-lg border-2 text-left transition-all ${
-                        selectedMonuments.includes(monument.id)
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/50"
-                      }`}
+                      className={`p-4 rounded-lg border-2 text-left transition-all ${selectedMonuments.includes(monument.id)
+                        ? "border-primary bg-primary/5"
+                        : "border-border hover:border-primary/50"
+                        }`}
                     >
                       <p className="font-semibold text-foreground">{monument.name}</p>
                       <p className="text-sm text-muted-foreground">{monument.location}</p>
@@ -240,7 +239,7 @@ const TripPlanner = () => {
 
           {/* Features Sidebar */}
           <div className="space-y-4">
-            <Card className="bg-gradient-to-br from-heritage-terracotta/10 to-heritage-gold/10 border-primary/20">
+            <Card className="from-heritage-terracotta/10 to-heritage-gold/10 border-primary/20">
               <CardContent className="p-6">
                 <h3 className="font-bold text-lg mb-4 text-foreground">What's Included</h3>
                 <div className="space-y-3">

@@ -30,8 +30,8 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get("search")
   const { t } = useI18n()
-  
-  const { data, isLoading, error } = useHeritageSites({ 
+
+  const { data, isLoading, error } = useHeritageSites({
     limit: 100,
     search: searchQuery || undefined,
   });
@@ -64,23 +64,23 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
   const mapZoom = initialZoom || 5;
 
   return (
-    <MapContainer 
-      center={mapCenter as [number, number]} 
-      zoom={mapZoom} 
-      scrollWheelZoom={true} 
+    <MapContainer
+      center={mapCenter as [number, number]}
+      zoom={mapZoom}
+      scrollWheelZoom={true}
       style={{ height: "100%", width: "100%" }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
-      
+
       {sites.map((site) => {
         const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
-        
+
         return (
-          <Marker 
-            key={site._id} 
+          <Marker
+            key={site._id}
             position={position}
             eventHandlers={{
               click: () => onSiteSelect(site._id)
@@ -89,8 +89,8 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
             <Popup>
               <div className="p-2 min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
-                  <img 
-                    src={site.image || "/placeholder.svg"} 
+                  <img
+                    src={site.image || "/placeholder.svg"}
                     alt={site.name}
                     className="w-16 h-16 object-cover rounded"
                   />
@@ -101,17 +101,17 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-1 mb-2">
                   <span className="text-yellow-500">★</span>
                   <span className="text-xs">{site.rating?.toFixed(1) || 'N/A'}</span>
                   <span className="text-xs text-gray-500">({site.reviewCount || 0} reviews)</span>
                 </div>
-                
+
                 <p className="text-xs text-gray-700 line-clamp-2 mb-2">
                   {site.description}
                 </p>
-                
+
                 <div className="flex gap-1 flex-wrap">
                   <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">
                     {site.era}
@@ -138,14 +138,14 @@ export default function MapPage() {
   const [mapCenter, setMapCenter] = useState<[number, number] | undefined>(undefined)
   const [mapZoom, setMapZoom] = useState<number | undefined>(undefined)
   const { t } = useI18n()
-  
+
   const { data: sitesData } = useHeritageSites({ limit: 100 })
 
   // Read site query parameter and select the site on mount
   useEffect(() => {
     const siteIdFromUrl = searchParams.get("site")
     const searchQuery = searchParams.get("search")
-    
+
     if (siteIdFromUrl && sitesData?.sites) {
       const site = sitesData.sites.find(s => s._id === siteIdFromUrl)
       if (site) {
@@ -180,8 +180,8 @@ export default function MapPage() {
       <div className="flex h-[calc(100vh-60px)]">
         {/* Map Section */}
         <div className="flex-1 relative">
-          <MapComponent 
-            onSiteSelect={setSelectedSiteId} 
+          <MapComponent
+            onSiteSelect={setSelectedSiteId}
             initialCenter={mapCenter}
             initialZoom={mapZoom}
           />
