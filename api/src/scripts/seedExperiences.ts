@@ -18,6 +18,7 @@ const connectDB = async () => {
 const MUSIC_SHOWS = [
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Classical Indian Music at Taj Mahal",
     image: "https://upload.wikimedia.org/wikipedia/commons/1/1d/Taj_Mahal_%28Edited%29.jpeg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -34,6 +35,7 @@ const MUSIC_SHOWS = [
   },
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Qawwali Evening at Humayun's Tomb",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQgwTqZJa4eQEYhb6J6P3c8bBNCCKUX0VavxQ&s",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -50,6 +52,7 @@ const MUSIC_SHOWS = [
   },
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Rajasthani Folk Music at Hawa Mahal",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRuDD8CIjBDuVukV24jBDSDnW6-DUu3qrzpeQ&s",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -66,6 +69,7 @@ const MUSIC_SHOWS = [
   },
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Carnatic Music at Mysore Palace",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRLyADkHVmysdaYefNY8J3KecQDfgvhkdlyqg&s",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -82,6 +86,7 @@ const MUSIC_SHOWS = [
   },
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Temple Music at Khajuraho",
     image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQNemzzVQ4UCMR-JvvNhQcDqnq2FYJ2oi2weA&s",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -98,6 +103,7 @@ const MUSIC_SHOWS = [
   },
   {
     type: "music" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Odissi Music & Dance at Konark",
     image: "https://s7ap1.scene7.com/is/image/incredibleindia/konark-temple-puri-odisha-2-attr-hero?qlt=82&ts=1726674676369",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -118,6 +124,7 @@ const MUSIC_SHOWS = [
 const WORKSHOPS = [
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Marble Inlay Art Workshop",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -140,6 +147,7 @@ const WORKSHOPS = [
   },
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Mughal Calligraphy Workshop",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -162,6 +170,7 @@ const WORKSHOPS = [
   },
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Traditional Textile Weaving",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -184,6 +193,7 @@ const WORKSHOPS = [
   },
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Stone Carving Workshop",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -206,6 +216,7 @@ const WORKSHOPS = [
   },
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Traditional Pottery & Ceramics",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -228,6 +239,7 @@ const WORKSHOPS = [
   },
   {
     type: "workshop" as const,
+    email: "harshit.rai.verma@gmail.com",
     name: "Indian Miniature Painting",
     image: "https://ichef.bbci.co.uk/images/ic/640x360/p09w0z2t.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",

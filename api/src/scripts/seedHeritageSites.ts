@@ -331,7 +331,7 @@ const INDIAN_HERITAGE_SITES = [
 const seedHeritageSites = async () => {
   try {
     console.log("🌱 Starting heritage sites seeding...");
-    
+
     // Clear existing heritage sites
     await HeritageSite.deleteMany({});
     console.log("🗑️  Cleared existing heritage sites");
@@ -339,7 +339,7 @@ const seedHeritageSites = async () => {
     // Insert new heritage sites
     const sites = await HeritageSite.insertMany(INDIAN_HERITAGE_SITES);
     console.log(`✅ Successfully seeded ${sites.length} heritage sites`);
-    
+
     // Log the seeded sites
     sites.forEach(site => {
       console.log(`   - ${site.name} (${site.city}, ${site.state})`);
