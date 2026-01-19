@@ -3,7 +3,7 @@
 import { Globe, Menu, X } from "lucide-react"
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
-import { SignedIn, UserButton, SignInButton, SignedOut } from '@clerk/clerk-react'
+import { SignedIn, UserButton, SignedOut } from '@clerk/clerk-react'
 import { Button } from "@/components/ui/button"
 import { useI18n } from "@/lib/i18n/context"
 import { LanguageToggle } from "@/components/language-toggle"
@@ -33,9 +33,6 @@ export function Navigation() {
           </Link>
           <Link to="/experiences" className="text-foreground hover:text-primary transition-colors">
             {t('experiences')}
-          </Link>
-          <Link to="/guides" className="text-foreground hover:text-primary transition-colors">
-            {t('guides')}
           </Link>
           <Link to="/donate" className="text-foreground hover:text-primary transition-colors">
             {t('donate')}
@@ -84,9 +81,6 @@ export function Navigation() {
             </Link>
             <Link to="/experiences" className="block text-foreground hover:text-primary py-2">
               {t('experiences')}
-            </Link>
-            <Link to="/guides" className="block text-foreground hover:text-primary py-2">
-              {t('guides')}
             </Link>
             <Link to="/donate" className="block text-foreground hover:text-primary py-2">
               {t('donate')}

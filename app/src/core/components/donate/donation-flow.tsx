@@ -11,7 +11,7 @@ interface DonationFlowProps {
 
 const DONATION_AMOUNTS = [25, 50, 100, 250, 500, 1000]
 
-export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
+export function DonationFlow({ onClose }: DonationFlowProps) {
   const [step, setStep] = useState(0)
   const [customAmount, setCustomAmount] = useState("")
   const [selectedAmount, setSelectedAmount] = useState(100)
@@ -59,9 +59,8 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
           return (
             <div key={index} className="flex-1">
               <div
-                className={`p-3 rounded-lg text-center transition-all ${
-                  index <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
-                }`}
+                className={`p-3 rounded-lg text-center transition-all ${index <= step ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground"
+                  }`}
               >
                 {Icon && <Icon className="w-5 h-5 mx-auto mb-1" />}
                 <p className="text-xs font-semibold">{s.label}</p>
@@ -86,11 +85,10 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
                     setSelectedAmount(amount)
                     setCustomAmount("")
                   }}
-                  className={`p-4 rounded-lg border-2 font-semibold transition-all ${
-                    selectedAmount === amount && !customAmount
-                      ? "border-primary bg-primary/5 text-primary"
-                      : "border-border hover:border-primary/50 text-foreground"
-                  }`}
+                  className={`p-4 rounded-lg border-2 font-semibold transition-all ${selectedAmount === amount && !customAmount
+                    ? "border-primary bg-primary/5 text-primary"
+                    : "border-border hover:border-primary/50 text-foreground"
+                    }`}
                 >
                   ${amount}
                 </button>
@@ -133,12 +131,11 @@ export function DonationFlow({ projectId, onClose }: DonationFlowProps) {
               ].map((option) => (
                 <button
                   key={option.type}
-                  onClick={() => setDonationType(option.type as any)}
-                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${
-                    donationType === option.type
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/50"
-                  }`}
+                  onClick={() => setDonationType(option.type as "one-time" | "monthly")}
+                  className={`w-full p-4 rounded-lg border-2 text-left transition-all ${donationType === option.type
+                    ? "border-primary bg-primary/5"
+                    : "border-border hover:border-primary/50"
+                    }`}
                 >
                   <p className="font-semibold text-foreground">{option.title}</p>
                   <p className="text-sm text-muted-foreground">{option.desc}</p>
