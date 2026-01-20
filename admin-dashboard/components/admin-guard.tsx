@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const ALLOWED_EMAIL = "harshit.rai.verma@gmail.com"
+const ALLOWED_EMAIL = "baljeelovesmemes@gmail.com"
 
 export function AdminGuard({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser()
