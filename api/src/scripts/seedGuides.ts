@@ -19,6 +19,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_1",
     name: "Rajesh Kumar",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://www.shutterstock.com/image-photo/young-asian-woman-professional-entrepreneur-600nw-2127014192.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Mughal Architecture & History",
@@ -52,6 +53,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_2",
     name: "Priya Sharma",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://p1.piqsels.com/preview/333/874/540/nature-outdoors-people-summer-person-man.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Delhi Heritage & Culture",
@@ -77,6 +79,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_3",
     name: "Amit Patel",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://static.vecteezy.com/system/resources/thumbnails/071/408/430/small/portrait-of-positive-young-guy-in-t-shirt-looking-at-camera-on-light-grey-studio-background-confident-millennial-man-with-dark-hair-wearing-casual-clothes-posing-and-smiling-photo.jpg",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Rajasthan Heritage & Rajput History",
@@ -102,6 +105,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_4",
     name: "Deepak Singh",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fm=jpg&q=60&w=3000&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGVyc29ufGVufDB8fDB8fHww",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "South Indian Temples & Architecture",
@@ -127,6 +131,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_5",
     name: "Meera Devi",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg?semt=ais_hybrid&w=740&q=80",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Medieval Indian Architecture & Sculpture",
@@ -152,6 +157,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_6",
     name: "Vikram Rao",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://img.freepik.com/free-photo/young-bearded-man-with-striped-shirt_273609-5677.jpg?semt=ais_hybrid&w=740&q=80",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Odisha Heritage & Kalinga Architecture",
@@ -177,6 +183,7 @@ const INDIAN_GUIDES = [
   {
     clerkUserId: "system_guide_7",
     name: "Anjali Mehta",
+    email: "baljeelovesmemes@gmail.com",
     image: "https://img.freepik.com/free-photo/close-up-portrait-handsome-smiling-young-man-white-t-shirt-blurry-outdoor-nature_176420-6305.jpg?semt=ais_hybrid&w=740&q=80",
     video: "http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
     specialization: "Mumbai Heritage & Colonial Architecture",

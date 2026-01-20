@@ -2,7 +2,6 @@
 import { Calendar, Users, MapPin, DollarSign, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useHeritageSites } from "@/lib/api"
-import { useMemo } from "react"
 
 interface FinalItineraryProps {
   sites: string[]
@@ -15,10 +14,12 @@ interface FinalItineraryProps {
 
 export function FinalItinerary({ sites, hotels, restaurants, flight, dates, travelers }: FinalItineraryProps) {
   const { data, isLoading } = useHeritageSites({ limit: 100 })
-  const selectedSites = useMemo(() => {
-    if (!data?.sites) return []
-    return data.sites.filter((s) => sites.includes(s._id))
-  }, [data?.sites, sites])
+  // NOTE: hotels/restaurants/flight are included in props for future expansion (costing, routing).
+  void hotels
+  void restaurants
+  void flight
+  // Avoid manual memoization here; React Compiler can safely optimize this derived value.
+  const selectedSites = data?.sites ? data.sites.filter((s) => sites.includes(s._id)) : []
 
   const calculateDays = () => {
     if (!dates.start || !dates.end) return 0

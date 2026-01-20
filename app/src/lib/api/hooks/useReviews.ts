@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { reviewsApi, type Review, type ReviewsQueryParams, type CreateReviewData } from '../reviews';
+import { reviewsApi, type ReviewsQueryParams, type CreateReviewData } from '../reviews';
 
 // Query keys
 export const reviewsKeys = {
@@ -30,7 +30,7 @@ export const useReview = (id: string, enabled = true) => {
 // Create review mutation
 export const useCreateReview = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (data: CreateReviewData) => reviewsApi.create(data),
     onSuccess: (_, variables) => {
@@ -52,7 +52,7 @@ export const useCreateReview = () => {
 // Update review mutation
 export const useUpdateReview = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<CreateReviewData> }) =>
       reviewsApi.update(id, data),
@@ -66,7 +66,7 @@ export const useUpdateReview = () => {
 // Delete review mutation
 export const useDeleteReview = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => reviewsApi.delete(id),
     onSuccess: () => {
@@ -78,7 +78,7 @@ export const useDeleteReview = () => {
 // Mark review as helpful mutation
 export const useMarkReviewHelpful = () => {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: (id: string) => reviewsApi.markHelpful(id),
     onSuccess: (_, id) => {

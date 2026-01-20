@@ -84,7 +84,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
             <div className="bg-muted p-3 rounded-lg text-center">
               <Calendar className="w-5 h-5 text-primary mx-auto mb-1" />
               <p className="text-xs text-muted-foreground">{t('era')}</p>
-              <p className="text-sm font-semibold text-foreground">{site.historicalPeriod || t('unknown')}</p>
+              <p className="text-sm font-semibold text-foreground">{site.era || t('unknown')}</p>
             </div>
             <div className="bg-muted p-3 rounded-lg text-center">
               <Users className="w-5 h-5 text-primary mx-auto mb-1" />
@@ -143,7 +143,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
-                  <span>{t('historicalPeriod')}: {site.historicalPeriod || t('unknown')}</span>
+                  <span>{t('historicalPeriod')}: {site.era || t('unknown')}</span>
                 </li>
                 <li className="flex gap-2">
                   <span className="text-primary">•</span>
@@ -161,7 +161,7 @@ export function SiteDetailPanel({ siteId, isSelected, onToggleSelect }: SiteDeta
         {activeTab === "history" && (
           <div className="mb-6">
             <p className="text-foreground leading-relaxed">
-              {site.historicalSignificance || site.description || t('historicalInformationNotAvailable')}
+              {site.historicalWriteup || site.description || t('historicalInformationNotAvailable')}
             </p>
           </div>
         )}

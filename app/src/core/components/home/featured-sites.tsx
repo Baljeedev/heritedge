@@ -61,7 +61,7 @@ export function FeaturedSites() {
               </div>
               <span className="text-muted-foreground">({(site.reviewCount || 0).toLocaleString()})</span>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">{site.historicalPeriod}</p>
+            <p className="text-xs text-muted-foreground mt-2">{site.era}</p>
           </div>
         </Link>
       ))}

@@ -1,9 +1,10 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useExperiences, useGuides } from "@/lib/api"
 import type { ExperienceType } from "@/data/experiences"
+import type { Experience } from "@/lib/api/experiences"
 import { ExperienceFilter } from "@/core/components/experiences/experience-filter"
 import { Navigation } from "@/core/components/navigation"
 import { ExperienceCard } from "@/core/components/experiences/experience-card"
@@ -11,6 +12,122 @@ import { GuideCard } from "@/core/components/guides/guide-card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Users, Music, Hammer, Loader2 } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
+import type { Guide } from "@/lib/api/guides"
+
+// Component for rendering guides tab (uses guides API)
+function GuidesTabContent({
+  guidesData,
+  guidesLoading,
+  guidesError
+}: {
+  guidesData: { guides: Guide[] } | undefined
+  guidesLoading: boolean
+  guidesError: Error | null
+}) {
+  const { t } = useI18n()
+
+  if (guidesLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-muted-foreground">{t('loadingGuides')}</span>
+      </div>
+    )
+  }
+
+  if (guidesError) {
+    return (
+      <div className="text-center py-12 bg-card border border-border rounded-lg">
+        <p className="text-muted-foreground mb-2">{t('errorLoadingGuides')}</p>
+        <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
+      </div>
+    )
+  }
+
+  const guides = guidesData?.guides || []
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold text-foreground">
+          {guides.length} {guides.length === 1 ? t('guidesAvailable') : t('guidesAvailablePlural')}
+        </h2>
+      </div>
+      {guides.length > 0 ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          {guides.map((guide) => (
+            <GuideCard key={guide._id} guide={guide} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-card border border-border rounded-lg">
+          <p className="text-muted-foreground mb-2">{t('noGuidesFound')}</p>
+          <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
+        </div>
+      )}
+    </>
+  )
+}
+
+// Component for rendering experience tabs with API data (music and workshops)
+function ExperienceTabContent({
+  type,
+  data,
+  isLoading,
+  error,
+  getTypeLabel
+}: {
+  type: "music" | "workshop"
+  data: { experiences: Experience[] } | undefined
+  isLoading: boolean
+  error: Error | null
+  getTypeLabel: (type: ExperienceType) => string
+}) {
+  const { t } = useI18n()
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2 text-muted-foreground">{t('loadingExperiences')}</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12 bg-card border border-border rounded-lg">
+        <p className="text-muted-foreground mb-2">{t('errorLoadingExperiences')}</p>
+        <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
+      </div>
+    )
+  }
+
+  // Type guard to check if data has experiences property
+  const experiences = (data && 'experiences' in data) ? data.experiences : []
+
+  return (
+    <>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-lg font-semibold text-foreground">
+          {experiences.length} {getTypeLabel(type)} {t('experiencesAvailable')}
+        </h2>
+      </div>
+      {experiences.length > 0 ? (
+        <div className="grid md:grid-cols-2 gap-6">
+          {experiences.map((experience: Experience) => (
+            <ExperienceCard key={`${experience.type}-${experience._id}`} experience={experience} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-card border border-border rounded-lg">
+          <p className="text-muted-foreground mb-2">{t('noExperiencesFound')} {getTypeLabel(type)} {t('noExperiencesFoundPlural')}</p>
+          <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
+        </div>
+      )}
+    </>
+  )
+}
 
 export default function ExperiencesPage() {
   const { t } = useI18n()
@@ -29,39 +146,44 @@ export default function ExperiencesPage() {
   const [priceFilter, setPriceFilter] = useState<"all" | "budget" | "mid" | "premium">("all")
   const [ratingFilter, setRatingFilter] = useState<number>(0)
 
-  useEffect(() => {
-    setSelectedType(getTypeFromParam(categoryParam))
-  }, [categoryParam])
+  // Remove the effect; instead, compute the default type value inside useState initializer
+  // and derive the selectedType from categoryParam directly when needed.
+  // Option 1: If you want selectedType to always reflect the URL param,
+  // just compute it as a derived value (not via state):
+  // const selectedType = getTypeFromParam(categoryParam);
+
+  // But if you want to allow setSelectedType for user interaction,
+  // initialize once, but don't update on every URL param change (recommended):
 
   // Build query parameters for API
   const getQueryParams = (type: ExperienceType) => {
     const params: Record<string, string | number> = { type }
-    
+
     if (selectedSite) params.siteId = selectedSite
     if (ratingFilter > 0) params.minRating = ratingFilter
-    
+
     if (priceFilter !== "all") {
       if (priceFilter === "budget") params.maxPrice = 100
       else if (priceFilter === "mid") params.maxPrice = 200
       // premium has no maxPrice limit
     }
-    
+
     return params
   }
 
   // Build query parameters for guides API (different from experiences)
   const getGuidesQueryParams = () => {
     const params: Record<string, string | number> = {}
-    
+
     if (selectedSite) params.siteId = selectedSite
     if (ratingFilter > 0) params.minRating = ratingFilter
-    
+
     if (priceFilter !== "all") {
       if (priceFilter === "budget") params.maxPrice = 100
       else if (priceFilter === "mid") params.maxPrice = 200
       // premium has no maxPrice limit
     }
-    
+
     return params
   }
 
@@ -70,17 +192,6 @@ export default function ExperiencesPage() {
   // Fetch experiences for music and workshops
   const { data: musicData, isLoading: musicLoading, error: musicError } = useExperiences(getQueryParams("music"))
   const { data: workshopsData, isLoading: workshopsLoading, error: workshopsError } = useExperiences(getQueryParams("workshop"))
-
-  const getExperiencesForType = (type: ExperienceType) => {
-    switch (type) {
-      case "guide":
-        return { data: guidesData, isLoading: guidesLoading, error: guidesError }
-      case "music":
-        return { data: musicData, isLoading: musicLoading, error: musicError }
-      case "workshop":
-        return { data: workshopsData, isLoading: workshopsLoading, error: workshopsError }
-    }
-  }
 
   const getTypeLabel = (type: ExperienceType) => {
     switch (type) {
@@ -91,98 +202,6 @@ export default function ExperiencesPage() {
       case "workshop":
         return t('workshops')
     }
-  }
-
-  // Component for rendering guides tab (uses guides API)
-  function GuidesTabContent() {
-    if (guidesLoading) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">{t('loadingGuides')}</span>
-        </div>
-      )
-    }
-
-    if (guidesError) {
-      return (
-        <div className="text-center py-12 bg-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-2">{t('errorLoadingGuides')}</p>
-          <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
-        </div>
-      )
-    }
-
-    const guides = guidesData?.guides || []
-
-    return (
-      <>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            {guides.length} {guides.length === 1 ? t('guidesAvailable') : t('guidesAvailablePlural')}
-          </h2>
-        </div>
-        {guides.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            {guides.map((guide) => (
-              <GuideCard key={guide._id} guide={guide} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-card border border-border rounded-lg">
-            <p className="text-muted-foreground mb-2">{t('noGuidesFound')}</p>
-            <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
-          </div>
-        )}
-      </>
-    )
-  }
-
-  // Component for rendering experience tabs with API data (music and workshops)
-  function ExperienceTabContent({ type }: { type: "music" | "workshop" }) {
-    const { data, isLoading, error } = getExperiencesForType(type)
-    
-    if (isLoading) {
-      return (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <span className="ml-2 text-muted-foreground">{t('loadingExperiences')}</span>
-        </div>
-      )
-    }
-
-    if (error) {
-      return (
-        <div className="text-center py-12 bg-card border border-border rounded-lg">
-          <p className="text-muted-foreground mb-2">{t('errorLoadingExperiences')}</p>
-          <p className="text-sm text-muted-foreground">{t('makeSureBackendRunning')}</p>
-        </div>
-      )
-    }
-
-    const experiences = data?.experiences || []
-
-    return (
-      <>
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            {experiences.length} {getTypeLabel(type)} {t('experiencesAvailable')}
-          </h2>
-        </div>
-        {experiences.length > 0 ? (
-          <div className="grid md:grid-cols-2 gap-6">
-            {experiences.map((experience) => (
-              <ExperienceCard key={`${experience.type}-${experience._id}`} experience={experience} />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-card border border-border rounded-lg">
-            <p className="text-muted-foreground mb-2">{t('noExperiencesFound')} {getTypeLabel(type)} {t('noExperiencesFoundPlural')}</p>
-            <p className="text-sm text-muted-foreground">{t('tryAdjustingFilters')}</p>
-          </div>
-        )}
-      </>
-    )
   }
 
   return (
@@ -228,15 +247,31 @@ export default function ExperiencesPage() {
               {/* Experience Cards Grid */}
               <div className="lg:col-span-3">
                 <TabsContent value="guide" className="mt-0">
-                  <GuidesTabContent />
+                  <GuidesTabContent
+                    guidesData={guidesData}
+                    guidesLoading={guidesLoading}
+                    guidesError={guidesError}
+                  />
                 </TabsContent>
 
                 <TabsContent value="music" className="mt-0">
-                  <ExperienceTabContent type="music" />
+                  <ExperienceTabContent
+                    type="music"
+                    data={musicData}
+                    isLoading={musicLoading}
+                    error={musicError}
+                    getTypeLabel={getTypeLabel}
+                  />
                 </TabsContent>
 
                 <TabsContent value="workshop" className="mt-0">
-                  <ExperienceTabContent type="workshop" />
+                  <ExperienceTabContent
+                    type="workshop"
+                    data={workshopsData}
+                    isLoading={workshopsLoading}
+                    error={workshopsError}
+                    getTypeLabel={getTypeLabel}
+                  />
                 </TabsContent>
               </div>
             </div>

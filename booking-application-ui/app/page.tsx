@@ -4,12 +4,16 @@ import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Users, Mail, Phone, FileText, Loader2 } from 'lucide-react';
+import { Calendar, Users, Mail, Phone, FileText, Loader2, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { bookingsApi, type Booking } from '@/lib/api/bookings';
+import { applicationsApi, type RegistrationStatus } from '@/lib/api/applications';
 import { AuthGuard } from '@/components/auth-guard';
 import { UserButton as ClerkUserButton } from '@clerk/nextjs';
 import { useI18n } from '@/lib/i18n/context';
 import { LanguageToggle } from '@/components/language-toggle';
+import { ApplicationTypeSelector } from '@/components/application-type-selector';
+import { ApplicationForm } from '@/components/application-form';
+import { toast } from 'sonner';
 
 function getStatusColor(status: string): string {
   switch (status) {
@@ -51,8 +55,54 @@ function BookingsContent() {
   const { user } = useUser();
   const { t, language } = useI18n();
   const [bookings, setBookings] = useState<Booking[]>([]);
+  const [registrationStatus, setRegistrationStatus] = useState<RegistrationStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedApplicationType, setSelectedApplicationType] = useState<'guide' | 'hotel' | 'experience' | null>(null);
+
+  // Check registration status and fetch bookings
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user?.primaryEmailAddress?.emailAddress) {
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        // Check registration status
+        const status = await applicationsApi.checkStatus();
+        setRegistrationStatus(status);
+
+        // If registered, fetch bookings
+        if (status.isGuide || status.isHotel || status.isExperience) {
+          const email = user.primaryEmailAddress.emailAddress;
+          const data = await bookingsApi.getByProviderEmail(email);
+          setBookings(data.bookings);
+        }
+      } catch (err: any) {
+        setError(err.message || 'Failed to load data');
+        console.error('Error fetching data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  const handleApplicationSuccess = () => {
+    toast.success('Application submitted! You will be notified once it is reviewed.');
+    setSelectedApplicationType(null);
+    // Refresh registration status
+    applicationsApi.checkStatus().then(setRegistrationStatus);
+  };
+
+  const handleApplicationCancel = () => {
+    setSelectedApplicationType(null);
+  };
 
   // Helper function to get booking type translation
   const getBookingTypeLabel = (type: string): string => {
@@ -69,30 +119,6 @@ function BookingsContent() {
     if (status === 'cancelled') return t('cancelled');
     return status;
   };
-
-  useEffect(() => {
-    const fetchBookings = async () => {
-      if (!user?.primaryEmailAddress?.emailAddress) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const email = user.primaryEmailAddress.emailAddress;
-        const data = await bookingsApi.getByProviderEmail(email);
-        setBookings(data.bookings);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load bookings');
-        console.error('Error fetching bookings:', err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchBookings();
-  }, [user]);
 
   if (isLoading) {
     return (
@@ -115,6 +141,71 @@ function BookingsContent() {
     );
   }
 
+  // Show application form if type is selected
+  if (selectedApplicationType) {
+    return (
+      <main className="min-h-screen bg-background p-6 sm:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">Apply as Provider</h1>
+              <p className="text-muted-foreground">Fill in the form below to apply</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <LanguageToggle />
+              <ClerkUserButton afterSignOutUrl="/" />
+            </div>
+          </div>
+          <ApplicationForm
+            applicationType={selectedApplicationType}
+            onSuccess={handleApplicationSuccess}
+            onCancel={handleApplicationCancel}
+          />
+        </div>
+      </main>
+    );
+  }
+
+  // Show application selector if not registered
+  if (!registrationStatus?.isGuide && !registrationStatus?.isHotel && !registrationStatus?.isExperience) {
+    return (
+      <main className="min-h-screen bg-background p-6 sm:p-8">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-8 flex items-start justify-between">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-2">Become a Provider</h1>
+              <p className="text-muted-foreground">Apply to become a guide, hotel, or experience provider</p>
+            </div>
+            <div className="flex items-center gap-4">
+              <LanguageToggle />
+              <ClerkUserButton afterSignOutUrl="/" />
+            </div>
+          </div>
+
+          {registrationStatus?.hasPendingApplication && (
+            <Card className="mb-8 border-yellow-200 bg-yellow-50 dark:bg-yellow-900/20">
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-3">
+                  <Clock className="w-5 h-5 text-yellow-600" />
+                  <div>
+                    <p className="font-semibold text-foreground">Application Pending</p>
+                    <p className="text-sm text-muted-foreground">
+                      You have a pending application as a {registrationStatus.pendingApplicationType}. 
+                      You will be notified once it is reviewed.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          <ApplicationTypeSelector onSelect={setSelectedApplicationType} />
+        </div>
+      </main>
+    );
+  }
+
+  // Show bookings if registered
   return (
     <main className="min-h-screen bg-background p-6 sm:p-8">
       <div className="max-w-7xl mx-auto">
@@ -123,6 +214,11 @@ function BookingsContent() {
           <div>
             <h1 className="text-4xl font-bold text-foreground mb-2">{t('bookings')}</h1>
             <p className="text-muted-foreground">{t('manageBookings')}</p>
+            <div className="flex gap-2 mt-2">
+              {registrationStatus.isGuide && <Badge>Guide</Badge>}
+              {registrationStatus.isHotel && <Badge>Hotel</Badge>}
+              {registrationStatus.isExperience && <Badge>Experience Provider</Badge>}
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <LanguageToggle />

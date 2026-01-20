@@ -4,33 +4,45 @@ export interface Trip {
   _id: string;
   clerkUserId: string;
   name: string;
+  // Featured/premade trip fields (used by Trip Planner / Trip Detail)
+  location?: string;
+  duration?: string; // e.g., "3 Days"
+  image?: string;
+  budget?: "Budget" | "Moderate" | "Luxury";
+  bestTimeToVisit?: string;
+  highlights?: string[];
   description?: string;
-  startDate: string;
-  endDate: string;
+  startDate?: string;
+  endDate?: string;
   status: 'draft' | 'planned' | 'booked' | 'completed' | 'cancelled';
-  selectedSites: string[] | Array<{ _id: string; name: string; location: any; image?: string; description?: string }>;
+  selectedSites: string[] | Array<{ _id: string; name: string; location: unknown; image?: string; description?: string }>;
   selectedHotels: Array<{
-    hotelId: string | { _id: string; name: string; location: any; images?: string[]; pricePerNight?: any };
+    hotelId: string | { _id: string; name: string; location: unknown; images?: string[]; pricePerNight?: unknown };
     checkIn: string;
     checkOut: string;
   }>;
   selectedGuides: Array<{
     guideId: string | { _id: string; name: string; specialization: string; rating: number; languages?: string[]; bio?: string };
-    siteId: string | { _id: string; name: string; location: any };
+    siteId: string | { _id: string; name: string; location: unknown };
     date: string;
   }>;
   selectedExperiences: Array<{
     experienceId: string | { _id: string; name: string; type: string; price: number; description?: string };
     date: string;
-    participants: number;
+    // backend supports time; some client code used participants earlier
+    time?: string;
+    participants?: number;
   }>;
-  itinerary?: {
-    [date: string]: {
-      sites: string[];
-      activities: string[];
-      meals?: string[];
-    };
-  };
+  itinerary?: Array<{
+    day: number;
+    title: string;
+    activities: Array<{
+      time: string;
+      activity: string;
+      location: string;
+      description?: string;
+    }>;
+  }>;
   totalBudget?: number;
   notes?: string;
   createdAt: string;

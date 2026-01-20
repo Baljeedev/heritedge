@@ -172,11 +172,15 @@ export function HeritageMap({ selectedSiteId, onSiteSelect }: HeritageMapProps) 
     <div
       ref={containerRef}
       className="w-full h-full relative bg-gradient-to-b from-background to-muted cursor-grab active:cursor-grabbing"
-      onMouseMove={handleMouseMove}
-      onMouseUp={handleMouseUp}
-      onMouseLeave={handleMouseUp}
     >
-      <canvas ref={canvasRef} onMouseDown={handleCanvasMouseDown} className="w-full h-full block" />
+      <canvas
+        ref={canvasRef}
+        onMouseDown={handleCanvasMouseDown}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
+        onMouseLeave={handleMouseUp}
+        className="w-full h-full block"
+      />
 
       {/* Zoom Controls */}
       <div className="absolute top-4 right-4 flex flex-col gap-2 bg-card border border-border rounded-lg shadow-lg p-2">

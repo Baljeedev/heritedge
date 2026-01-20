@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar } from "lucide-react"
+import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar, FileText } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 
@@ -16,6 +16,7 @@ const navItems = [
   { href: "/admin/trips", label: "Trips", icon: Map },
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
+  { href: "/admin/applications", label: "Applications", icon: FileText },
 ]
 
 export function Sidebar() {

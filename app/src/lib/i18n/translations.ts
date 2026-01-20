@@ -44,7 +44,6 @@ export const translations = {
     noGuidesFound: "No guides found matching your criteria",
     tryAdjustingFilters: "Try adjusting your filters",
     errorLoadingGuides: "Error loading guides",
-    makeSureBackendRunning: "Please make sure the backend API is running",
     
     // Experiences Page
     tripsAndExperiencesTitle: "Trips & Experiences",
@@ -185,7 +184,6 @@ export const translations = {
     noGuidesFound: "आपकी criteria से मेल खाने वाला कोई गाइड नहीं मिला",
     tryAdjustingFilters: "अपने फ़िल्टर समायोजित करने का प्रयास करें",
     errorLoadingGuides: "गाइड लोड करने में त्रुटि",
-    makeSureBackendRunning: "कृपया सुनिश्चित करें कि बैकएंड API चल रहा है",
     
     // Experiences Page
     tripsAndExperiencesTitle: "यात्राएं और अनुभव",

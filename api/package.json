@@ -4,13 +4,15 @@
   "type": "module",
   "private": true,
   "scripts": {
+    "build": "bun build src/index.ts --outdir dist",
     "dev": "bun src/index.ts",
     "start": "bun src/index.ts",
     "seed:trips": "bun src/scripts/seedTrips.ts",
     "seed:sites": "bun src/scripts/seedHeritageSites.ts",
     "seed:guides": "bun src/scripts/seedGuides.ts",
     "seed:experiences": "bun src/scripts/seedExperiences.ts",
-    "seed:all": "bun src/scripts/seedHeritageSites.ts && bun src/scripts/seedGuides.ts && bun src/scripts/seedExperiences.ts && bun src/scripts/seedTrips.ts"
+    "seed:all": "bun src/scripts/seedHeritageSites.ts && bun src/scripts/seedGuides.ts && bun src/scripts/seedExperiences.ts && bun src/scripts/seedTrips.ts",
+    "clear:db": "bun src/scripts/clearDatabase.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
