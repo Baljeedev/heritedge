@@ -34,7 +34,7 @@ export default function TripDetail() {
       if (!tripId) throw new Error("Trip ID is required");
       return await tripsApi.edit(tripId, data);
     },
-    onSuccess: (updatedTrip) => {
+    onSuccess: () => {
       // Invalidate and refetch trip data
       queryClient.invalidateQueries({ queryKey: ["trips", tripId] });
       setEditDialogOpen(false);
