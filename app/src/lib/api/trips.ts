@@ -45,6 +45,8 @@ export interface Trip {
   }>;
   totalBudget?: number;
   notes?: string;
+  isAIGenerated?: boolean;
+  aiPrompt?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,6 +72,17 @@ export interface CreateTripData {
 
 export interface GenerateItineraryData {
   prompt?: string;
+}
+
+export interface GenerateTripData {
+  budget: "Budget" | "Moderate" | "Luxury" | "high" | "medium" | "low";
+  numberOfDays: number;
+  siteId: string;
+  selectedHotelIds?: string[];
+}
+
+export interface EditTripData {
+  customPrompt: string;
 }
 
 export const tripsApi = {
@@ -115,7 +128,19 @@ export const tripsApi = {
     return response.data;
   },
 
-  // Generate AI itinerary
+  // Generate AI trip itinerary
+  generate: async (data: GenerateTripData) => {
+    const response = await apiClient.post<Trip>('/api/trips/generate', data);
+    return response.data;
+  },
+
+  // Edit AI trip itinerary with custom prompt
+  edit: async (id: string, data: EditTripData) => {
+    const response = await apiClient.post<Trip>(`/api/trips/${id}/edit`, data);
+    return response.data;
+  },
+
+  // Generate AI itinerary (legacy endpoint - kept for backward compatibility)
   generateItinerary: async (id: string, data?: GenerateItineraryData) => {
     const response = await apiClient.post<{ message: string; prompt?: string; note: string }>(
       `/api/trips/${id}/generate-itinerary`,

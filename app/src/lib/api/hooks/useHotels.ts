@@ -12,10 +12,11 @@ export const hotelsKeys = {
 };
 
 // Get all hotels
-export const useHotels = (params?: HotelsQueryParams) => {
+export const useHotels = (params?: HotelsQueryParams, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: hotelsKeys.list(params),
     queryFn: () => hotelsApi.getAll(params),
+    enabled: options?.enabled !== false && !!params,
   });
 };
 

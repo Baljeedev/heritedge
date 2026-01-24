@@ -11,21 +11,23 @@
     "seed:sites": "bun src/scripts/seedHeritageSites.ts",
     "seed:guides": "bun src/scripts/seedGuides.ts",
     "seed:experiences": "bun src/scripts/seedExperiences.ts",
-    "seed:all": "bun src/scripts/seedHeritageSites.ts && bun src/scripts/seedGuides.ts && bun src/scripts/seedExperiences.ts && bun src/scripts/seedTrips.ts",
+    "seed:hotels": "bun src/scripts/seedHotels.ts",
+    "seed:all": "bun src/scripts/seedHeritageSites.ts && bun src/scripts/seedGuides.ts && bun src/scripts/seedExperiences.ts && bun src/scripts/seedHotels.ts && bun src/scripts/seedTrips.ts",
     "clear:db": "bun src/scripts/clearDatabase.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.490.0",
+    "@clerk/clerk-sdk-node": "^5.0.0",
     "cors": "^2.8.5",
     "express": "^5.2.1",
     "mongoose": "^8.0.0",
-    "@clerk/clerk-sdk-node": "^5.0.0",
-    "zod": "^3.22.4",
-    "@aws-sdk/client-s3": "^3.490.0",
     "multer": "^1.4.5-lts.1",
-    "uuid": "^9.0.1"
+    "openai": "^6.16.0",
+    "uuid": "^9.0.1",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/bun": "latest",
