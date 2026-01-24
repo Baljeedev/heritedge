@@ -3,12 +3,53 @@ import { Navigation } from "@/core/components/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Clock, MapPin, Calendar, DollarSign, ArrowLeft, CheckCircle2, Loader2 } from "lucide-react";
-import { useTrip } from "@/lib/api";
+import { Clock, MapPin, Calendar, DollarSign, ArrowLeft, CheckCircle2, Loader2, Edit, Sparkles } from "lucide-react";
+import { useTrip, tripsApi } from "@/lib/api";
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/core/components/ui/label";
+import { Alert, AlertDescription } from "@/core/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function TripDetail() {
   const { tripId } = useParams<{ tripId: string }>();
   const { data: trip, isLoading, error } = useTrip(tripId || "", !!tripId);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [customPrompt, setCustomPrompt] = useState("");
+  const queryClient = useQueryClient();
+
+  // Edit trip mutation
+  const editTripMutation = useMutation({
+    mutationFn: async (data: { customPrompt: string }) => {
+      if (!tripId) throw new Error("Trip ID is required");
+      return await tripsApi.edit(tripId, data);
+    },
+    onSuccess: (updatedTrip) => {
+      // Invalidate and refetch trip data
+      queryClient.invalidateQueries({ queryKey: ["trips", tripId] });
+      setEditDialogOpen(false);
+      setCustomPrompt("");
+      // Optionally navigate to refresh the page
+      window.location.reload();
+    },
+  });
+
+  const handleEditTrip = () => {
+    if (!customPrompt.trim()) {
+      return;
+    }
+    editTripMutation.mutate({ customPrompt: customPrompt.trim() });
+  };
 
   if (isLoading) {
     return (
@@ -182,19 +223,95 @@ export default function TripDetail() {
               </CardContent>
             </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Ready to Book?</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Customize this itinerary or get personalized recommendations for hotels, restaurants, and experiences.
-                </p>
-                <Button className="w-full" size="lg">
-                  Customize This Trip
-                </Button>
-              </CardContent>
-            </Card>
+            {trip.status === "draft" && trip.isAIGenerated && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Trip Actions</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    {trip.itinerary && trip.itinerary.length > 0
+                      ? "Edit your itinerary with AI or customize it further."
+                      : "Generate or customize your itinerary."}
+                  </p>
+                  {trip.itinerary && trip.itinerary.length > 0 && (
+                    <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="w-full" size="lg" variant="outline">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit with AI
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[600px]">
+                        <DialogHeader>
+                          <DialogTitle className="flex items-center gap-2">
+                            <Sparkles className="w-5 h-5 text-primary" />
+                            Edit Trip Itinerary
+                          </DialogTitle>
+                          <DialogDescription>
+                            Describe how you'd like to modify your trip itinerary. Our AI will regenerate it based on your preferences.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                          {editTripMutation.isError && (
+                            <Alert variant="destructive">
+                              <AlertCircle className="h-4 w-4" />
+                              <AlertDescription>
+                                {editTripMutation.error instanceof Error
+                                  ? editTripMutation.error.message
+                                  : "Failed to edit trip. Please try again."}
+                              </AlertDescription>
+                            </Alert>
+                          )}
+                          <div className="space-y-2">
+                            <Label htmlFor="prompt">Custom Instructions</Label>
+                            <Textarea
+                              id="prompt"
+                              placeholder="e.g., Add more time for photography, include more local food experiences, make it more budget-friendly, add a day trip to nearby attractions..."
+                              value={customPrompt}
+                              onChange={(e) => setCustomPrompt(e.target.value)}
+                              rows={6}
+                              className="resize-none"
+                            />
+                            <p className="text-xs text-muted-foreground">
+                              Be specific about what you want to change or add to your itinerary.
+                            </p>
+                          </div>
+                        </div>
+                        <DialogFooter>
+                          <Button
+                            variant="outline"
+                            onClick={() => {
+                              setEditDialogOpen(false);
+                              setCustomPrompt("");
+                            }}
+                            disabled={editTripMutation.isPending}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            onClick={handleEditTrip}
+                            disabled={!customPrompt.trim() || editTripMutation.isPending}
+                          >
+                            {editTripMutation.isPending ? (
+                              <>
+                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                Editing...
+                              </>
+                            ) : (
+                              <>
+                                <Sparkles className="w-4 h-4 mr-2" />
+                                Apply Changes
+                              </>
+                            )}
+                          </Button>
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  )}
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

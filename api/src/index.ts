@@ -73,6 +73,8 @@ app.listen(Number(PORT), "0.0.0.0", () => {
   console.log(`   GET    /api/experiences`);
   console.log(`   GET    /api/trips`);
   console.log(`   GET    /api/trips/featured (open to all)`);
+  console.log(`   POST   /api/trips/generate (AI trip generation)`);
+  console.log(`   POST   /api/trips/:id/edit (AI trip editing)`);
   console.log(`   GET    /api/reviews`);
   console.log(`   GET    /api/bookings`);
   console.log(`   GET    /api/applications`);

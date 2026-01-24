@@ -1,6 +1,11 @@
 import express, { Request, Response } from "express";
 import Trip from "../models/Trip";
+import HeritageSite from "../models/HeritageSite";
+import Hotel from "../models/Hotel";
+import Guide from "../models/Guide";
+import Experience from "../models/Experience";
 import { authenticateUser, optionalAuth } from "../middleware/auth";
+import { generateItinerary, editItinerary } from "../services/openai";
 
 const router = express.Router();
 
@@ -34,11 +39,18 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
 
     const query: any = {};
 
-    // If authenticated, show user's trips; otherwise show public/example trips
+    // If authenticated, show ONLY user's trips (not featured/system trips unless they own them)
     if (req.userId) {
       query.clerkUserId = req.userId;
     } else if (userId) {
+      // Allow querying by userId if provided (for admin dashboard)
       query.clerkUserId = userId;
+    } else {
+      // If not authenticated and no userId provided, show only featured/system trips
+      query.$or = [
+        { isFeatured: true },
+        { clerkUserId: "system" },
+      ];
     }
 
     if (status) query.status = status;
@@ -80,11 +92,14 @@ router.get("/:id", optionalAuth, async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
-    // Allow admin to view any trip (for admin dashboard)
-    // TODO: Add proper admin check
-    // For now, allow viewing if user owns the trip, it's public, or it's a system trip
-    if (trip.clerkUserId !== req.userId && trip.status !== "planned" && trip.clerkUserId !== "system") {
-      // Allow admin access (you can add proper admin check here)
+    // Only allow users to view their own trips (unless it's a featured/system trip)
+    if (trip.clerkUserId !== "system" && !trip.isFeatured) {
+      if (!req.userId) {
+        return res.status(401).json({ error: "Authentication required" });
+      }
+      if (trip.clerkUserId !== req.userId) {
+        return res.status(403).json({ error: "Unauthorized: You can only view your own trips" });
+      }
     }
 
     res.json(trip);
@@ -117,9 +132,10 @@ router.put("/:id", authenticateUser, async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
-    // Allow admin to update any trip (for admin dashboard)
-    // TODO: Add proper admin check based on email or role
-    // For now, allow admin to update any trip
+    // Only allow users to update their own trips (unless it's a system trip)
+    if (trip.clerkUserId !== "system" && trip.clerkUserId !== req.userId) {
+      return res.status(403).json({ error: "Unauthorized: You can only update your own trips" });
+    }
 
     Object.assign(trip, req.body);
     await trip.save();
@@ -137,14 +153,261 @@ router.delete("/:id", authenticateUser, async (req: Request, res: Response) => {
       return res.status(404).json({ error: "Trip not found" });
     }
 
-    // Allow admin to delete any trip (for admin dashboard)
-    // TODO: Add proper admin check based on email or role
-    // For now, allow admin to delete any trip
+    // Only allow users to delete their own trips (unless it's a system trip)
+    if (trip.clerkUserId !== "system" && trip.clerkUserId !== req.userId) {
+      return res.status(403).json({ error: "Unauthorized: You can only delete your own trips" });
+    }
 
     await trip.deleteOne();
     res.json({ message: "Trip deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// POST /api/trips/generate - Generate AI trip itinerary
+router.post("/generate", authenticateUser, async (req: Request, res: Response) => {
+  try {
+    let { budget, numberOfDays, siteId, selectedHotelIds } = req.body;
+
+    // Validate input
+    if (!budget || !numberOfDays || !siteId) {
+      return res.status(400).json({ error: "Missing required fields: budget, numberOfDays, siteId" });
+    }
+
+    // Map user-friendly budget values to model values
+    const budgetMap: Record<string, "Budget" | "Moderate" | "Luxury"> = {
+      low: "Budget",
+      medium: "Moderate",
+      high: "Luxury",
+      budget: "Budget",
+      moderate: "Moderate",
+      luxury: "Luxury",
+    };
+
+    const normalizedBudget = budgetMap[budget.toLowerCase()] || budget;
+    if (!["Budget", "Moderate", "Luxury"].includes(normalizedBudget)) {
+      return res.status(400).json({ error: "Budget must be one of: Budget/Moderate/Luxury or high/medium/low" });
+    }
+
+    budget = normalizedBudget;
+
+    if (numberOfDays < 1 || numberOfDays > 30) {
+      return res.status(400).json({ error: "Number of days must be between 1 and 30" });
+    }
+
+    // Fetch the heritage site
+    const site = await HeritageSite.findById(siteId);
+    if (!site) {
+      return res.status(404).json({ error: "Heritage site not found" });
+    }
+
+    // Fetch hotels - use selectedHotelIds if provided, otherwise fetch by nearbySites
+    let hotels;
+    if (selectedHotelIds && Array.isArray(selectedHotelIds) && selectedHotelIds.length > 0) {
+      // Use user-selected hotels
+      hotels = await Hotel.find({
+        _id: { $in: selectedHotelIds },
+        isActive: true,
+      })
+        .select("name location city state pricePerNight description")
+        .sort({ rating: -1 });
+    } else {
+      // Fetch hotels near the site (by nearbySites or by city/state)
+      const hotelQuery: any = { isActive: true };
+      hotelQuery.$or = [
+        { nearbySites: siteId },
+        { city: site.city },
+        { state: site.state },
+      ];
+
+      // Filter hotels by budget
+      if (budget === "Budget") {
+        hotelQuery["pricePerNight.max"] = { $lte: 3000 };
+      } else if (budget === "Moderate") {
+        hotelQuery["pricePerNight.max"] = { $lte: 8000 };
+      }
+      // Luxury: no price filter
+
+      hotels = await Hotel.find(hotelQuery)
+        .select("name location city state pricePerNight description")
+        .limit(10)
+        .sort({ rating: -1 });
+    }
+
+    // Fetch guides for the site
+    const guides = await Guide.find({
+      isActive: true,
+      sites: siteId,
+    })
+      .select("name specialization pricePerDay bio languages rating")
+      .limit(10)
+      .sort({ rating: -1 });
+
+    // Fetch experiences (music shows and workshops) for the site
+    const experiences = await Experience.find({
+      isActive: true,
+      sites: siteId,
+      type: { $in: ["music", "workshop"] },
+    })
+      .select("name type price description venue duration")
+      .limit(10)
+      .sort({ rating: -1 });
+
+    // Generate itinerary using OpenAI
+    const itinerary = await generateItinerary({
+      siteName: site.name,
+      siteLocation: site.location,
+      siteDescription: site.description + "\n\n" + site.historicalWriteup,
+      numberOfDays: Number(numberOfDays),
+      budget: budget as "Budget" | "Moderate" | "Luxury",
+      hotels: hotels.map((h) => ({
+        _id: h._id.toString(),
+        name: h.name,
+        location: h.location,
+        pricePerNight: h.pricePerNight,
+        description: h.description,
+      })),
+      guides: guides.map((g) => ({
+        _id: g._id.toString(),
+        name: g.name,
+        specialization: g.specialization,
+        pricePerDay: g.pricePerDay,
+        bio: g.bio,
+        languages: g.languages,
+        rating: g.rating,
+      })),
+      experiences: experiences.map((e) => ({
+        _id: e._id.toString(),
+        name: e.name,
+        type: e.type as "music" | "workshop",
+        price: e.price,
+        description: e.description,
+        venue: e.venue,
+        duration: e.duration,
+      })),
+    });
+
+    // Calculate start and end dates (using current date as start)
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + numberOfDays - 1);
+
+    // Create the trip
+    const trip = new Trip({
+      clerkUserId: req.userId!,
+      name: `${site.name} - ${numberOfDays} Day Trip`,
+      location: site.location,
+      duration: `${numberOfDays} Days`,
+      image: site.image,
+      description: `AI-generated ${numberOfDays}-day itinerary for ${site.name} in ${site.location}`,
+      highlights: site.keyFacts.slice(0, 5),
+      itinerary,
+      budget: budget as "Budget" | "Moderate" | "Luxury",
+      bestTimeToVisit: "Year-round",
+      selectedSites: [siteId],
+      selectedHotels: [],
+      selectedGuides: [],
+      selectedExperiences: [],
+      isAIGenerated: true,
+      aiPrompt: `Generate a ${numberOfDays}-day ${budget} budget trip for ${site.name}`,
+      isFeatured: false,
+      status: "draft",
+      startDate,
+      endDate,
+    });
+
+    await trip.save();
+
+    // Populate the trip before returning
+    const populatedTrip = await Trip.findById(trip._id)
+      .populate("selectedSites", "name location image description")
+      .populate("selectedHotels.hotelId", "name location images pricePerNight")
+      .populate("selectedGuides.guideId", "name specialization bio rating languages")
+      .populate("selectedGuides.siteId", "name location")
+      .populate("selectedExperiences.experienceId", "name type price description");
+
+    res.status(201).json(populatedTrip);
+  } catch (error: any) {
+    console.error("Error generating trip:", error);
+    res.status(500).json({ error: error.message || "Failed to generate trip itinerary" });
+  }
+});
+
+// POST /api/trips/:id/edit - Edit trip itinerary with custom prompt
+router.post("/:id/edit", authenticateUser, async (req: Request, res: Response) => {
+  try {
+    const { customPrompt } = req.body;
+
+    if (!customPrompt || typeof customPrompt !== "string" || customPrompt.trim().length === 0) {
+      return res.status(400).json({ error: "customPrompt is required and must be a non-empty string" });
+    }
+
+    const trip = await Trip.findById(req.params.id)
+      .populate("selectedSites", "name location")
+      .populate("selectedHotels.hotelId", "name location")
+      .populate("selectedGuides.guideId", "name specialization")
+      .populate("selectedExperiences.experienceId", "name type");
+
+    if (!trip) {
+      return res.status(404).json({ error: "Trip not found" });
+    }
+
+    // Only allow users to edit their own trips
+    if (trip.clerkUserId !== req.userId) {
+      return res.status(403).json({ error: "Unauthorized: You can only edit your own trips" });
+    }
+
+    if (!trip.isAIGenerated) {
+      return res.status(400).json({ error: "This trip was not AI-generated and cannot be edited with AI" });
+    }
+
+    // Get site information for context
+    const site = trip.selectedSites[0];
+    if (!site || typeof site === "string") {
+      return res.status(400).json({ error: "Trip must have at least one selected site" });
+    }
+
+    const siteName = (site as any).name || "the heritage site";
+    const siteLocation = (site as any).location || trip.location;
+
+    // Calculate number of days from start and end dates
+    let numberOfDays = trip.itinerary.length;
+    if (trip.startDate && trip.endDate) {
+      const start = new Date(trip.startDate);
+      const end = new Date(trip.endDate);
+      numberOfDays = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+    }
+
+    // Edit itinerary using OpenAI
+    const updatedItinerary = await editItinerary({
+      existingItinerary: trip.itinerary,
+      customPrompt: customPrompt.trim(),
+      siteName,
+      siteLocation,
+      numberOfDays,
+      budget: trip.budget,
+    });
+
+    // Update the trip
+    trip.itinerary = updatedItinerary;
+    trip.aiPrompt = trip.aiPrompt ? `${trip.aiPrompt}\n\nEdit: ${customPrompt}` : `Edit: ${customPrompt}`;
+    trip.updatedAt = new Date();
+
+    await trip.save();
+
+    // Populate the trip before returning
+    const populatedTrip = await Trip.findById(trip._id)
+      .populate("selectedSites", "name location image description")
+      .populate("selectedHotels.hotelId", "name location images pricePerNight")
+      .populate("selectedGuides.guideId", "name specialization bio rating languages")
+      .populate("selectedGuides.siteId", "name location")
+      .populate("selectedExperiences.experienceId", "name type price description");
+
+    res.json(populatedTrip);
+  } catch (error: any) {
+    console.error("Error editing trip:", error);
+    res.status(500).json({ error: error.message || "Failed to edit trip itinerary" });
   }
 });
 
