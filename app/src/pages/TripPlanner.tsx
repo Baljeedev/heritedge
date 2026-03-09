@@ -13,7 +13,7 @@ import { Alert, AlertDescription } from "@/core/components/ui/alert";
 const TripPlanner = () => {
   const [showCustomPlanner, setShowCustomPlanner] = useState(false);
   const [selectedCity, setSelectedCity] = useState<string | null>(null);
-  const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
+  const [selectedSiteIds, setSelectedSiteIds] = useState<string[]>([]);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [selectedBudget, setSelectedBudget] = useState<"Budget" | "Moderate" | "Luxury" | null>(null);
   const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
@@ -36,16 +36,16 @@ const TripPlanner = () => {
   const cities = Array.from(new Set(allSites.map(s => s.city).filter(Boolean))).sort() as string[];
   const sites = selectedCity ? allSites.filter(s => s.city === selectedCity) : allSites;
 
-  // Fetch hotels near selected site
+  // Fetch hotels near the first selected site
   const { data: hotelsData, isLoading: hotelsLoading } = useHotels(
-    selectedSiteId && showHotelSelection ? { siteId: selectedSiteId } : undefined,
-    { enabled: !!selectedSiteId && showHotelSelection }
+    selectedSiteIds.length > 0 && showHotelSelection ? { siteId: selectedSiteIds[0] } : undefined,
+    { enabled: selectedSiteIds.length > 0 && showHotelSelection }
   );
   const hotels = hotelsData?.hotels || [];
 
   // Generate trip mutation
   const generateTripMutation = useMutation({
-    mutationFn: async (data: { budget: "Budget" | "Moderate" | "Luxury" | "high" | "medium" | "low"; numberOfDays: number; siteId: string; selectedHotelIds?: string[] }) => {
+    mutationFn: async (data: { budget: "Budget" | "Moderate" | "Luxury" | "high" | "medium" | "low"; numberOfDays: number; siteId: string; siteIds?: string[]; selectedHotelIds?: string[] }) => {
       return await tripsApi.generate(data);
     },
     onSuccess: (trip) => {
@@ -53,8 +53,19 @@ const TripPlanner = () => {
     },
   });
 
+  const toggleSiteSelection = (siteId: string) => {
+    const site = allSites.find(s => s._id === siteId);
+    setSelectedSiteIds(prev => {
+      if (prev.includes(siteId)) return prev.filter(id => id !== siteId);
+      // If selecting a site from a different city, replace entire selection
+      const firstSelected = allSites.find(s => s._id === prev[0]);
+      if (prev.length > 0 && firstSelected?.city !== site?.city) return [siteId];
+      return [...prev, siteId];
+    });
+  };
+
   const handleContinueToHotels = () => {
-    if (!selectedSiteId || !selectedDuration || !selectedBudget) {
+    if (selectedSiteIds.length === 0 || !selectedDuration || !selectedBudget) {
       return;
     }
     setShowHotelSelection(true);
@@ -66,14 +77,15 @@ const TripPlanner = () => {
       return;
     }
 
-    if (!selectedSiteId || !selectedDuration || !selectedBudget) {
+    if (selectedSiteIds.length === 0 || !selectedDuration || !selectedBudget) {
       return;
     }
 
     generateTripMutation.mutate({
       budget: selectedBudget,
       numberOfDays: selectedDuration,
-      siteId: selectedSiteId,
+      siteId: selectedSiteIds[0],
+      siteIds: selectedSiteIds,
       selectedHotelIds: selectedHotelIds.length > 0 ? selectedHotelIds : undefined,
     });
   };
@@ -300,7 +312,7 @@ const TripPlanner = () => {
                 ) : (
                   <div className="flex flex-wrap gap-2">
                     <button
-                      onClick={() => { setSelectedCity(null); setSelectedSiteId(null); }}
+                      onClick={() => setSelectedCity(null)}
                       className={`px-4 py-2 rounded-lg border-2 text-sm transition-all ${
                         selectedCity === null
                           ? "border-primary bg-primary/5 font-semibold text-primary"
@@ -312,7 +324,7 @@ const TripPlanner = () => {
                     {cities.map((city) => (
                       <button
                         key={city}
-                        onClick={() => { setSelectedCity(city); setSelectedSiteId(null); }}
+                        onClick={() => setSelectedCity(city)}
                         className={`px-4 py-2 rounded-lg border-2 text-sm transition-all ${
                           selectedCity === city
                             ? "border-primary bg-primary/5 font-semibold text-primary"
@@ -332,10 +344,14 @@ const TripPlanner = () => {
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  Select Heritage Site {selectedCity && <span className="text-sm font-normal text-muted-foreground">in {selectedCity}</span>}
+                  Select Heritage Sites {selectedCity && <span className="text-sm font-normal text-muted-foreground">in {selectedCity}</span>}
+                  {selectedSiteIds.length > 0 && (
+                    <Badge variant="secondary" className="ml-auto text-xs">{selectedSiteIds.length} selected</Badge>
+                  )}
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="text-xs text-muted-foreground mb-3">You can select multiple sites from the same city. Selecting a site from a different city will start a new selection.</p>
                 {sitesLoading ? (
                   <div className="flex items-center justify-center py-8">
                     <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -345,23 +361,29 @@ const TripPlanner = () => {
                   <p className="text-center text-muted-foreground py-8">No heritage sites available</p>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
-                    {sites.map((site) => (
-                      <button
-                        key={site._id}
-                        onClick={() => setSelectedSiteId(site._id)}
-                        className={`p-4 rounded-lg border-2 text-left transition-all ${
-                          selectedSiteId === site._id
-                            ? "border-primary bg-primary/5"
-                            : "border-border hover:border-primary/50"
-                        }`}
-                      >
-                        <p className="font-semibold text-foreground">{site.name}</p>
-                        <p className="text-sm text-muted-foreground">{site.location}</p>
-                        {site.city && (
-                          <p className="text-xs text-muted-foreground mt-1">{site.city}, {site.state || site.country}</p>
-                        )}
-                      </button>
-                    ))}
+                    {sites.map((site) => {
+                      const isSelected = selectedSiteIds.includes(site._id);
+                      return (
+                        <button
+                          key={site._id}
+                          onClick={() => toggleSiteSelection(site._id)}
+                          className={`p-4 rounded-lg border-2 text-left transition-all relative ${
+                            isSelected ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"
+                          }`}
+                        >
+                          {isSelected && (
+                            <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
+                              <Check className="w-3 h-3" />
+                            </div>
+                          )}
+                          <p className="font-semibold text-foreground pr-6">{site.name}</p>
+                          <p className="text-sm text-muted-foreground">{site.location}</p>
+                          {site.city && (
+                            <p className="text-xs text-muted-foreground mt-1">{site.city}, {site.state || site.country}</p>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </CardContent>
@@ -433,7 +455,7 @@ const TripPlanner = () => {
             </Card>
 
             {/* Hotel Selection Step */}
-            {showHotelSelection && selectedSiteId && (
+            {showHotelSelection && selectedSiteIds.length > 0 && (
               <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center gap-2">
@@ -443,8 +465,7 @@ const TripPlanner = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    Choose hotels near {sites.find((s) => s._id === selectedSiteId)?.name || "the site"}. 
-                    You can skip this step and let AI recommend hotels.
+                    Choose hotels near your selected sites. You can skip this step and let AI recommend hotels.
                   </p>
                   {hotelsLoading ? (
                     <div className="flex items-center justify-center py-8">
@@ -565,7 +586,7 @@ const TripPlanner = () => {
                   className="w-full h-14 text-lg bg-primary hover:bg-primary/90"
                   onClick={handleContinueToHotels}
                   disabled={
-                    !selectedSiteId ||
+                    selectedSiteIds.length === 0 ||
                     !selectedDuration ||
                     !selectedBudget ||
                     !isSignedIn
