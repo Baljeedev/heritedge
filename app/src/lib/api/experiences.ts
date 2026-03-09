@@ -42,6 +42,9 @@ export interface ExperiencesQueryParams {
   skillLevel?: string;
   limit?: number;
   skip?: number;
+  cityId?: string;
+  instrumentId?: string;
+  artFormId?: string;
 }
 
 export const experiencesApi = {

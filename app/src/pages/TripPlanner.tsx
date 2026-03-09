@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/core/components/ui/alert";
 
 const TripPlanner = () => {
   const [showCustomPlanner, setShowCustomPlanner] = useState(false);
+  const [selectedCity, setSelectedCity] = useState<string | null>(null);
   const [selectedSiteId, setSelectedSiteId] = useState<string | null>(null);
   const [selectedDuration, setSelectedDuration] = useState<number | null>(null);
   const [selectedBudget, setSelectedBudget] = useState<"Budget" | "Moderate" | "Luxury" | null>(null);
@@ -31,7 +32,9 @@ const TripPlanner = () => {
 
   // Fetch heritage sites from API
   const { data: sitesData, isLoading: sitesLoading } = useHeritageSites({ limit: 100 });
-  const sites = sitesData?.sites || [];
+  const allSites = sitesData?.sites || [];
+  const cities = Array.from(new Set(allSites.map(s => s.city).filter(Boolean))).sort() as string[];
+  const sites = selectedCity ? allSites.filter(s => s.city === selectedCity) : allSites;
 
   // Fetch hotels near selected site
   const { data: hotelsData, isLoading: hotelsLoading } = useHotels(
@@ -280,12 +283,56 @@ const TripPlanner = () => {
 
         <div className="grid lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
+            {/* City Selection */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-primary" />
+                  Select City
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {sitesLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                    <span className="ml-2 text-muted-foreground text-sm">Loading cities...</span>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      onClick={() => { setSelectedCity(null); setSelectedSiteId(null); }}
+                      className={`px-4 py-2 rounded-lg border-2 text-sm transition-all ${
+                        selectedCity === null
+                          ? "border-primary bg-primary/5 font-semibold text-primary"
+                          : "border-border hover:border-primary/50 text-foreground"
+                      }`}
+                    >
+                      All Cities
+                    </button>
+                    {cities.map((city) => (
+                      <button
+                        key={city}
+                        onClick={() => { setSelectedCity(city); setSelectedSiteId(null); }}
+                        className={`px-4 py-2 rounded-lg border-2 text-sm transition-all ${
+                          selectedCity === city
+                            ? "border-primary bg-primary/5 font-semibold text-primary"
+                            : "border-border hover:border-primary/50 text-foreground"
+                        }`}
+                      >
+                        {city}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             {/* Site Selection */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MapPin className="h-5 w-5 text-primary" />
-                  Select Heritage Site
+                  Select Heritage Site {selectedCity && <span className="text-sm font-normal text-muted-foreground">in {selectedCity}</span>}
                 </CardTitle>
               </CardHeader>
               <CardContent>

@@ -145,6 +145,9 @@ export default function ExperiencesPage() {
   const [selectedType, setSelectedType] = useState<ExperienceType>(getTypeFromParam(categoryParam))
   const [priceFilter, setPriceFilter] = useState<"all" | "budget" | "mid" | "premium">("all")
   const [ratingFilter, setRatingFilter] = useState<number>(0)
+  const [selectedCity, setSelectedCity] = useState<string | null>(null)
+  const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null)
+  const [selectedArtForm, setSelectedArtForm] = useState<string | null>(null)
 
   // Remove the effect; instead, compute the default type value inside useState initializer
   // and derive the selectedType from categoryParam directly when needed.
@@ -166,6 +169,14 @@ export default function ExperiencesPage() {
       if (priceFilter === "budget") params.maxPrice = 100
       else if (priceFilter === "mid") params.maxPrice = 200
       // premium has no maxPrice limit
+    }
+
+    if (type === "music") {
+      if (selectedCity) params.cityId = selectedCity
+      if (selectedInstrument) params.instrumentId = selectedInstrument
+    } else if (type === "workshop") {
+      if (selectedCity) params.cityId = selectedCity
+      if (selectedArtForm) params.artFormId = selectedArtForm
     }
 
     return params
@@ -215,7 +226,7 @@ export default function ExperiencesPage() {
             {t('experiencesDescription')}
           </p>
 
-          <Tabs value={selectedType} onValueChange={(value) => setSelectedType(value as ExperienceType)} className="w-full">
+          <Tabs value={selectedType} onValueChange={(value) => { setSelectedType(value as ExperienceType); setSelectedCity(null); setSelectedInstrument(null); setSelectedArtForm(null) }} className="w-full">
             <TabsList className="mb-8">
               <TabsTrigger value="guide" className="flex items-center gap-2">
                 <Users className="w-4 h-4" />
@@ -235,12 +246,19 @@ export default function ExperiencesPage() {
               {/* Sidebar Filters */}
               <div className="lg:col-span-1">
                 <ExperienceFilter
+                  activeTab={selectedType}
                   selectedSite={selectedSite}
                   onSiteChange={setSelectedSite}
                   priceFilter={priceFilter}
                   onPriceChange={setPriceFilter}
                   ratingFilter={ratingFilter}
                   onRatingChange={setRatingFilter}
+                  selectedCity={selectedCity}
+                  onCityChange={setSelectedCity}
+                  selectedInstrument={selectedInstrument}
+                  onInstrumentChange={setSelectedInstrument}
+                  selectedArtForm={selectedArtForm}
+                  onArtFormChange={setSelectedArtForm}
                 />
               </div>
 

@@ -3,11 +3,12 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar, FileText } from "lucide-react"
+import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar, FileText, Music2, Palette, Globe, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
+import { useAdminRole } from "@/components/admin-guard"
 
-const navItems = [
+const managerNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/heritage-sites", label: "Heritage Sites", icon: MapPin },
   { href: "/admin/guides", label: "Guides", icon: Users },
@@ -17,15 +18,24 @@ const navItems = [
   { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/bookings", label: "Bookings", icon: Calendar },
   { href: "/admin/applications", label: "Applications", icon: FileText },
+  { href: "/admin/cities", label: "Cities", icon: Globe },
+  { href: "/admin/instruments", label: "Instruments", icon: Music2 },
+  { href: "/admin/art-forms", label: "Art Forms", icon: Palette },
+]
+
+const adminOnlyNavItems = [
+  { href: "/admin/managers", label: "Managers", icon: ShieldCheck },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const [isOpen, setIsOpen] = useState(false)
+  const { isAdmin } = useAdminRole()
+
+  const navItems = isAdmin ? [...managerNavItems, ...adminOnlyNavItems] : managerNavItems
 
   return (
     <>
-      {/* Mobile Menu Button */}
       <Button
         variant="ghost"
         size="icon"
@@ -35,16 +45,15 @@ export function Sidebar() {
         {isOpen ? <X /> : <Menu />}
       </Button>
 
-      {/* Sidebar */}
       <aside
         className={cn(
-          "fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border pt-20 md:pt-0 transition-transform md:fixed md:translate-x-0 z-30",
+          "fixed left-0 top-0 h-full w-64 bg-sidebar border-r border-sidebar-border pt-20 md:pt-0 transition-transform md:fixed md:translate-x-0 z-30 overflow-y-auto",
           isOpen ? "translate-x-0" : "-translate-x-full",
         )}
       >
         <div className="p-6">
           <h1 className="text-2xl font-bold text-sidebar-foreground mb-8">HeritEdge</h1>
-          <nav className="space-y-2">
+          <nav className="space-y-1">
             {navItems.map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>
                 <Button
@@ -61,7 +70,6 @@ export function Sidebar() {
         </div>
       </aside>
 
-      {/* Overlay for mobile */}
       {isOpen && <div className="fixed inset-0 bg-black/50 z-20 md:hidden" onClick={() => setIsOpen(false)} />}
     </>
   )

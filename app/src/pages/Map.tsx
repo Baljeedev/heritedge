@@ -20,13 +20,44 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
+// Custom icons for selected/unselected markers
+const defaultIcon = L.icon({
+  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+  iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
+const selectedIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width: 32px;
+    height: 32px;
+    background: #b45309;
+    border: 3px solid #fff;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    box-shadow: 0 3px 8px rgba(0,0,0,0.4);
+  "></div>`,
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -34],
+});
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const MarkerWithIcon = Marker as any;
+
 interface MapComponentProps {
   onSiteSelect: (siteId: string) => void;
+  selectedSiteId: string | null;
+  selectedCity?: string;
   initialCenter?: [number, number];
   initialZoom?: number;
 }
 
-const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponentProps) => {
+const MapComponent = ({ onSiteSelect, selectedSiteId, selectedCity, initialCenter, initialZoom }: MapComponentProps) => {
   const [searchParams] = useSearchParams()
   const searchQuery = searchParams.get("search")
   const { t } = useI18n()
@@ -34,6 +65,7 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
   const { data, isLoading, error } = useHeritageSites({
     limit: 100,
     search: searchQuery || undefined,
+    city: selectedCity || undefined,
   });
   const sites = data?.sites || [];
 
@@ -79,11 +111,13 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
 
         {sites.map((site) => {
           const position: [number, number] = [site.coordinates.latitude, site.coordinates.longitude];
+          const isSelected = selectedSiteId === site._id;
 
           return (
-            <Marker
+            <MarkerWithIcon
               key={site._id}
               position={position}
+              icon={isSelected ? selectedIcon : defaultIcon}
               eventHandlers={{
                 click: () => onSiteSelect(site._id)
               }}
@@ -126,7 +160,7 @@ const MapComponent = ({ onSiteSelect, initialCenter, initialZoom }: MapComponent
                   </div>
                 </div>
               </Popup>
-            </Marker>
+            </MarkerWithIcon>
           );
         })}
       </MapContainer>
@@ -140,9 +174,15 @@ export default function MapPage() {
   const [selectedSites, setSelectedSites] = useState<string[]>([])
   const [mapCenter, setMapCenter] = useState<[number, number] | undefined>(undefined)
   const [mapZoom, setMapZoom] = useState<number | undefined>(undefined)
+  const [selectedCity, setSelectedCity] = useState<string>("")
   const { t } = useI18n()
 
   const { data: sitesData } = useHeritageSites({ limit: 100 })
+
+  // Derive unique cities from sites
+  const cities = sitesData?.sites
+    ? Array.from(new Set(sitesData.sites.map(s => s.city).filter(Boolean))).sort() as string[]
+    : []
 
   // Read site query parameter and select the site on mount
   useEffect(() => {
@@ -152,20 +192,20 @@ export default function MapPage() {
     if (siteIdFromUrl && sitesData?.sites) {
       const site = sitesData.sites.find(s => s._id === siteIdFromUrl)
       if (site) {
-        // Defer state updates out of the effect body to avoid React Compiler warnings
         Promise.resolve().then(() => {
           setSelectedSiteId(siteIdFromUrl)
           setMapCenter([site.coordinates.latitude, site.coordinates.longitude])
-          setMapZoom(12) // Zoom in closer when a specific site is selected
+          setMapZoom(12)
         })
       }
     } else if (searchQuery) {
-      // If there's a search query, filter sites and show results
-      // The MapComponent will handle displaying filtered results
-      // For now, we'll just keep the search query in the URL
-      // You could add a search results panel here if needed
+      // MapComponent handles filtered results via search query param
     }
   }, [searchParams, sitesData])
+
+  const handleSiteSelect = (siteId: string) => {
+    setSelectedSiteId(siteId)
+  }
 
   const handleToggleSite = (siteId: string) => {
     setSelectedSites((prev) => (prev.includes(siteId) ? prev.filter((id) => id !== siteId) : [...prev, siteId]))
@@ -186,10 +226,26 @@ export default function MapPage() {
         {/* Map Section */}
         <div className="flex-1 relative">
           <MapComponent
-            onSiteSelect={setSelectedSiteId}
+            onSiteSelect={handleSiteSelect}
+            selectedSiteId={selectedSiteId}
+            selectedCity={selectedCity}
             initialCenter={mapCenter}
             initialZoom={mapZoom}
           />
+
+          {/* City Filter Overlay */}
+          <div className="absolute top-3 left-3 z-[1000]">
+            <select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              className="bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm shadow-md focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">All Cities</option>
+              {cities.map((city) => (
+                <option key={city} value={city}>{city}</option>
+              ))}
+            </select>
+          </div>
 
           {/* Map Controls */}
           <MapControls
