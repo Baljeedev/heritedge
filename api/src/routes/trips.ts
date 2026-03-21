@@ -168,12 +168,18 @@ router.delete("/:id", authenticateUser, async (req: Request, res: Response) => {
 // POST /api/trips/generate - Generate AI trip itinerary
 router.post("/generate", authenticateUser, async (req: Request, res: Response) => {
   try {
-    let { budget, numberOfDays, siteId, selectedHotelIds } = req.body;
+    let { budget, numberOfDays, siteId, siteIds, selectedHotelIds } = req.body;
+
+    // Support both siteId (single) and siteIds (multiple); normalize to array
+    const resolvedSiteIds: string[] = siteIds?.length ? siteIds : siteId ? [siteId] : [];
 
     // Validate input
-    if (!budget || !numberOfDays || !siteId) {
-      return res.status(400).json({ error: "Missing required fields: budget, numberOfDays, siteId" });
+    if (!budget || !numberOfDays || resolvedSiteIds.length === 0) {
+      return res.status(400).json({ error: "Missing required fields: budget, numberOfDays, siteId (or siteIds)" });
     }
+
+    // Use first site as primary for backward compat
+    siteId = resolvedSiteIds[0];
 
     // Map user-friendly budget values to model values
     const budgetMap: Record<string, "Budget" | "Moderate" | "Luxury"> = {
@@ -196,11 +202,13 @@ router.post("/generate", authenticateUser, async (req: Request, res: Response) =
       return res.status(400).json({ error: "Number of days must be between 1 and 30" });
     }
 
-    // Fetch the heritage site
-    const site = await HeritageSite.findById(siteId);
-    if (!site) {
-      return res.status(404).json({ error: "Heritage site not found" });
+    // Fetch all selected heritage sites
+    const allSites = await HeritageSite.find({ _id: { $in: resolvedSiteIds } });
+    if (allSites.length === 0) {
+      return res.status(404).json({ error: "No heritage sites found" });
     }
+    // Primary site (first selected)
+    const site = allSites.find(s => s._id.toString() === siteId) || allSites[0];
 
     // Fetch hotels - use selectedHotelIds if provided, otherwise fetch by nearbySites
     let hotels;
@@ -213,10 +221,10 @@ router.post("/generate", authenticateUser, async (req: Request, res: Response) =
         .select("name location city state pricePerNight description")
         .sort({ rating: -1 });
     } else {
-      // Fetch hotels near the site (by nearbySites or by city/state)
+      // Fetch hotels near any of the selected sites (by nearbySites or by city/state)
       const hotelQuery: any = { isActive: true };
       hotelQuery.$or = [
-        { nearbySites: siteId },
+        { nearbySites: { $in: resolvedSiteIds } },
         { city: site.city },
         { state: site.state },
       ];
@@ -235,19 +243,19 @@ router.post("/generate", authenticateUser, async (req: Request, res: Response) =
         .sort({ rating: -1 });
     }
 
-    // Fetch guides for the site
+    // Fetch guides for any of the selected sites
     const guides = await Guide.find({
       isActive: true,
-      sites: siteId,
+      sites: { $in: resolvedSiteIds },
     })
       .select("name specialization pricePerDay bio languages rating")
       .limit(10)
       .sort({ rating: -1 });
 
-    // Fetch experiences (music shows and workshops) for the site
+    // Fetch experiences (music shows and workshops) for any of the selected sites
     const experiences = await Experience.find({
       isActive: true,
-      sites: siteId,
+      sites: { $in: resolvedSiteIds },
       type: { $in: ["music", "workshop"] },
     })
       .select("name type price description venue duration")
@@ -255,10 +263,12 @@ router.post("/generate", authenticateUser, async (req: Request, res: Response) =
       .sort({ rating: -1 });
 
     // Generate itinerary using OpenAI
+    const siteNamesStr = allSites.map(s => s.name).join(", ");
+    const siteDescriptionsStr = allSites.map(s => `${s.name}: ${s.description}`).join("\n\n");
     const itinerary = await generateItinerary({
-      siteName: site.name,
+      siteName: siteNamesStr,
       siteLocation: site.location,
-      siteDescription: site.description + "\n\n" + site.historicalWriteup,
+      siteDescription: siteDescriptionsStr,
       numberOfDays: Number(numberOfDays),
       budget: budget as "Budget" | "Moderate" | "Luxury",
       hotels: hotels.map((h) => ({
@@ -294,23 +304,30 @@ router.post("/generate", authenticateUser, async (req: Request, res: Response) =
     endDate.setDate(endDate.getDate() + numberOfDays - 1);
 
     // Create the trip
+    const tripName = allSites.length > 1
+      ? `${site.city || site.location} Heritage Tour - ${numberOfDays} Days`
+      : `${site.name} - ${numberOfDays} Day Trip`;
+    const tripDescription = allSites.length > 1
+      ? `AI-generated ${numberOfDays}-day itinerary covering ${siteNamesStr}`
+      : `AI-generated ${numberOfDays}-day itinerary for ${site.name} in ${site.location}`;
+
     const trip = new Trip({
       clerkUserId: req.userId!,
-      name: `${site.name} - ${numberOfDays} Day Trip`,
+      name: tripName,
       location: site.location,
       duration: `${numberOfDays} Days`,
       image: site.image,
-      description: `AI-generated ${numberOfDays}-day itinerary for ${site.name} in ${site.location}`,
+      description: tripDescription,
       highlights: site.keyFacts.slice(0, 5),
       itinerary,
       budget: budget as "Budget" | "Moderate" | "Luxury",
       bestTimeToVisit: "Year-round",
-      selectedSites: [siteId],
+      selectedSites: resolvedSiteIds,
       selectedHotels: [],
       selectedGuides: [],
       selectedExperiences: [],
       isAIGenerated: true,
-      aiPrompt: `Generate a ${numberOfDays}-day ${budget} budget trip for ${site.name}`,
+      aiPrompt: `Generate a ${numberOfDays}-day ${budget} budget trip covering ${siteNamesStr}`,
       isFeatured: false,
       status: "draft",
       startDate,

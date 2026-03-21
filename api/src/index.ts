@@ -15,6 +15,10 @@ import reviewsRouter from "./routes/reviews";
 import uploadRouter from "./routes/upload";
 import bookingsRouter from "./routes/bookings";
 import applicationsRouter from "./routes/applications";
+import citiesRouter from "./routes/cities";
+import instrumentsRouter from "./routes/instruments";
+import artFormsRouter from "./routes/artForms";
+import adminUsersRouter from "./routes/adminUsers";
 
 const app = express();
 
@@ -48,6 +52,10 @@ app.use("/api/reviews", reviewsRouter);
 app.use("/api/upload", uploadRouter);
 app.use("/api/bookings", bookingsRouter);
 app.use("/api/applications", applicationsRouter);
+app.use("/api/cities", citiesRouter);
+app.use("/api/instruments", instrumentsRouter);
+app.use("/api/art-forms", artFormsRouter);
+app.use("/api/admin-users", adminUsersRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

@@ -192,7 +192,7 @@ const seedHotels = async () => {
           nearbySites: [site._id],
           partnershipType: template.partnershipType,
           discountPercentage: template.discountPercentage,
-          email: "harshit.rai.verma@gmail.com",
+          email: "baljeelovesmemes@gmail.com",
           isActive: true,
         };
 

@@ -78,6 +78,7 @@ export interface GenerateTripData {
   budget: "Budget" | "Moderate" | "Luxury" | "high" | "medium" | "low";
   numberOfDays: number;
   siteId: string;
+  siteIds?: string[];
   selectedHotelIds?: string[];
 }
 
