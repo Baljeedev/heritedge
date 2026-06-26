@@ -7,7 +7,7 @@ export interface Guide {
   image?: string;
   video?: string;
   specialization: string;
-  sites: string[] | { _id: string; name: string; location: any; image?: string }[];
+  sites: string[] | { _id: string; name: string; location: string; city?: string; state?: string; image?: string }[];
   rating: number;
   reviewCount: number;
   pricePerDay: number;
@@ -27,6 +27,8 @@ export interface Guide {
   age?: number;
   internshipStatus?: "pending" | "approved" | "rejected" | "completed";
   internshipTestScore?: number;
+  whatsappNumber?: string;
+  leadCount?: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;
@@ -34,8 +36,11 @@ export interface Guide {
 
 export interface GuidesQueryParams {
   siteId?: string;
+  cityId?: string;
+  search?: string;
   specialization?: string;
   minRating?: number;
+  minPrice?: number;
   maxPrice?: number;
   languages?: string;
   isIntern?: boolean;
@@ -113,6 +118,12 @@ export const guidesApi = {
   // Apply for internship
   applyInternship: async (data: InternshipApplicationData) => {
     const response = await apiClient.post<Guide>('/api/guides/apply-internship', data);
+    return response.data;
+  },
+
+  // Record a contact lead when user clicks Contact Guide
+  recordLead: async (id: string) => {
+    const response = await apiClient.post<{ leadCount: number }>(`/api/guides/${id}/leads`);
     return response.data;
   },
 };

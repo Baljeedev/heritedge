@@ -3,6 +3,8 @@ import { apiClient } from './client';
 export interface Review {
   _id: string;
   clerkUserId: string;
+  authorName?: string;
+  authorImage?: string;
   reviewType: 'site' | 'guide' | 'hotel' | 'experience';
   targetId: string;
   rating: number;
@@ -28,6 +30,8 @@ export interface CreateReviewData {
   targetId: string;
   rating: number;
   comment?: string;
+  authorName?: string;
+  authorImage?: string;
   images?: string[];
   visitDate?: string;
 }

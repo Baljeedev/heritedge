@@ -1,6 +1,8 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Experience from "../models/Experience";
 import { optionalAuth } from "../middleware/auth";
+import { resolveCityToSiteIds } from "../utils/cityFilter";
 
 const router = express.Router();
 
@@ -8,7 +10,7 @@ const router = express.Router();
 router.get("/", optionalAuth, async (req: Request, res: Response) => {
   try {
     const {
-      type, siteId, minRating, maxPrice, skillLevel,
+      type, siteId, minRating, minPrice, maxPrice, skillLevel,
       instrumentId, artFormId, cityId,
       all, limit = 50, skip = 0,
     } = req.query;
@@ -18,14 +20,29 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
     if (type) query.type = type;
     if (siteId) query.sites = siteId;
     if (minRating) query.rating = { $gte: Number(minRating) };
-    if (maxPrice) query.price = { $lte: Number(maxPrice) };
+    if (minPrice || maxPrice) {
+      query.price = {};
+      if (minPrice) query.price.$gte = Number(minPrice);
+      if (maxPrice) query.price.$lte = Number(maxPrice);
+    }
     if (skillLevel) query.skillLevel = skillLevel;
     if (instrumentId) query.instruments = instrumentId;
     if (artFormId) query.artForms = artFormId;
-    if (cityId) query.$or = [{ city: cityId }, { workshopCity: cityId }];
+
+    if (cityId && !siteId) {
+      const siteIds = await resolveCityToSiteIds(cityId as string);
+      const cityConditions: Record<string, unknown>[] = [
+        { city: cityId },
+        { workshopCity: cityId },
+      ];
+      if (siteIds.length > 0) {
+        cityConditions.push({ sites: { $in: siteIds } });
+      }
+      query.$or = cityConditions;
+    }
 
     const experiences = await Experience.find(query)
-      .populate("sites", "name location")
+      .populate("sites", "name location city state")
       .populate("guideId", "name specialization rating")
       .populate("instruments", "name category")
       .populate("artForms", "name category")

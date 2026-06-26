@@ -1,9 +1,13 @@
 import OpenAI from "openai";
-import { IDayPlan } from "../models/Trip";
+import type { IDayPlan } from "../models/Trip";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+function getOpenAIClient(): OpenAI {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    throw new Error("OPENAI_API_KEY is not set. Trip AI features require this environment variable.");
+  }
+  return new OpenAI({ apiKey });
+}
 
 interface GenerateItineraryParams {
   siteName: string;
@@ -127,7 +131,7 @@ Return ONLY a valid JSON array in this exact format. You can wrap it in a markdo
 ]`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },
@@ -222,7 +226,7 @@ Return ONLY a valid JSON array in this exact format. You can wrap it in a markdo
 ]`;
 
   try {
-    const completion = await openai.chat.completions.create({
+    const completion = await getOpenAIClient().chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: systemPrompt },

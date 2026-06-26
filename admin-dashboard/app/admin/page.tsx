@@ -88,24 +88,30 @@ export default function DashboardPage() {
   }, [])
 
   const loadStats = async () => {
-    try {
-      const [sitesRes, guidesRes, experiencesRes, hotelsRes, tripsRes, reviewsRes, bookingsRes, applicationsRes] = await Promise.all([
-        heritageSitesApi.getAll({ limit: 1 }),
-        guidesApi.getAll({ limit: 1, all: true }),
-        experiencesApi.getAll({ limit: 1, all: true }),
-        hotelsApi.getAll({ limit: 1, all: true }),
-        tripsApi.getAll({ limit: 1 }),
-        reviewsApi.getAll({ limit: 1, all: true }),
-        bookingsApi.getAll({ all: true }),
-        applicationsApi.getAll("pending"),
-      ])
+    const settled = await Promise.allSettled([
+      heritageSitesApi.getAll({ limit: 1 }),
+      guidesApi.getAll({ limit: 1, all: true }),
+      experiencesApi.getAll({ limit: 1, all: true }),
+      hotelsApi.getAll({ limit: 1, all: true }),
+      tripsApi.getAll({ limit: 1 }),
+      reviewsApi.getAll({ limit: 1, all: true }),
+      bookingsApi.getAll({ all: true }),
+      applicationsApi.getAll("pending"),
+    ])
 
-      // Count pending internship applications
-      const allGuides = await guidesApi.getAll({ limit: 1000, all: true })
-      const pendingInterns = allGuides.guides.filter(
-        (g) => g.isIntern && g.internshipStatus === "pending"
-      ).length
-      
+    const get = <T,>(i: number, fallback: T): T =>
+      settled[i].status === "fulfilled" ? settled[i].value : fallback
+
+    try {
+      const sitesRes = get(0, { total: 0, sites: [] })
+      const guidesRes = get(1, { total: 0, guides: [] })
+      const experiencesRes = get(2, { total: 0, experiences: [] })
+      const hotelsRes = get(3, { total: 0, hotels: [] })
+      const tripsRes = get(4, { total: 0, trips: [] })
+      const reviewsRes = get(5, { total: 0, reviews: [] })
+      const bookingsRes = get(6, { bookings: [] as { _id: string }[] })
+      const applicationsRes = get(7, { applications: [] as { _id: string }[] })
+
       const pendingApplications = applicationsRes.applications.length
 
       setStats([
@@ -174,8 +180,9 @@ export default function DashboardPage() {
           loading: false,
         },
       ])
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to load dashboard stats:", error)
+      setStats((prev) => prev.map((s) => ({ ...s, loading: false })))
     }
   }
 

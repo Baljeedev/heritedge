@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Hotel from "../models/Hotel";
 import { optionalAuth } from "../middleware/auth";
 

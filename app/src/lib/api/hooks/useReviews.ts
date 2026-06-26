@@ -11,10 +11,11 @@ export const reviewsKeys = {
 };
 
 // Get all reviews
-export const useReviews = (params?: ReviewsQueryParams) => {
+export const useReviews = (params?: ReviewsQueryParams, enabled = true) => {
   return useQuery({
     queryKey: reviewsKeys.list(params),
     queryFn: () => reviewsApi.getAll(params),
+    enabled,
   });
 };
 
