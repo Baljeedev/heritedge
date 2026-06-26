@@ -91,31 +91,28 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    const newGuide: IGuide = {
-      _id: guide?._id || "",
+    const payload: Partial<IGuide> = {
       clerkUserId: formData.clerkUserId || "",
       name: formData.name || "",
       image: formData.image || "",
+      video: formData.video,
       specialization: formData.specialization || "",
       sites: formData.sites || [],
       bio: formData.bio || "",
       experience: formData.experience || 0,
       pricePerDay: formData.pricePerDay || 0,
-      languages: languagesInput.split(",").map((l) => l.trim()),
+      languages: languagesInput.split(",").map((l) => l.trim()).filter(Boolean),
       certifications,
       isIntern: formData.isIntern || false,
-      age: guide?.age,
-      internshipStatus: guide?.internshipStatus,
-      internshipTestScore: guide?.internshipTestScore,
+      age: formData.age ?? guide?.age,
+      internshipStatus: formData.internshipStatus ?? guide?.internshipStatus,
+      internshipTestScore: formData.internshipTestScore ?? guide?.internshipTestScore,
       email: formData.email,
+      whatsappNumber: formData.whatsappNumber,
       isActive: formData.isActive ?? true,
-      rating: formData.rating || 0,
-      reviewCount: formData.reviewCount || 0,
-      createdAt: formData.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
     }
 
-    onSave(newGuide)
+    onSave(payload)
   }
 
   return (
@@ -230,6 +227,17 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
           value={formData.email || ""}
           onChange={handleChange}
           placeholder="guide@example.com"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="whatsappNumber">WhatsApp Number</Label>
+        <Input
+          id="whatsappNumber"
+          name="whatsappNumber"
+          value={formData.whatsappNumber || ""}
+          onChange={handleChange}
+          placeholder="+91 98765 43210"
         />
       </div>
 

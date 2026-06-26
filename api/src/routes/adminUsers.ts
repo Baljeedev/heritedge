@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import AdminUser from "../models/AdminUser";
 
 const router = express.Router();

@@ -57,6 +57,8 @@ export interface IGuide {
   internshipStatus?: "pending" | "approved" | "rejected" | "completed"
   internshipTestScore?: number
   email?: string
+  whatsappNumber?: string
+  leadCount?: number
   isActive: boolean
   createdAt: string
   updatedAt: string

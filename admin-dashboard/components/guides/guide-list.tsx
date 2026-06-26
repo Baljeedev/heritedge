@@ -195,6 +195,9 @@ export function GuideList() {
                   <span className="text-muted-foreground">${guide.pricePerDay}/day</span>
                 </div>
                 <div className="text-sm text-muted-foreground">{guide.experience} years experience</div>
+                <div className="text-sm font-medium text-foreground">
+                  Leads: {guide.leadCount ?? 0}
+                </div>
                 <div className="flex gap-1 flex-wrap">
                   {guide.languages.map((lang) => (
                     <Badge key={lang} variant="outline" className="text-xs">

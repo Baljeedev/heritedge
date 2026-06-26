@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Review from "../models/Review";
 import { authenticateUser, optionalAuth } from "../middleware/auth";
 import HeritageSite from "../models/HeritageSite";
@@ -110,7 +111,7 @@ router.get("/:id", optionalAuth, async (req: Request, res: Response) => {
 // POST /api/reviews - Create a new review
 router.post("/", authenticateUser, async (req: Request, res: Response) => {
   try {
-    const { reviewType, targetId, rating, comment, images, visitDate } =
+    const { reviewType, targetId, rating, comment, images, visitDate, authorName, authorImage } =
       req.body;
 
     // Check if user already reviewed this item
@@ -128,6 +129,8 @@ router.post("/", authenticateUser, async (req: Request, res: Response) => {
 
     const review = new Review({
       clerkUserId: req.userId!,
+      authorName,
+      authorImage,
       reviewType,
       targetId,
       rating,

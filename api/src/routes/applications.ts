@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Application from "../models/Application";
 import Guide from "../models/Guide";
 import Hotel from "../models/Hotel";

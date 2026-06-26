@@ -2,6 +2,8 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IReview extends Document {
   clerkUserId: string; // User who wrote the review
+  authorName?: string;
+  authorImage?: string;
   rating: number; // 1-5
   comment: string;
   images?: string[]; // Photos from traveler's adventures
@@ -24,6 +26,8 @@ export interface IReview extends Document {
 const ReviewSchema = new Schema<IReview>(
   {
     clerkUserId: { type: String, required: true, index: true },
+    authorName: { type: String },
+    authorImage: { type: String },
     rating: { type: Number, required: true, min: 1, max: 5 },
     comment: { type: String, required: true },
     images: [{ type: String }],

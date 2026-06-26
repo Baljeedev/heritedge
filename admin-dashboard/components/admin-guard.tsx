@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const SUPER_ADMIN_EMAIL = "baljeelovesmemes@gmail.com"
+const SUPER_ADMIN_EMAIL = "abhikumar06071998@gmail.com"
 
 export type AdminRole = "admin" | "manager" | null
 
@@ -24,28 +24,48 @@ export function AdminGuard({ children, requiredRole }: AdminGuardProps) {
 
   useEffect(() => {
     if (!isLoaded) return
-    if (!user) { router.push("/sign-in"); return }
+
+    if (!user) {
+      setChecking(false)
+      router.replace("/sign-in")
+      return
+    }
 
     const userEmail = user.primaryEmailAddress?.emailAddress
     if (userEmail === SUPER_ADMIN_EMAIL) {
-      setRole("admin"); setChecking(false); return
+      setRole("admin")
+      setChecking(false)
+      return
     }
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost:3001"
     fetch(`${apiBase}/api/admin-users/check/${user.id}`)
       .then((r) => r.json())
-      .then((data) => { if (data.authorized) setRole(data.role as AdminRole) })
+      .then((data) => {
+        if (data.authorized) setRole(data.role as AdminRole)
+        else setRole(null)
+      })
       .catch(() => setRole(null))
       .finally(() => setChecking(false))
   }, [user, isLoaded, router])
 
   if (!isLoaded || checking) {
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   if (!user) {
-    router.push("/sign-in")
-    return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
   }
 
   if (!role) {
@@ -54,11 +74,17 @@ export function AdminGuard({ children, requiredRole }: AdminGuardProps) {
         <div className="max-w-md text-center space-y-4">
           <h1 className="text-2xl font-semibold">Not authorized</h1>
           <p className="text-muted-foreground">
-            You are signed in as <span className="font-mono">{user.primaryEmailAddress?.emailAddress}</span>, which does not have admin or manager access.
+            You are signed in as{" "}
+            <span className="font-mono">{user.primaryEmailAddress?.emailAddress}</span>, which does
+            not have admin or manager access.
           </p>
           <div className="flex items-center justify-center gap-2">
-            <SignOutButton redirectUrl="/sign-in"><Button variant="destructive">Log out</Button></SignOutButton>
-            <Button variant="outline" onClick={() => router.push("/")}>Go to home</Button>
+            <SignOutButton redirectUrl="/sign-in">
+              <Button variant="destructive">Log out</Button>
+            </SignOutButton>
+            <Button variant="outline" onClick={() => router.push("/")}>
+              Go to home
+            </Button>
           </div>
         </div>
       </div>
@@ -70,8 +96,12 @@ export function AdminGuard({ children, requiredRole }: AdminGuardProps) {
       <div className="min-h-screen flex items-center justify-center">
         <div className="max-w-md text-center space-y-4">
           <h1 className="text-2xl font-semibold">Admin access required</h1>
-          <p className="text-muted-foreground">This section is only accessible to admins. You are logged in as a manager.</p>
-          <Button variant="outline" onClick={() => router.back()}>Go back</Button>
+          <p className="text-muted-foreground">
+            This section is only accessible to admins. You are logged in as a manager.
+          </p>
+          <Button variant="outline" onClick={() => router.back()}>
+            Go back
+          </Button>
         </div>
       </div>
     )
@@ -87,12 +117,20 @@ export function useAdminRole(): { role: AdminRole; isAdmin: boolean; isManager: 
   useEffect(() => {
     if (!isLoaded || !user) return
     const userEmail = user.primaryEmailAddress?.emailAddress
-    if (userEmail === SUPER_ADMIN_EMAIL) { setRole("admin"); return }
+    if (userEmail === SUPER_ADMIN_EMAIL) {
+      setRole("admin")
+      return
+    }
 
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001"
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL ||
+      process.env.NEXT_PUBLIC_API_URL ||
+      "http://localhost:3001"
     fetch(`${apiBase}/api/admin-users/check/${user.id}`)
       .then((r) => r.json())
-      .then((data) => { if (data.authorized) setRole(data.role as AdminRole) })
+      .then((data) => {
+        if (data.authorized) setRole(data.role as AdminRole)
+      })
       .catch(() => {})
   }, [user, isLoaded])
 

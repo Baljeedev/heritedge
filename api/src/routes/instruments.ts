@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Instrument from "../models/Instrument";
 import { optionalAuth } from "../middleware/auth";
 

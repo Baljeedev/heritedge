@@ -38,6 +38,7 @@ export interface ExperiencesQueryParams {
   type?: string;
   siteId?: string;
   minRating?: number;
+  minPrice?: number;
   maxPrice?: number;
   skillLevel?: string;
   limit?: number;

@@ -1,16 +1,53 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import Guide from "../models/Guide";
+import HeritageSite from "../models/HeritageSite";
 import { authenticateUser, optionalAuth } from "../middleware/auth";
+import { resolveCityToSiteIds } from "../utils/cityFilter";
 
 const router = express.Router();
+const SITE_POPULATE_FIELDS = "name location city state image";
+
+const ALLOWED_GUIDE_UPDATE_FIELDS = [
+  "name",
+  "image",
+  "video",
+  "specialization",
+  "sites",
+  "bio",
+  "experience",
+  "pricePerDay",
+  "languages",
+  "certifications",
+  "isIntern",
+  "age",
+  "internshipStatus",
+  "internshipTestScore",
+  "email",
+  "whatsappNumber",
+  "isActive",
+] as const;
+
+function pickAllowedGuideFields(body: Record<string, unknown>) {
+  const updates: Record<string, unknown> = {};
+  for (const field of ALLOWED_GUIDE_UPDATE_FIELDS) {
+    if (field in body) {
+      updates[field] = body[field];
+    }
+  }
+  return updates;
+}
 
 // GET /api/guides - Get all guides (with filters)
 router.get("/", optionalAuth, async (req: Request, res: Response) => {
   try {
     const {
       siteId,
+      cityId,
+      search,
       specialization,
       minRating,
+      minPrice,
       maxPrice,
       languages,
       isIntern,
@@ -27,14 +64,34 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
     }
 
     if (siteId) {
-      // sites is an array of ObjectIds, check if it contains the siteId
       query.sites = siteId;
     }
-    if (specialization) {
+
+    if (cityId && !siteId) {
+      const siteIds = await resolveCityToSiteIds(cityId as string);
+      query.sites = siteIds.length > 0 ? { $in: siteIds } : { $in: [] };
+    }
+
+    if (search) {
+      const matchingSites = await HeritageSite.find({
+        $text: { $search: search as string },
+      }).distinct("_id");
+      query.$or = [
+        { $text: { $search: search as string } },
+        { sites: { $in: matchingSites } },
+      ];
+    } else if (specialization) {
       query.$text = { $search: specialization as string };
     }
+
     if (minRating) query.rating = { $gte: Number(minRating) };
-    if (maxPrice) query.pricePerDay = { $lte: Number(maxPrice) };
+
+    if (minPrice || maxPrice) {
+      query.pricePerDay = {};
+      if (minPrice) query.pricePerDay.$gte = Number(minPrice);
+      if (maxPrice) query.pricePerDay.$lte = Number(maxPrice);
+    }
+
     if (languages) {
       query.languages = { $in: (languages as string).split(",") };
     }
@@ -44,19 +101,13 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       query["certifications.verified"] = true;
     }
 
-    // Debug: Log the query (remove in production)
-    console.log("Guides query:", JSON.stringify(query, null, 2));
-
     const guides = await Guide.find(query)
-      .populate("sites", "name location")
+      .populate("sites", SITE_POPULATE_FIELDS)
       .limit(Number(limit))
       .skip(Number(skip))
       .sort({ rating: -1, reviewCount: -1 });
 
     const total = await Guide.countDocuments(query);
-
-    // Debug: Log results
-    console.log(`Found ${guides.length} guides (total: ${total})`);
 
     res.json({
       guides,
@@ -70,12 +121,29 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
   }
 });
 
+// POST /api/guides/:id/leads - Record a contact lead (public)
+router.post("/:id/leads", async (req: Request, res: Response) => {
+  try {
+    const guide = await Guide.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { leadCount: 1 } },
+      { new: true }
+    );
+    if (!guide) {
+      return res.status(404).json({ error: "Guide not found" });
+    }
+    res.json({ leadCount: guide.leadCount });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET /api/guides/:id - Get a specific guide
 router.get("/:id", optionalAuth, async (req: Request, res: Response) => {
   try {
     const guide = await Guide.findById(req.params.id).populate(
       "sites",
-      "name location image"
+      SITE_POPULATE_FIELDS
     );
     if (!guide) {
       return res.status(404).json({ error: "Guide not found" });
@@ -89,7 +157,6 @@ router.get("/:id", optionalAuth, async (req: Request, res: Response) => {
 // POST /api/guides - Register as a guide
 router.post("/", authenticateUser, async (req: Request, res: Response) => {
   try {
-    // Check if guide already exists
     const existingGuide = await Guide.findOne({
       clerkUserId: req.userId!,
     });
@@ -114,20 +181,18 @@ router.post("/", authenticateUser, async (req: Request, res: Response) => {
 // PUT /api/guides/:id - Update guide profile (admin can update any guide)
 router.put("/:id", authenticateUser, async (req: Request, res: Response) => {
   try {
-    const guide = await Guide.findById(req.params.id);
+    const updates = pickAllowedGuideFields(req.body);
+
+    const guide = await Guide.findByIdAndUpdate(
+      req.params.id,
+      { $set: updates },
+      { new: true, runValidators: true }
+    ).populate("sites", SITE_POPULATE_FIELDS);
+
     if (!guide) {
       return res.status(404).json({ error: "Guide not found" });
     }
 
-    // Allow admin to update any guide (for admin dashboard)
-    // TODO: Add proper admin check based on email or role
-    // For now, allow updates for admin dashboard
-    // if (guide.clerkUserId !== req.userId) {
-    //   return res.status(403).json({ error: "Unauthorized" });
-    // }
-
-    Object.assign(guide, req.body);
-    await guide.save();
     res.json(guide);
   } catch (error: any) {
     res.status(400).json({ error: error.message });

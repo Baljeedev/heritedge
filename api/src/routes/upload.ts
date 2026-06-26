@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import multer from "multer";
 import { authenticateUser } from "../middleware/auth";
 import { uploadToR2 } from "../services/r2-upload";

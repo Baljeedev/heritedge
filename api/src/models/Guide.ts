@@ -27,6 +27,8 @@ export interface IGuide extends Document {
   internshipStatus?: "pending" | "approved" | "rejected" | "completed";
   internshipTestScore?: number;
   email?: string;
+  whatsappNumber?: string;
+  leadCount: number;
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -65,6 +67,8 @@ const GuideSchema = new Schema<IGuide>(
     },
     internshipTestScore: { type: Number, min: 0, max: 100 },
     email: { type: String },
+    whatsappNumber: { type: String },
+    leadCount: { type: Number, default: 0, min: 0 },
     isActive: { type: Boolean, default: true },
   },
   {

@@ -121,9 +121,9 @@ export function SearchBar({ onSearch }: SearchBarProps) {
   }, [])
 
   return (
-    <div className="flex gap-3 mb-8 relative">
+    <div className="flex flex-col sm:flex-row gap-3 relative">
       <div className="flex-1 relative">
-        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+        <Search className="absolute left-5 top-1/2 transform -translate-y-1/2 w-5 h-5 text-primary/50 z-10" />
         <Input
           ref={searchInputRef}
           value={searchQuery}
@@ -138,7 +138,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
             }
           }}
           placeholder="Search monuments, historical sites, destinations..."
-          className="pl-12 pr-10 py-6 text-base"
+          className="pl-12 pr-10 h-14 text-base rounded-full border-primary/15 bg-card shadow-[0_4px_24px_oklch(0.42_0.15_35/0.08)] focus-visible:border-primary/40 focus-visible:ring-primary/20"
         />
         {searchQuery && (
           <button
@@ -158,7 +158,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
         {showSuggestions && (
           <div
             ref={suggestionsRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-card border border-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto"
+            className="absolute top-full left-0 right-0 mt-3 bg-card border border-border rounded-2xl shadow-[0_12px_40px_oklch(0.42_0.15_35/0.12)] z-50 max-h-96 overflow-y-auto"
           >
             {isLoading ? (
               <div className="p-4 flex items-center justify-center">
@@ -213,7 +213,7 @@ export function SearchBar({ onSearch }: SearchBarProps) {
       </div>
       <Button
         onClick={handleSearch}
-        className="bg-primary text-primary-foreground px-8 py-6"
+        className="h-14 rounded-full bg-primary text-primary-foreground px-10 text-base shadow-[0_4px_20px_oklch(0.42_0.15_35/0.3)] hover:shadow-[0_6px_28px_oklch(0.42_0.15_35/0.4)] transition-shadow"
         disabled={!searchQuery.trim()}
       >
         Search
