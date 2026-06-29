@@ -3,6 +3,8 @@ import { ArrowRight, BadgePercent, HandHelping, MessageCircle } from "lucide-rea
 import { Button } from "@/components/ui/button"
 import { Link } from "react-router-dom"
 import { Navigation } from "@/core/components/navigation"
+import { HomeHotelsSection } from "@/core/components/home/home-hotels-section"
+import { HomeImpactSection } from "@/core/components/home/home-impact-section"
 import { useHeritageSites } from "@/lib/api"
 import { useI18n } from "@/lib/i18n/context"
 
@@ -88,6 +90,10 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      <HomeHotelsSection />
+
+      <HomeImpactSection />
 
       {/* Mission + SDG + CTA */}
       <section className="relative py-24 px-4 overflow-hidden">

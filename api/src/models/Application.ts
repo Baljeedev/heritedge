@@ -21,6 +21,7 @@ export interface IApplication extends Document {
     video?: string;
     specialization?: string;
     sites?: mongoose.Types.ObjectId[];
+    cities?: mongoose.Types.ObjectId[];
     bio?: string;
     experience?: number;
     pricePerDay?: number;

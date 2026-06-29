@@ -9,8 +9,10 @@ export interface City {
 }
 
 export const citiesApi = {
-  getAll: async (): Promise<{ cities: City[] }> => {
-    const response = await apiClient.get<{ cities: City[] }>('/api/cities');
+  getAll: async (params?: { limit?: number; search?: string }): Promise<{ cities: City[] }> => {
+    const response = await apiClient.get<{ cities: City[] }>('/api/cities', {
+      params: { limit: params?.limit ?? 2000, ...params },
+    });
     return response.data;
   },
 };

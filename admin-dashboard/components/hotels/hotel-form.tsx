@@ -39,7 +39,11 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
 
   const [imageFiles, setImageFiles] = useState<File[]>([])
   const [amenitiesInput, setAmenitiesInput] = useState(hotel?.amenities?.join(", ") || "")
-  const [roomTypes, setRoomTypes] = useState(hotel?.roomTypes || [])
+  const [roomTypes, setRoomTypes] = useState(
+    hotel?.roomTypes?.length
+      ? hotel.roomTypes
+      : [{ name: "", description: "", pricePerNight: 0, maxOccupancy: 1, isLivingHistory: false }]
+  )
 
   // Heritage sites for nearbySites selector
   const [allSites, setAllSites] = useState<IHeritageSite[]>([])
@@ -102,6 +106,20 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+
+    if (roomTypes.length === 0) {
+      toast.error("Please add at least one room type")
+      return
+    }
+
+    const hasInvalidRoom = roomTypes.some(
+      (room) => !room.name.trim() || room.pricePerNight <= 0 || room.maxOccupancy <= 0
+    )
+    if (hasInvalidRoom) {
+      toast.error("Each room type needs a name, price per night, and max occupancy")
+      return
+    }
+
     let imageUrls = formData.images || []
     if (imageFiles.length > 0) {
       try {
@@ -209,17 +227,49 @@ export function HotelForm({ hotel, onSave, onCancel }: HotelFormProps) {
       {/* Room Types */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <Label>Room Types</Label>
+          <Label>Room Types *</Label>
           <Button type="button" variant="outline" size="sm" onClick={addRoomType}><Plus className="h-4 w-4 mr-2" />Add Room Type</Button>
         </div>
+        <p className="text-xs text-muted-foreground mb-3">At least one room type is required.</p>
         <div className="space-y-3">
           {roomTypes.map((room, index) => (
             <Card key={index} className="p-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                <Input placeholder="Room name" value={room.name} onChange={e => updateRoomType(index, "name", e.target.value)} />
-                <Input placeholder="Price per night" type="number" value={room.pricePerNight} onChange={e => updateRoomType(index, "pricePerNight", e.target.value)} />
-                <Textarea placeholder="Room description" value={room.description} onChange={e => updateRoomType(index, "description", e.target.value)} rows={2} />
-                <Input placeholder="Max occupancy" type="number" value={room.maxOccupancy} onChange={e => updateRoomType(index, "maxOccupancy", e.target.value)} />
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Room name *</Label>
+                  <Input
+                    placeholder="e.g., Deluxe Heritage Room"
+                    value={room.name}
+                    onChange={e => updateRoomType(index, "name", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Price per night *</Label>
+                  <Input
+                    placeholder="Price per night"
+                    type="number"
+                    min="1"
+                    value={room.pricePerNight}
+                    onChange={e => updateRoomType(index, "pricePerNight", e.target.value)}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Description</Label>
+                  <Textarea placeholder="Room description" value={room.description} onChange={e => updateRoomType(index, "description", e.target.value)} rows={2} />
+                </div>
+                <div>
+                  <Label className="text-xs text-muted-foreground mb-1 block">Max occupancy *</Label>
+                  <Input
+                    placeholder="Max occupancy"
+                    type="number"
+                    min="1"
+                    value={room.maxOccupancy}
+                    onChange={e => updateRoomType(index, "maxOccupancy", e.target.value)}
+                    required
+                  />
+                </div>
               </div>
               <div className="flex items-center gap-4 mt-3">
                 <div className="flex items-center space-x-2">

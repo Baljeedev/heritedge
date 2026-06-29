@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useMemo } from "react"
 import { useSearchParams } from "react-router-dom"
 import { useGuides, useHeritageSites } from "@/lib/api"
-import { citiesApi, type City } from "@/lib/api/cities"
-import { filterByCitySites } from "@/lib/cityFilter"
+import type { GuidesQueryParams } from "@/lib/api/guides"
 import type { ExperienceType } from "@/data/experiences"
 import { ExperienceFilter } from "@/core/components/experiences/experience-filter"
 import { Navigation } from "@/core/components/navigation"
@@ -145,25 +144,12 @@ export default function ExperiencesPage() {
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null)
   const [selectedArtForm, setSelectedArtForm] = useState<string | null>(null)
-  const [cities, setCities] = useState<City[]>([])
 
   const { data: heritageSitesData } = useHeritageSites({ limit: 200 })
   const heritageSites = heritageSitesData?.sites || []
   const headerImage =
     heritageSites.find((s) => s.name.toLowerCase().includes("taj"))?.image ||
     heritageSites.find((s) => s.image)?.image
-
-  useEffect(() => {
-    citiesApi.getAll().then((d) => setCities(d.cities)).catch(() => {})
-  }, [])
-
-  const applyPriceParams = (params: Record<string, string | number>) => {
-    if (priceFilter === "budget") params.maxPrice = 100
-    else if (priceFilter === "mid") {
-      params.minPrice = 100
-      params.maxPrice = 200
-    } else if (priceFilter === "premium") params.minPrice = 200
-  }
 
   const clearAllFilters = () => {
     setSelectedSite(null)
@@ -174,25 +160,22 @@ export default function ExperiencesPage() {
     setSelectedArtForm(null)
   }
 
-  const getGuidesQueryParams = () => {
-    const params: Record<string, string | number> = {}
+  const guidesQueryParams = useMemo((): GuidesQueryParams => {
+    const params: GuidesQueryParams = {}
     if (selectedSite) params.siteId = selectedSite
+    else if (selectedCity) params.cityId = selectedCity
     if (ratingFilter > 0) params.minRating = ratingFilter
-    applyPriceParams(params)
+    if (priceFilter === "budget") params.maxPrice = 100
+    else if (priceFilter === "mid") {
+      params.minPrice = 100
+      params.maxPrice = 200
+    } else if (priceFilter === "premium") params.minPrice = 200
     return params
-  }
+  }, [selectedSite, selectedCity, ratingFilter, priceFilter])
 
-  const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(getGuidesQueryParams())
+  const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(guidesQueryParams)
 
-  const applyCityFilter = <T extends { sites?: (string | { _id: string })[] }>(items: T[]) => {
-    if (selectedSite || !selectedCity) return items
-    return filterByCitySites(items, selectedCity, cities, heritageSites)
-  }
-
-  const filteredGuides = useMemo(
-    () => applyCityFilter(guidesData?.guides || []),
-    [guidesData, selectedCity, selectedSite, cities, heritageSites]
-  )
+  const filteredGuides = guidesData?.guides || []
 
   const isGuidesTab = selectedType === "guide"
 

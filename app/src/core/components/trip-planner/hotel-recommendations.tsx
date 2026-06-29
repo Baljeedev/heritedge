@@ -77,7 +77,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
             >
               <div className="relative h-40 bg-muted">
                 <img 
-                  src={hotel.images?.[0] || "/placeholder.svg"} 
+                  src={hotel.images?.[0] || "/hotel-placeholder.svg"} 
                   alt={hotel.name} 
                   className="w-full h-full object-cover" 
                 />

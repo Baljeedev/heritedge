@@ -12,6 +12,7 @@ import type { IGuide } from "@/lib/types"
 import { GuideForm } from "./guide-form"
 import { guidesApi } from "@/lib/api"
 import { toast } from "sonner"
+import { parseSpecializationItems } from "@/lib/utils"
 
 const internshipStatusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -171,7 +172,10 @@ export function GuideList() {
       {/* Guides Grid */}
       {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredGuides.map((guide) => (
+        {filteredGuides.map((guide) => {
+          const specializationItems = parseSpecializationItems(guide.specialization)
+
+          return (
           <Card key={guide._id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="bg-gradient-to-r from-amber-100 to-amber-50 p-6 flex items-center justify-center">
               {guide.image && (
@@ -184,7 +188,36 @@ export function GuideList() {
             </div>
             <div className="p-4">
               <h3 className="font-bold text-lg">{guide.name}</h3>
-              <p className="text-sm text-muted-foreground mb-3">{guide.specialization}</p>
+
+              {specializationItems.length > 0 && (
+                <div className="mt-2 mb-3">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1.5">Specialization</p>
+                  <div className="flex gap-1 flex-wrap">
+                    {specializationItems.map((item) => (
+                      <Badge key={item} variant="secondary" className="text-xs">
+                        {item}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {guide.cities && guide.cities.length > 0 && (
+                <div className="mb-3">
+                  <p className="text-xs font-semibold text-muted-foreground mb-1.5">Cities</p>
+                  <div className="flex gap-1 flex-wrap">
+                    {guide.cities.map((city) => {
+                      const label = typeof city === "string" ? city : `${city.name}, ${city.state}`
+                      const key = typeof city === "string" ? city : city._id
+                      return (
+                        <Badge key={key} variant="outline" className="text-xs">
+                          {label}
+                        </Badge>
+                      )
+                    })}
+                  </div>
+                </div>
+              )}
 
               {guide.isIntern && <Badge variant="secondary">Intern - {guide.internshipStatus}</Badge>}
               {!guide.isIntern && <Badge variant="outline">Professional</Badge>}
@@ -217,7 +250,8 @@ export function GuideList() {
               </div>
             </div>
           </Card>
-        ))}
+          )
+        })}
       </div>
       )}
 
@@ -230,12 +264,13 @@ export function GuideList() {
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto">
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingGuide ? "Edit Guide" : "Create New Guide"}</DialogTitle>
           </DialogHeader>
-          <GuideForm 
-            guide={editingGuide} 
+          <GuideForm
+            key={editingGuide?._id ?? "new"}
+            guide={editingGuide}
             onSave={handleSave} 
             onCancel={() => {
               setIsFormOpen(false)

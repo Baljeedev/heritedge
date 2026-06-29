@@ -176,8 +176,12 @@ export function HotelList() {
           <Card key={hotel._id} className="overflow-hidden hover:shadow-lg transition-shadow">
             <div className="aspect-video bg-muted overflow-hidden">
               <img
-                src={hotel.images[0] || "/placeholder.svg"}
+                src={hotel.images?.[0]?.trim() || "/hotel-placeholder.svg"}
                 alt={hotel.name}
+                onError={(e) => {
+                  e.currentTarget.src = "/hotel-placeholder.svg"
+                  e.currentTarget.className = "w-full h-full object-contain bg-muted p-6"
+                }}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -229,12 +233,13 @@ export function HotelList() {
 
       {/* Form Dialog */}
       <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-        <DialogContent className="max-w-2xl max-h-96 overflow-y-auto">
+        <DialogContent className="max-w-4xl w-[95vw] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editingHotel ? "Edit Hotel" : "Create New Hotel"}</DialogTitle>
           </DialogHeader>
-          <HotelForm 
-            hotel={editingHotel} 
+          <HotelForm
+            key={editingHotel?._id ?? "new"}
+            hotel={editingHotel}
             onSave={handleSave} 
             onCancel={() => {
               setIsFormOpen(false)

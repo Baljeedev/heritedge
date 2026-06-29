@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar, FileText, Music2, Palette, Globe, ShieldCheck } from "lucide-react"
+import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Calendar, FileText, Music2, Palette, Globe, ShieldCheck, MessageSquareQuote } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useAdminRole } from "@/components/admin-guard"
@@ -12,6 +12,7 @@ const managerNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/heritage-sites", label: "Heritage Sites", icon: MapPin },
   { href: "/admin/guides", label: "Guides", icon: Users },
+  { href: "/admin/guide-testimonials", label: "Guide Testimonials", icon: MessageSquareQuote },
   { href: "/admin/experiences", label: "Experiences", icon: Zap },
   { href: "/admin/hotels", label: "Hotels", icon: Building2 },
   { href: "/admin/trips", label: "Trips", icon: Map },

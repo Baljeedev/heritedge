@@ -19,6 +19,7 @@ import citiesRouter from "./routes/cities";
 import instrumentsRouter from "./routes/instruments";
 import artFormsRouter from "./routes/artForms";
 import adminUsersRouter from "./routes/adminUsers";
+import guideTestimonialsRouter from "./routes/guideTestimonials";
 
 const app = express();
 
@@ -56,6 +57,7 @@ app.use("/api/cities", citiesRouter);
 app.use("/api/instruments", instrumentsRouter);
 app.use("/api/art-forms", artFormsRouter);
 app.use("/api/admin-users", adminUsersRouter);
+app.use("/api/guide-testimonials", guideTestimonialsRouter);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

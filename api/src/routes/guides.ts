@@ -3,10 +3,10 @@ import type { Request, Response } from "express";
 import Guide from "../models/Guide";
 import HeritageSite from "../models/HeritageSite";
 import { authenticateUser, optionalAuth } from "../middleware/auth";
-import { resolveCityToSiteIds } from "../utils/cityFilter";
 
 const router = express.Router();
 const SITE_POPULATE_FIELDS = "name location city state image";
+const CITY_POPULATE_FIELDS = "name state";
 
 const ALLOWED_GUIDE_UPDATE_FIELDS = [
   "name",
@@ -14,6 +14,7 @@ const ALLOWED_GUIDE_UPDATE_FIELDS = [
   "video",
   "specialization",
   "sites",
+  "cities",
   "bio",
   "experience",
   "pricePerDay",
@@ -68,8 +69,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
     }
 
     if (cityId && !siteId) {
-      const siteIds = await resolveCityToSiteIds(cityId as string);
-      query.sites = siteIds.length > 0 ? { $in: siteIds } : { $in: [] };
+      query.cities = cityId;
     }
 
     if (search) {
@@ -103,6 +103,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
 
     const guides = await Guide.find(query)
       .populate("sites", SITE_POPULATE_FIELDS)
+      .populate("cities", CITY_POPULATE_FIELDS)
       .limit(Number(limit))
       .skip(Number(skip))
       .sort({ rating: -1, reviewCount: -1 });
@@ -141,10 +142,9 @@ router.post("/:id/leads", async (req: Request, res: Response) => {
 // GET /api/guides/:id - Get a specific guide
 router.get("/:id", optionalAuth, async (req: Request, res: Response) => {
   try {
-    const guide = await Guide.findById(req.params.id).populate(
-      "sites",
-      SITE_POPULATE_FIELDS
-    );
+    const guide = await Guide.findById(req.params.id)
+      .populate("sites", SITE_POPULATE_FIELDS)
+      .populate("cities", CITY_POPULATE_FIELDS);
     if (!guide) {
       return res.status(404).json({ error: "Guide not found" });
     }
@@ -187,7 +187,8 @@ router.put("/:id", authenticateUser, async (req: Request, res: Response) => {
       req.params.id,
       { $set: updates },
       { new: true, runValidators: true }
-    ).populate("sites", SITE_POPULATE_FIELDS);
+    ).populate("sites", SITE_POPULATE_FIELDS)
+      .populate("cities", CITY_POPULATE_FIELDS);
 
     if (!guide) {
       return res.status(404).json({ error: "Guide not found" });

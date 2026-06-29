@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useRef, useMemo } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Star, Search, MapPin, X, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -13,7 +13,6 @@ import type { HeritageSite } from "@/lib/api/heritageSites"
 import { SearchableSelect } from "@/core/components/ui/searchable-select"
 import { Separator } from "@/core/components/ui/separator"
 import { cn } from "@/lib/utils"
-import { filterCitiesWithHeritage } from "@/lib/cityFilter"
 
 interface ExperienceFilterProps {
   activeTab: "guide" | "music" | "workshop"
@@ -83,13 +82,7 @@ export function ExperienceFilter({
     search: debouncedSearch || undefined,
     limit: 8,
   })
-  const { data: allSitesData } = useHeritageSites({ limit: 200 })
   const suggestions = debouncedSearch ? searchData?.sites || [] : []
-
-  const citiesWithHeritage = useMemo(
-    () => filterCitiesWithHeritage(cities, allSitesData?.sites || []),
-    [cities, allSitesData]
-  )
 
   useEffect(() => {
     if (!selectedSite) setSelectedSiteName(null)
@@ -131,7 +124,7 @@ export function ExperienceFilter({
     priceFilter !== "all" ||
     ratingFilter > 0
 
-  const cityOptions = citiesWithHeritage.map((c) => ({
+  const cityOptions = cities.map((c) => ({
     value: c._id,
     label: c.name,
     sublabel: c.state,
@@ -221,20 +214,18 @@ export function ExperienceFilter({
       <Separator />
 
       {/* City */}
-      {citiesWithHeritage.length > 0 && (
-        <div>
-          <FilterLabel>{t("city")}</FilterLabel>
-          <SearchableSelect
-            options={cityOptions}
-            value={selectedCity}
-            onChange={onCityChange}
-            placeholder={t("selectCity")}
-            searchPlaceholder={t("searchCity")}
-            allLabel={t("allCities")}
-            emptyMessage={t("noOptionsFound")}
-          />
-        </div>
-      )}
+      <div>
+        <FilterLabel>{t("city")}</FilterLabel>
+        <SearchableSelect
+          options={cityOptions}
+          value={selectedCity}
+          onChange={onCityChange}
+          placeholder={t("selectCity")}
+          searchPlaceholder={t("searchCity")}
+          allLabel={t("allCities")}
+          emptyMessage={t("noOptionsFound")}
+        />
+      </div>
 
       {/* Instrument — music */}
       {activeTab === "music" && instruments.length > 0 && (

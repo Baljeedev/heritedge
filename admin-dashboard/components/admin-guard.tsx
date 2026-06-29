@@ -109,7 +109,6 @@ export function AdminGuard({ children, requiredRole }: AdminGuardProps) {
 
   return <>{children}</>
 }
-
 export function useAdminRole(): { role: AdminRole; isAdmin: boolean; isManager: boolean } {
   const { user, isLoaded } = useUser()
   const [role, setRole] = useState<AdminRole>(null)

@@ -37,6 +37,7 @@ export interface IGuide {
   video?: string
   specialization: string
   sites: string[] | IHeritageSite[]
+  cities: string[] | { _id: string; name: string; state: string }[]
   rating: number
   reviewCount: number
   pricePerDay: number
@@ -60,6 +61,17 @@ export interface IGuide {
   whatsappNumber?: string
   leadCount?: number
   isActive: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// Guide Testimonial
+export interface IGuideTestimonial {
+  _id: string
+  guideId: string | IGuide
+  quote: string
+  isActive: boolean
+  displayOrder: number
   createdAt: string
   updatedAt: string
 }

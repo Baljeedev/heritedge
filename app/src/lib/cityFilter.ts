@@ -40,6 +40,19 @@ export function getSiteIdsForCity(
     .map((s) => s._id)
 }
 
+export function getSiteNamesForCity(
+  cityId: string,
+  cities: City[],
+  heritageSites: HeritageSite[]
+): string[] {
+  const city = cities.find((c) => c._id === cityId)
+  if (!city) return []
+  return heritageSites
+    .filter((s) => s.city && cityMatchesHeritageCity(city.name, s.city))
+    .map((s) => s.name)
+    .filter(Boolean)
+}
+
 type SiteRef = string | { _id: string }
 
 export function matchesAnySite(sites: SiteRef[] | undefined, siteIds: string[]): boolean {
@@ -58,4 +71,30 @@ export function filterByCitySites<T extends { sites?: SiteRef[] }>(
   const siteIds = getSiteIdsForCity(cityId, cities, heritageSites)
   if (siteIds.length === 0) return []
   return items.filter((item) => matchesAnySite(item.sites, siteIds))
+}
+
+function specializationMatchesSiteNames(specialization: string, siteNames: string[]): boolean {
+  const normalized = specialization.toLowerCase()
+  return siteNames.some((name) => normalized.includes(name.toLowerCase()))
+}
+
+export function filterGuidesByCity<T extends { sites?: SiteRef[]; specialization?: string }>(
+  guides: T[],
+  cityId: string | null,
+  cities: City[],
+  heritageSites: HeritageSite[]
+): T[] {
+  if (!cityId) return guides
+
+  const siteIds = getSiteIdsForCity(cityId, cities, heritageSites)
+  const siteNames = getSiteNamesForCity(cityId, cities, heritageSites)
+  if (siteIds.length === 0 && siteNames.length === 0) return []
+
+  return guides.filter((guide) => {
+    if (matchesAnySite(guide.sites, siteIds)) return true
+    if (guide.specialization && siteNames.length > 0) {
+      return specializationMatchesSiteNames(guide.specialization, siteNames)
+    }
+    return false
+  })
 }

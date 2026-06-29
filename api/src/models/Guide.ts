@@ -7,6 +7,7 @@ export interface IGuide extends Document {
   video?: string; // Video URL or path
   specialization: string;
   sites: mongoose.Types.ObjectId[]; // References to HeritageSite
+  cities: mongoose.Types.ObjectId[]; // References to City
   rating: number;
   reviewCount: number;
   pricePerDay: number;
@@ -42,6 +43,7 @@ const GuideSchema = new Schema<IGuide>(
     video: { type: String },
     specialization: { type: String, required: true },
     sites: [{ type: Schema.Types.ObjectId, ref: "HeritageSite" }],
+    cities: [{ type: Schema.Types.ObjectId, ref: "City" }],
     rating: { type: Number, default: 0, min: 0, max: 5 },
     reviewCount: { type: Number, default: 0 },
     pricePerDay: { type: Number, required: true, min: 0 },
@@ -78,6 +80,7 @@ const GuideSchema = new Schema<IGuide>(
 
 GuideSchema.index({ specialization: "text", bio: "text" });
 GuideSchema.index({ sites: 1 });
+GuideSchema.index({ cities: 1 });
 GuideSchema.index({ isActive: 1, isIntern: 1 });
 
 export default mongoose.model<IGuide>("Guide", GuideSchema);
