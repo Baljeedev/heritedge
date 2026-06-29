@@ -68,9 +68,15 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
     } = req.query;
 
     const query: any = {};
-    // Only filter by isVisible if 'all' parameter is not set
+    // Guide reviews are public immediately; other types respect visibility
     if (all !== "true") {
-      query.isVisible = true;
+      if (reviewType === "guide") {
+        // show all guide reviews on the public site
+      } else if (reviewType) {
+        query.isVisible = true;
+      } else {
+        query.$or = [{ reviewType: "guide" }, { isVisible: true }];
+      }
     }
 
     if (reviewType) query.reviewType = reviewType;
@@ -114,6 +120,17 @@ router.post("/", authenticateUser, async (req: Request, res: Response) => {
     const { reviewType, targetId, rating, comment, images, visitDate, authorName, authorImage } =
       req.body;
 
+    const resolvedAuthorName =
+      (typeof authorName === "string" && authorName.trim()) ||
+      [req.user?.firstName, req.user?.lastName].filter(Boolean).join(" ").trim() ||
+      req.user?.username ||
+      undefined;
+
+    const resolvedAuthorImage =
+      (typeof authorImage === "string" && authorImage.trim()) ||
+      req.user?.imageUrl ||
+      undefined;
+
     // Check if user already reviewed this item
     const existingReview = await Review.findOne({
       clerkUserId: req.userId!,
@@ -129,14 +146,15 @@ router.post("/", authenticateUser, async (req: Request, res: Response) => {
 
     const review = new Review({
       clerkUserId: req.userId!,
-      authorName,
-      authorImage,
+      authorName: resolvedAuthorName,
+      authorImage: resolvedAuthorImage,
       reviewType,
       targetId,
       rating,
       comment,
       images,
       visitDate,
+      isVisible: true,
     });
 
     await review.save();

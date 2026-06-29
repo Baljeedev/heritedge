@@ -53,11 +53,6 @@ export function Navigation() {
               )}
             </Link>
           ))}
-          <SignedIn>
-            <Link to="/my-bookings" className={navLinkClass("/my-bookings")}>
-              {t("myBookings")}
-            </Link>
-          </SignedIn>
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3">
@@ -103,15 +98,6 @@ export function Navigation() {
                 {t(labelKey)}
               </Link>
             ))}
-            <SignedIn>
-              <Link
-                to="/my-bookings"
-                className={mobileNavLinkClass("/my-bookings")}
-                onClick={() => setIsOpen(false)}
-              >
-                {t("myBookings")}
-              </Link>
-            </SignedIn>
             <SignedOut>
               <Button
                 onClick={() => {

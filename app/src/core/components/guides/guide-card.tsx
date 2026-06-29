@@ -3,13 +3,12 @@
 import { Star, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "@clerk/clerk-react"
 import type { Guide as ApiGuide } from "@/lib/api/guides"
 import { guidesApi } from "@/lib/api/guides"
 import { formatWhatsAppUrl } from "@/lib/whatsapp"
 import { GuideReviewForm } from "@/core/components/guides/guide-review-form"
-import { useReviews } from "@/lib/api/hooks/useReviews"
 import { useI18n } from "@/lib/i18n/context"
 import { parseSpecializationItems } from "@/lib/utils"
 
@@ -51,11 +50,6 @@ export function GuideCard({ guide }: GuideCardProps) {
 
   const isApiData = "_id" in guide
   const guideId = isApiData ? (guide as ApiGuide)._id : undefined
-
-  const { data: reviewsData } = useReviews(
-    { reviewType: "guide", targetId: guideId ?? "", limit: 3 },
-    !!guideId
-  )
 
   const handlePlayClick = () => {
     if (videoRef.current) {
@@ -214,7 +208,7 @@ export function GuideCard({ guide }: GuideCardProps) {
           </div>
         )}
 
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center flex-wrap gap-x-2 gap-y-1 mb-3">
           <div className="flex gap-0.5">
             {[...Array(5)].map((_, i) => (
               <Star
@@ -225,6 +219,14 @@ export function GuideCard({ guide }: GuideCardProps) {
           </div>
           <span className="font-semibold text-foreground">{guide.rating.toFixed(1)}</span>
           <span className="text-xs text-muted-foreground">({reviewCount})</span>
+          {isApiData && guideId && reviewCount > 0 && (
+            <Link
+              to={`/guides/${guideId}/reviews`}
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {t("seeReviews")}
+            </Link>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-3 mb-4 text-xs text-muted-foreground">
@@ -332,41 +334,6 @@ export function GuideCard({ guide }: GuideCardProps) {
                       ))}
                     </div>
                     <p className="text-muted-foreground line-clamp-2">{review.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {isApiData && reviewsData?.reviews && reviewsData.reviews.length > 0 && (
-            <div>
-              <h4 className="font-semibold text-foreground text-sm mb-2">{t("recentReviews")}</h4>
-              <div className="space-y-2">
-                {reviewsData.reviews.slice(0, 3).map((review) => (
-                  <div key={review._id} className="text-xs bg-muted p-2 rounded">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex gap-0.5">
-                        {[...Array(5)].map((_, j) => (
-                          <Star
-                            key={j}
-                            className={`w-2.5 h-2.5 ${j < review.rating ? "fill-accent text-accent" : "text-border"}`}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                    {review.images && review.images.length > 0 && (
-                      <div className="flex gap-1.5 mb-2 overflow-x-auto">
-                        {review.images.map((img, i) => (
-                          <img
-                            key={i}
-                            src={img}
-                            alt=""
-                            className="w-16 h-16 rounded object-cover shrink-0 border border-border"
-                          />
-                        ))}
-                      </div>
-                    )}
-                    <p className="text-muted-foreground line-clamp-3">{review.comment}</p>
                   </div>
                 ))}
               </div>
