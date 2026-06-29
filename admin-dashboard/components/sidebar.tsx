@@ -7,6 +7,7 @@ import { MapPin, Users, Zap, Building2, Map, Star, LayoutDashboard, Menu, X, Cal
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { useAdminRole } from "@/components/admin-guard"
+import { Logo } from "@/components/logo"
 
 const managerNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -53,7 +54,9 @@ export function Sidebar() {
         )}
       >
         <div className="p-6">
-          <h1 className="text-2xl font-bold text-sidebar-foreground mb-8">HeritEdge</h1>
+          <Link href="/admin" className="block mb-8" onClick={() => setIsOpen(false)}>
+            <Logo size="md" />
+          </Link>
           <nav className="space-y-1">
             {navItems.map(({ href, label, icon: Icon }) => (
               <Link key={href} href={href}>

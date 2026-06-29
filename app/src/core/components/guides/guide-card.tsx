@@ -3,6 +3,7 @@
 import { Star, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
+import { useNavigate } from "react-router-dom"
 import { useAuth } from "@clerk/clerk-react"
 import type { Guide as ApiGuide } from "@/lib/api/guides"
 import { guidesApi } from "@/lib/api/guides"
@@ -41,6 +42,7 @@ interface GuideCardProps {
 
 export function GuideCard({ guide }: GuideCardProps) {
   const { t } = useI18n()
+  const navigate = useNavigate()
   const { isSignedIn } = useAuth()
   const [isFavorited, setIsFavorited] = useState(false)
   const [isVideoPlaying, setIsVideoPlaying] = useState(false)
@@ -111,6 +113,15 @@ export function GuideCard({ guide }: GuideCardProps) {
   const handleContactGuide = () => {
     if (!isApiData) return
     guidesApi.recordLead((guide as ApiGuide)._id).catch(() => {})
+  }
+
+  const handleReviewClick = () => {
+    if (!isSignedIn) {
+      const returnUrl = window.location.pathname + window.location.search
+      navigate(`/sign-in?redirect_url=${encodeURIComponent(returnUrl)}`)
+      return
+    }
+    setShowReviewForm(true)
   }
 
   return (
@@ -247,12 +258,12 @@ export function GuideCard({ guide }: GuideCardProps) {
               {t("contactUnavailable")}
             </Button>
           )}
-          {isSignedIn && isApiData && guideId && (
+          {isApiData && guideId && (
             <Button
               variant="outline"
               size="sm"
               className="flex-1 bg-transparent"
-              onClick={() => setShowReviewForm(true)}
+              onClick={handleReviewClick}
             >
               <PenLine className="w-4 h-4 mr-2" />
               {t("writeReview")}
