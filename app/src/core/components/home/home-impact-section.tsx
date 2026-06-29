@@ -1,10 +1,18 @@
 "use client"
 
-import { useState } from "react"
-import { Loader2, Quote, TrendingUp } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Loader2, Quote } from "lucide-react"
 import { useGuideTestimonials } from "@/lib/api"
 import type { GuideTestimonial, GuideTestimonialGuide } from "@/lib/api/guide-testimonials"
 import { useI18n } from "@/lib/i18n/context"
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/core/components/ui/carousel"
 
 const GUIDE_PLACEHOLDER = "/guide-placeholder.svg"
 
@@ -23,8 +31,8 @@ function TestimonialCard({ testimonial }: { testimonial: GuideTestimonial }) {
   if (!guide) return null
 
   return (
-    <article className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-md transition-all flex flex-col h-full">
-      <div className="p-6 flex flex-col flex-1">
+    <article className="bg-white/95 backdrop-blur-sm border border-accent/20 rounded-2xl overflow-hidden hover:border-accent/45 hover:shadow-[0_16px_48px_oklch(0.42_0.15_35/0.1)] transition-all flex flex-col h-full border-l-4 border-l-accent shadow-sm">
+      <div className="p-6 flex flex-col flex-1 bg-gradient-to-br from-primary/[0.03] to-transparent">
         <div className="flex items-center gap-4 mb-4">
           <img
             src={imageSrc}
@@ -56,13 +64,24 @@ function TestimonialCard({ testimonial }: { testimonial: GuideTestimonial }) {
 export function HomeImpactSection() {
   const { t } = useI18n()
   const { data, isLoading, error } = useGuideTestimonials()
+  const [carouselApi, setCarouselApi] = useState<CarouselApi>()
 
   const testimonials = data?.testimonials || []
-  const totalLeads = data?.totalLeads ?? 0
+  const useSlider = testimonials.length > 2
+
+  useEffect(() => {
+    if (!carouselApi || !useSlider) return
+
+    const timer = setInterval(() => {
+      carouselApi.scrollNext()
+    }, 5000)
+
+    return () => clearInterval(timer)
+  }, [carouselApi, useSlider])
 
   if (isLoading) {
     return (
-      <section className="py-24 px-4">
+      <section className="py-24 px-4 bg-gradient-to-br from-primary/10 via-background to-accent/8">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
           <span className="text-muted-foreground">{t("loadingImpact")}</span>
@@ -71,13 +90,17 @@ export function HomeImpactSection() {
     )
   }
 
-  if (error || (totalLeads === 0 && testimonials.length === 0)) return null
+  if (error || testimonials.length === 0) return null
 
   return (
-    <section className="py-24 px-4">
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-14">
-          <p className="text-sm font-semibold tracking-widest uppercase text-primary mb-3">
+    <section className="relative py-24 px-4 bg-gradient-to-br from-primary/10 via-background to-accent/8 overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[12rem] font-display text-primary/[0.04] pointer-events-none select-none leading-none">
+        &ldquo;
+      </div>
+      <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full bg-accent/10 blur-3xl pointer-events-none" />
+      <div className="max-w-7xl mx-auto relative">
+        <div className="text-center mb-10">
+          <p className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-primary mb-4 px-4 py-1.5 rounded-full bg-white/80 border border-primary/20 shadow-sm">
             {t("ourImpact")}
           </p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-4">
@@ -88,24 +111,43 @@ export function HomeImpactSection() {
           </p>
         </div>
 
-        {totalLeads > 0 && (
-          <div className="mb-14 flex justify-center">
-            <div className="inline-flex items-center gap-4 px-8 py-6 rounded-2xl border border-primary/20 bg-primary/5">
-              <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                <TrendingUp className="w-6 h-6" />
-              </div>
-              <div className="text-left">
-                <p className="text-3xl md:text-4xl font-bold text-foreground">{totalLeads}+</p>
-                <p className="text-sm text-muted-foreground">{t("totalLeadsGenerated")}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {testimonials.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+        {useSlider ? (
+          <Carousel
+            setApi={setCarouselApi}
+            opts={{
+              align: "start",
+              loop: true,
+              slidesToScroll: 1,
+              containScroll: "trimSnaps",
+            }}
+            className="w-full max-w-5xl mx-auto relative px-14"
+          >
+            <CarouselContent className="-ml-4">
+              {testimonials.map((testimonial) => (
+                <CarouselItem
+                  key={testimonial._id}
+                  className="pl-4 basis-full sm:basis-1/2"
+                >
+                  <TestimonialCard testimonial={testimonial} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-0 md:left-2" />
+            <CarouselNext className="right-0 md:right-2" />
+          </Carousel>
+        ) : (
+          <div className="flex flex-wrap justify-center gap-6 max-w-4xl mx-auto px-4">
             {testimonials.map((testimonial) => (
-              <TestimonialCard key={testimonial._id} testimonial={testimonial} />
+              <div
+                key={testimonial._id}
+                className={
+                  testimonials.length === 1
+                    ? "w-full max-w-md"
+                    : "w-full md:w-[calc(50%-0.75rem)] max-w-md"
+                }
+              >
+                <TestimonialCard testimonial={testimonial} />
+              </div>
             ))}
           </div>
         )}

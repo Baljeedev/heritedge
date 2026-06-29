@@ -46,7 +46,7 @@ function HotelCard({ hotel }: { hotel: Hotel }) {
   const locationLabel = [hotel.city, hotel.state].filter(Boolean).join(", ")
 
   return (
-    <article className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/40 hover:shadow-md transition-all flex flex-col h-full">
+    <article className="bg-white border border-border rounded-2xl overflow-hidden hover:border-primary/40 hover:shadow-lg transition-all flex flex-col h-full shadow-sm">
       <div className="relative h-48 bg-muted overflow-hidden">
         <img
           src={imageSrc}
@@ -185,7 +185,7 @@ export function HomeHotelsSection() {
 
   if (isLoading) {
     return (
-      <section className="py-24 px-4 bg-muted/20">
+      <section className="py-24 px-4 bg-white">
         <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-12">
           <Loader2 className="h-8 w-8 animate-spin text-primary mb-3" />
           <span className="text-muted-foreground">{t("loadingHotels")}</span>
@@ -197,10 +197,10 @@ export function HomeHotelsSection() {
   if (error || hotels.length === 0) return null
 
   return (
-    <section className="py-24 px-4 bg-muted/20 border-y border-border/50">
+    <section className="py-24 px-4 bg-white border-y border-border/60">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-14">
-          <p className="text-sm font-semibold tracking-widest uppercase text-primary mb-3">
+          <p className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-primary-foreground mb-4 px-5 py-2 rounded-full bg-primary shadow-sm">
             {t("heritageStays")}
           </p>
           <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight mb-4">
