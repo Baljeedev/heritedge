@@ -333,19 +333,7 @@ export function GuideCard({ guide }: GuideCardProps) {
               <div className="space-y-2">
                 {reviewsData.reviews.slice(0, 3).map((review) => (
                   <div key={review._id} className="text-xs bg-muted p-2 rounded">
-                    <div className="flex items-center gap-2 mb-1">
-                      {review.authorImage ? (
-                        <img
-                          src={review.authorImage}
-                          alt=""
-                          className="w-6 h-6 rounded-full object-cover shrink-0"
-                        />
-                      ) : (
-                        <div className="w-6 h-6 rounded-full bg-primary/10 shrink-0" />
-                      )}
-                      <p className="font-semibold text-foreground flex-1">
-                        {review.authorName || t("guide")}
-                      </p>
+                    <div className="flex items-center justify-between mb-1">
                       <div className="flex gap-0.5">
                         {[...Array(5)].map((_, j) => (
                           <Star
@@ -355,6 +343,18 @@ export function GuideCard({ guide }: GuideCardProps) {
                         ))}
                       </div>
                     </div>
+                    {review.images && review.images.length > 0 && (
+                      <div className="flex gap-1.5 mb-2 overflow-x-auto">
+                        {review.images.map((img, i) => (
+                          <img
+                            key={i}
+                            src={img}
+                            alt=""
+                            className="w-16 h-16 rounded object-cover shrink-0 border border-border"
+                          />
+                        ))}
+                      </div>
+                    )}
                     <p className="text-muted-foreground line-clamp-3">{review.comment}</p>
                   </div>
                 ))}

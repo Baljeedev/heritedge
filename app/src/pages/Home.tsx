@@ -59,11 +59,12 @@ export default function HomePage() {
         <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-background to-transparent pointer-events-none" />
       </section>
 
-      {/* Why We Are Different */}
-      <section className="py-24 px-4">
-        <div className="max-w-6xl mx-auto">
+      {/* Why We Are Different — clean white, warm pillars */}
+      <section className="relative py-24 px-4 bg-gradient-to-b from-background via-secondary/10 to-background overflow-hidden">
+        <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-primary/5 blur-3xl pointer-events-none" />
+        <div className="max-w-6xl mx-auto relative">
           <div className="text-center mb-16">
-            <p className="text-sm font-semibold tracking-widest uppercase text-primary mb-3">
+            <p className="inline-block text-xs font-bold tracking-[0.2em] uppercase text-primary mb-4 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/15">
               HeritEdge
             </p>
             <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground tracking-tight">
@@ -132,8 +133,8 @@ function MissionPillar({
   description: string
 }) {
   return (
-    <div className="flex flex-col p-8 rounded-2xl border border-border bg-card h-full transition-all duration-300 hover:border-primary/30 hover:shadow-[0_12px_40px_oklch(0.42_0.15_35/0.1)] hover:-translate-y-1">
-      <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/15 to-accent/10 flex items-center justify-center text-primary mb-5">
+    <div className="flex flex-col p-8 rounded-2xl border border-primary/15 bg-card h-full transition-all duration-300 hover:border-primary/35 hover:shadow-[0_16px_48px_oklch(0.42_0.15_35/0.12)] hover:-translate-y-1 border-t-4 border-t-primary">
+      <div className="w-14 h-14 rounded-2xl bg-primary/12 flex items-center justify-center text-primary mb-5 ring-4 ring-primary/5">
         {icon}
       </div>
       <h3 className="font-display text-xl font-bold text-foreground mb-3">{title}</h3>

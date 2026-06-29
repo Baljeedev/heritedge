@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useRef } from "react"
-import { Star, Upload, User, CheckCircle2, AlertCircle } from "lucide-react"
-import { useUser } from "@clerk/clerk-react"
+import { Star, Upload, ImagePlus, X, CheckCircle2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/core/components/ui/textarea"
-import { Input } from "@/components/ui/input"
 import {
   Dialog,
   DialogContent,
@@ -13,7 +11,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/core/components/ui/dialog"
+} from "@/components/ui/dialog"
 import { useCreateReview } from "@/lib/api/hooks/useReviews"
 import { uploadApi } from "@/lib/api/upload"
 import { useI18n } from "@/lib/i18n/context"
@@ -27,15 +25,13 @@ interface GuideReviewFormProps {
 
 export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: GuideReviewFormProps) {
   const { t } = useI18n()
-  const { user } = useUser()
   const createReview = useCreateReview()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [rating, setRating] = useState(5)
   const [comment, setComment] = useState("")
-  const [authorName, setAuthorName] = useState("")
-  const [profileFile, setProfileFile] = useState<File | null>(null)
-  const [profilePreview, setProfilePreview] = useState<string | null>(null)
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [hoveredStar, setHoveredStar] = useState(0)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,33 +40,33 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
   const resetForm = () => {
     setRating(5)
     setComment("")
-    setAuthorName(user?.fullName || user?.firstName || "")
-    setProfileFile(null)
-    setProfilePreview(user?.imageUrl || null)
+    setImageFile(null)
+    setImagePreview(null)
     setError(null)
     setShowSuccess(false)
   }
 
   const handleOpenChange = (next: boolean) => {
-    if (next) {
-      setAuthorName(user?.fullName || user?.firstName || "")
-      setProfilePreview(user?.imageUrl || null)
-    } else {
-      resetForm()
-    }
+    if (!next) resetForm()
     onOpenChange(next)
   }
 
-  const handleProfileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith("image/")) {
       setError(t("reviewImageOnly"))
       return
     }
-    setProfileFile(file)
-    setProfilePreview(URL.createObjectURL(file))
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
     setError(null)
+  }
+
+  const removeImage = () => {
+    setImageFile(null)
+    setImagePreview(null)
+    if (fileInputRef.current) fileInputRef.current.value = ""
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,12 +80,10 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
 
     setIsSubmitting(true)
     try {
-      let authorImage = profilePreview && !profileFile ? profilePreview : undefined
       const images: string[] = []
 
-      if (profileFile) {
-        const uploaded = await uploadApi.upload("review", profileFile)
-        authorImage = uploaded.url
+      if (imageFile) {
+        const uploaded = await uploadApi.upload("review", imageFile)
         images.push(uploaded.url)
       }
 
@@ -98,8 +92,6 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
         targetId: guideId,
         rating,
         comment: comment.trim(),
-        authorName: authorName.trim() || user?.fullName || user?.firstName || undefined,
-        authorImage,
         images: images.length > 0 ? images : undefined,
       })
 
@@ -133,43 +125,6 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              <div className="flex flex-col items-center gap-3">
-                <button
-                  type="button"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="relative w-20 h-20 rounded-full overflow-hidden border-2 border-dashed border-border hover:border-primary transition-colors bg-muted flex items-center justify-center"
-                >
-                  {profilePreview ? (
-                    <img src={profilePreview} alt="" className="w-full h-full object-cover" />
-                  ) : (
-                    <User className="w-8 h-8 text-muted-foreground" />
-                  )}
-                  <span className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-[10px] py-0.5 flex items-center justify-center gap-0.5">
-                    <Upload className="w-2.5 h-2.5" />
-                    {t("photo")}
-                  </span>
-                </button>
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  onChange={handleProfileSelect}
-                />
-                <p className="text-xs text-muted-foreground">{t("reviewProfilePhotoHint")}</p>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium text-foreground mb-1.5 block">
-                  {t("fullName")}
-                </label>
-                <Input
-                  value={authorName}
-                  onChange={(e) => setAuthorName(e.target.value)}
-                  placeholder={t("fullName")}
-                />
-              </div>
-
               <div>
                 <label className="text-sm font-medium text-foreground mb-1.5 block">
                   {t("rating")}
@@ -205,6 +160,49 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
                   rows={4}
                   required
                 />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1.5 block">
+                  {t("reviewPhotoLabel")}
+                </label>
+                {imagePreview ? (
+                  <div className="relative rounded-lg overflow-hidden border border-border">
+                    <img
+                      src={imagePreview}
+                      alt=""
+                      className="w-full h-40 object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={removeImage}
+                      className="absolute top-2 right-2 p-1 rounded-full bg-black/60 text-white hover:bg-black/80 transition-colors"
+                      aria-label={t("removePhoto")}
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="w-full h-32 rounded-lg border-2 border-dashed border-border hover:border-primary transition-colors bg-muted/50 flex flex-col items-center justify-center gap-2 text-muted-foreground hover:text-primary"
+                  >
+                    <ImagePlus className="w-8 h-8" />
+                    <span className="text-sm font-medium flex items-center gap-1">
+                      <Upload className="w-4 h-4" />
+                      {t("reviewPhotoUpload")}
+                    </span>
+                  </button>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">{t("reviewPhotoHint")}</p>
               </div>
 
               {error && (
