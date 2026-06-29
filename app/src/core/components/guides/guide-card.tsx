@@ -1,6 +1,6 @@
 "use client"
 
-import { Star, MapPin, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine } from "lucide-react"
+import { Star, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
 import { useAuth } from "@clerk/clerk-react"
@@ -10,19 +10,13 @@ import { formatWhatsAppUrl } from "@/lib/whatsapp"
 import { GuideReviewForm } from "@/core/components/guides/guide-review-form"
 import { useReviews } from "@/lib/api/hooks/useReviews"
 import { useI18n } from "@/lib/i18n/context"
+import { parseSpecializationItems } from "@/lib/utils"
 
 const GUIDE_PLACEHOLDER_IMAGE = "/guide-placeholder.svg"
 
 function resolveGuideImage(image?: string | null): string {
   const trimmed = image?.trim()
   return trimmed ? trimmed : GUIDE_PLACEHOLDER_IMAGE
-}
-
-interface PopulatedSite {
-  name: string
-  city?: string
-  state?: string
-  location?: string
 }
 
 interface StaticGuide {
@@ -73,39 +67,25 @@ export function GuideCard({ guide }: GuideCardProps) {
   const videoUrl = isApiData ? (guide as ApiGuide).video : undefined
   const isPlaceholderImage = imageSrc === GUIDE_PLACEHOLDER_IMAGE
 
-  const getPopulatedSites = (): PopulatedSite[] => {
-    if (!guide.sites?.length) return []
-    if (isApiData) {
-      const apiGuide = guide as ApiGuide
-      if (typeof apiGuide.sites[0] === "object" && apiGuide.sites[0] !== null && "name" in apiGuide.sites[0]) {
-        return (apiGuide.sites as PopulatedSite[]).map((s) => ({
-          name: s.name,
-          city: s.city,
-          state: s.state,
-          location: s.location,
-        }))
-      }
-      return []
-    }
-    return (guide as StaticGuide).sites.map(() => ({ name: "Heritage Site" }))
-  }
-
-  const populatedSites = getPopulatedSites()
-  const siteNames = populatedSites.map((s) => s.name)
-
-  const getPrimaryLocation = () => {
-    const first = populatedSites[0]
-    if (!first) return null
-    const parts = [first.city, first.state].filter(Boolean)
-    if (parts.length > 0) return parts.join(", ")
-    return first.location || null
-  }
-
-  const primaryLocation = getPrimaryLocation()
-
   const specialization = isApiData
     ? (guide as ApiGuide).specialization
     : (guide as StaticGuide).specialization
+
+  const specializationItems = parseSpecializationItems(specialization)
+
+  const guideCities = isApiData
+    ? ((guide as ApiGuide).cities || [])
+        .map((city) => {
+          if (typeof city === "object" && city !== null && "name" in city) {
+            return {
+              id: city._id,
+              label: city.state ? `${city.name}, ${city.state}` : city.name,
+            }
+          }
+          return null
+        })
+        .filter((city): city is { id: string; label: string } => city !== null)
+    : []
 
   const reviewCount = isApiData
     ? (guide as ApiGuide).reviewCount
@@ -194,12 +174,32 @@ export function GuideCard({ guide }: GuideCardProps) {
           </div>
         </div>
 
-        <p className="text-sm text-muted-foreground mb-2">{specialization}</p>
+        {guideCities.length > 0 && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">{t("cities")}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {guideCities.map((city) => (
+                <span
+                  key={city.id}
+                  className="text-xs bg-muted text-foreground px-2.5 py-1 rounded-full border border-border"
+                >
+                  {city.label}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
-        {primaryLocation && (
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-3">
-            <MapPin className="w-3.5 h-3.5 text-primary shrink-0" />
-            <span>{primaryLocation}</span>
+        {specializationItems.length > 0 && (
+          <div className="mb-3">
+            <p className="text-xs font-semibold text-muted-foreground mb-1.5">{t("specializesIn")}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {specializationItems.map((item, index) => (
+                <span key={index} className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full">
+                  {item}
+                </span>
+              ))}
+            </div>
           </div>
         )}
 
@@ -228,19 +228,6 @@ export function GuideCard({ guide }: GuideCardProps) {
             </span>
           )}
         </div>
-
-        {siteNames.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs font-semibold text-muted-foreground mb-2">{t("specializesIn")}</p>
-            <div className="flex flex-wrap gap-1.5">
-              {siteNames.map((siteName, index) => (
-                <span key={index} className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full">
-                  {siteName}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
 
         <div className="flex gap-2 pt-4 border-t border-border">
           {whatsappUrl ? (

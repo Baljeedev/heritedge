@@ -5,4 +5,5 @@ export * from './useHotels';
 export * from './useExperiences';
 export * from './useTrips';
 export * from './useReviews';
+export * from './useGuideTestimonials';
 

@@ -169,6 +169,7 @@ router.post("/:id/approve", authenticateUser, async (req: Request, res: Response
         video: guideData.video,
         specialization: guideData.specialization,
         sites: guideData.sites || [],
+        cities: guideData.cities || [],
         bio: guideData.bio,
         experience: guideData.experience || 0,
         pricePerDay: guideData.pricePerDay,

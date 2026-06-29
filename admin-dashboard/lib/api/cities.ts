@@ -16,10 +16,11 @@ export interface CitiesResponse {
 }
 
 export const citiesApi = {
-  getAll: async (filters?: { search?: string; state?: string }): Promise<CitiesResponse> => {
+  getAll: async (filters?: { search?: string; state?: string; limit?: number }): Promise<CitiesResponse> => {
     const params = new URLSearchParams()
     if (filters?.search) params.append("search", filters.search)
     if (filters?.state) params.append("state", filters.state)
+    params.append("limit", String(filters?.limit ?? 2000))
     const res = await apiClient.get<CitiesResponse>(`/api/cities?${params.toString()}`)
     return res.data
   },

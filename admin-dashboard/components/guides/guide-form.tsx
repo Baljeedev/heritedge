@@ -2,17 +2,18 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2 } from "lucide-react"
+import { Plus, Trash2, X } from "lucide-react"
 import { FileUpload } from "@/components/ui/file-upload"
-import { uploadApi } from "@/lib/api/upload"
+import { citiesApi, type ICity } from "@/lib/api/cities"
 import { toast } from "sonner"
 import type { IGuide } from "@/lib/types"
 
@@ -30,6 +31,7 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       image: "",
       specialization: "",
       sites: [],
+      cities: [],
       bio: "",
       experience: 0,
       pricePerDay: 0,
@@ -48,6 +50,21 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
   const [videoFile, setVideoFile] = useState<File | null>(null)
   const [languagesInput, setLanguagesInput] = useState(guide?.languages?.join(", ") || "")
   const [certifications, setCertifications] = useState(guide?.certifications || [])
+  const [allCities, setAllCities] = useState<ICity[]>([])
+  const [selectedCityIds, setSelectedCityIds] = useState<string[]>(() => {
+    const cities = guide?.cities || []
+    return cities.map((city) => (typeof city === "string" ? city : city._id))
+  })
+
+  useEffect(() => {
+    citiesApi.getAll().then((data) => setAllCities(data.cities)).catch(() => {})
+  }, [])
+
+  const toggleCity = (cityId: string) => {
+    setSelectedCityIds((prev) =>
+      prev.includes(cityId) ? prev.filter((id) => id !== cityId) : [...prev, cityId]
+    )
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -91,6 +108,11 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (selectedCityIds.length === 0) {
+      toast.error("Please select at least one city")
+      return
+    }
+
     const payload: Partial<IGuide> = {
       clerkUserId: formData.clerkUserId || "",
       name: formData.name || "",
@@ -98,6 +120,7 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       video: formData.video,
       specialization: formData.specialization || "",
       sites: formData.sites || [],
+      cities: selectedCityIds,
       bio: formData.bio || "",
       experience: formData.experience || 0,
       pricePerDay: formData.pricePerDay || 0,
@@ -182,6 +205,48 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
             placeholder="3000"
             required
           />
+        </div>
+      </div>
+
+      <div>
+        <Label className="mb-2 block">Cities *</Label>
+        {selectedCityIds.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-2">
+            {selectedCityIds.map((cityId) => {
+              const city = allCities.find((item) => item._id === cityId)
+              if (!city) return null
+              return (
+                <Badge key={cityId} variant="secondary" className="flex items-center gap-1">
+                  {city.name}, {city.state}
+                  <button type="button" onClick={() => toggleCity(cityId)}>
+                    <X className="h-3 w-3" />
+                  </button>
+                </Badge>
+              )
+            })}
+          </div>
+        )}
+        <div className="max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
+          {allCities.map((city) => (
+            <label
+              key={city._id}
+              className="flex items-center gap-3 px-3 py-2 hover:bg-background cursor-pointer"
+            >
+              <Checkbox
+                checked={selectedCityIds.includes(city._id)}
+                onCheckedChange={() => toggleCity(city._id)}
+              />
+              <span className="text-sm">
+                <span className="font-medium">{city.name}</span>
+                <span className="text-muted-foreground ml-1">({city.state})</span>
+              </span>
+            </label>
+          ))}
+          {allCities.length === 0 && (
+            <p className="text-sm text-muted-foreground text-center py-3">
+              No cities found. Add them in the Cities section.
+            </p>
+          )}
         </div>
       </div>
 

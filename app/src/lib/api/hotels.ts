@@ -42,6 +42,7 @@ export interface Hotel {
   listingFee?: number;
   referralFee?: number;
   discountPercentage?: number;
+  email?: string;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

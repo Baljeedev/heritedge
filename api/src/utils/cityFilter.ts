@@ -14,15 +14,35 @@ export function getCityNameVariants(cityName: string): string[] {
   return [cityName];
 }
 
+export function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/** Resolve a City document id to heritage site ids and names in that city */
+export async function resolveCityToSiteInfo(cityId: string): Promise<{
+  siteIds: mongoose.Types.ObjectId[];
+  siteNames: string[];
+}> {
+  const city = await City.findById(cityId);
+  if (!city) return { siteIds: [], siteNames: [] };
+
+  const variants = getCityNameVariants(city.name);
+  const sites = await HeritageSite.find({ city: { $in: variants } })
+    .select("name")
+    .lean();
+
+  return {
+    siteIds: sites.map((site) => site._id as mongoose.Types.ObjectId),
+    siteNames: sites.map((site) => site.name).filter(Boolean),
+  };
+}
+
 /** Resolve a City document id to heritage site ids in that city */
 export async function resolveCityToSiteIds(
   cityId: string
 ): Promise<mongoose.Types.ObjectId[]> {
-  const city = await City.findById(cityId);
-  if (!city) return [];
-
-  const variants = getCityNameVariants(city.name);
-  return HeritageSite.find({ city: { $in: variants } }).distinct("_id");
+  const { siteIds } = await resolveCityToSiteInfo(cityId);
+  return siteIds;
 }
 
 /** Check if a City record corresponds to a heritage site city name */

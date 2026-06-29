@@ -8,6 +8,7 @@ export interface Guide {
   video?: string;
   specialization: string;
   sites: string[] | { _id: string; name: string; location: string; city?: string; state?: string; image?: string }[];
+  cities?: string[] | { _id: string; name: string; state: string }[];
   rating: number;
   reviewCount: number;
   pricePerDay: number;
