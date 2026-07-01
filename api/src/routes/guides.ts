@@ -65,7 +65,25 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
     }
 
     if (siteId) {
-      query.sites = siteId;
+      const site = await HeritageSite.findById(siteId).select("name").lean();
+      if (site?.name) {
+        const terms = [
+          site.name.trim(),
+          site.name.replace(/\s*\([^)]*\)/g, "").trim(),
+        ].filter(Boolean);
+        const uniqueTerms = [...new Set(terms)];
+        query.$or = [
+          { sites: siteId },
+          ...uniqueTerms.map((term) => ({
+            specialization: {
+              $regex: term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+              $options: "i",
+            },
+          })),
+        ];
+      } else {
+        query.sites = siteId;
+      }
     }
 
     if (cityId && !siteId) {
