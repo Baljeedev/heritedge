@@ -170,8 +170,8 @@ export default function ExperiencesPage() {
 
   const guidesQueryParams = useMemo((): GuidesQueryParams => {
     const params: GuidesQueryParams = {}
-    // Monument filter is applied client-side (specialization text match)
-    if (selectedCity) params.cityId = selectedCity
+    if (selectedSite) params.siteId = selectedSite
+    else if (selectedCity) params.cityId = selectedCity
     if (ratingFilter > 0) params.minRating = ratingFilter
     if (priceFilter === "budget") params.maxPrice = 100
     else if (priceFilter === "mid") {
@@ -179,7 +179,7 @@ export default function ExperiencesPage() {
       params.maxPrice = 200
     } else if (priceFilter === "premium") params.minPrice = 200
     return params
-  }, [selectedCity, ratingFilter, priceFilter])
+  }, [selectedSite, selectedCity, ratingFilter, priceFilter])
 
   const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(guidesQueryParams)
 

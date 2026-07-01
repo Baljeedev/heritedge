@@ -30,19 +30,15 @@ export function guideMatchesMonument(
   siteId: string | null,
   siteName: string
 ): boolean {
-  const spec = guide.specialization.toLowerCase()
-  const terms = getMonumentSearchTerms(siteName)
-
-  if (terms.some((term) => spec.includes(term.toLowerCase()))) {
-    return true
-  }
-
   if (siteId && guide.sites?.length) {
-    return guide.sites.some((site) => {
+    const hasSiteId = guide.sites.some((site) => {
       const id = typeof site === "string" ? site : site._id
       return id === siteId
     })
+    if (hasSiteId) return true
   }
 
-  return false
+  const spec = guide.specialization.toLowerCase()
+  const terms = getMonumentSearchTerms(siteName)
+  return terms.some((term) => spec.includes(term.toLowerCase()))
 }

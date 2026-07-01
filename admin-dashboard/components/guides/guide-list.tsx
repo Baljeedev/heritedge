@@ -173,7 +173,13 @@ export function GuideList() {
       {!loading && (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredGuides.map((guide) => {
-          const specializationItems = parseSpecializationItems(guide.specialization)
+          const populatedSiteNames = (guide.sites || [])
+            .map((site) => (typeof site === "object" && site !== null && "name" in site ? site.name : null))
+            .filter((name): name is string => Boolean(name))
+          const specializationItems =
+            populatedSiteNames.length > 0
+              ? populatedSiteNames
+              : parseSpecializationItems(guide.specialization)
 
           return (
           <Card key={guide._id} className="overflow-hidden hover:shadow-lg transition-shadow">
