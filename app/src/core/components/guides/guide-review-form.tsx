@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useRef } from "react"
+import { useUser } from "@clerk/clerk-react"
 import { Star, Upload, ImagePlus, X, CheckCircle2, AlertCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/core/components/ui/textarea"
@@ -25,6 +26,7 @@ interface GuideReviewFormProps {
 
 export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: GuideReviewFormProps) {
   const { t } = useI18n()
+  const { user } = useUser()
   const createReview = useCreateReview()
   const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -92,6 +94,8 @@ export function GuideReviewForm({ open, onOpenChange, guideId, guideName }: Guid
         targetId: guideId,
         rating,
         comment: comment.trim(),
+        authorName: user?.fullName || user?.firstName || undefined,
+        authorImage: user?.imageUrl || undefined,
         images: images.length > 0 ? images : undefined,
       })
 

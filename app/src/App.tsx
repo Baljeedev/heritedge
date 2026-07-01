@@ -9,6 +9,7 @@ import DonatePage from "./pages/Donate"
 import SigninPage from "./pages/SigninPage"
 import SignupPage from "./pages/SignupPage"
 import MyBookingsPage from "./pages/MyBookings"
+import GuideReviewsPage from "./pages/GuideReviews"
 
 function App() {
   const location = useLocation()
@@ -26,6 +27,7 @@ function App() {
         <Route path="/sign-up" element={<SignupPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/experiences" element={<ExperiencesPage />} />
+        <Route path="/guides/:guideId/reviews" element={<GuideReviewsPage />} />
         <Route path="/trip-planner" element={<TripPlanner />} />
         <Route path="/trip-planner/:tripId" element={<TripDetail />} />
         <Route path="/donate" element={<DonatePage />} />

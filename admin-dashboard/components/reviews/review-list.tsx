@@ -184,6 +184,7 @@ export function ReviewList() {
             <thead className="border-b">
               <tr>
                 <th className="text-left p-4">Type</th>
+                <th className="text-left p-4">Client</th>
                 <th className="text-left p-4">Rating</th>
                 <th className="text-left p-4">Comment</th>
                 <th className="text-left p-4">Status</th>
@@ -197,6 +198,11 @@ export function ReviewList() {
                     <Badge className={reviewTypeColors[review.reviewType]}>
                       {review.reviewType}
                     </Badge>
+                  </td>
+                  <td className="p-4">
+                    <p className="font-medium text-sm">
+                      {review.authorName?.trim() || "Guest"}
+                    </p>
                   </td>
                   <td className="p-4">
                     <div className="flex items-center gap-2">
@@ -279,6 +285,10 @@ export function ReviewList() {
               <DialogTitle>Review Details</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
+              <div>
+                <Label>Client</Label>
+                <p className="font-medium">{selectedReview.authorName?.trim() || "Guest"}</p>
+              </div>
               <div>
                 <Label>Rating</Label>
                 <div className="text-2xl text-yellow-500">{ratingStars(selectedReview.rating)}</div>

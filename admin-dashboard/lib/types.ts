@@ -211,6 +211,7 @@ export interface ITrip {
 export interface IReview {
   _id: string
   clerkUserId: string
+  authorName?: string
   rating: number
   comment: string
   images?: string[]
