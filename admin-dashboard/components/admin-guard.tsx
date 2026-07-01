@@ -7,7 +7,7 @@ import { useEffect, useState } from "react"
 import { Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
-const SUPER_ADMIN_EMAIL = "abhikumar06071998@gmail.com"
+const SUPER_ADMIN_EMAIL = "baljeelovesmemes@gmail.com"
 
 export type AdminRole = "admin" | "manager" | null
 
