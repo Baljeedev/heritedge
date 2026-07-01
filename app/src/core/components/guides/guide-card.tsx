@@ -63,11 +63,24 @@ export function GuideCard({ guide }: GuideCardProps) {
   const videoUrl = isApiData ? (guide as ApiGuide).video : undefined
   const isPlaceholderImage = imageSrc === GUIDE_PLACEHOLDER_IMAGE
 
-  const specialization = isApiData
-    ? (guide as ApiGuide).specialization
-    : (guide as StaticGuide).specialization
+  const specializationItems = (() => {
+    if (isApiData) {
+      const populatedSiteNames = ((guide as ApiGuide).sites || [])
+        .map((site) => {
+          if (typeof site === "object" && site !== null && "name" in site) {
+            return site.name
+          }
+          return null
+        })
+        .filter((name): name is string => Boolean(name))
+      if (populatedSiteNames.length > 0) return populatedSiteNames
+    }
 
-  const specializationItems = parseSpecializationItems(specialization)
+    const specialization = isApiData
+      ? (guide as ApiGuide).specialization
+      : (guide as StaticGuide).specialization
+    return parseSpecializationItems(specialization)
+  })()
 
   const guideCities = isApiData
     ? ((guide as ApiGuide).cities || [])
