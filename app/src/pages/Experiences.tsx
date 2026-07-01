@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { Users, Music, Hammer, Loader2, Compass, Clock, type LucideIcon } from "lucide-react"
 import { useI18n } from "@/lib/i18n/context"
 import type { Guide } from "@/lib/api/guides"
-import { guideMatchesMonument } from "@/lib/utils"
+import { guideMatchesSpecialization } from "@/lib/utils"
 
 function CountBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -138,8 +138,7 @@ export default function ExperiencesPage() {
     return "guide"
   }
 
-  const [selectedSite, setSelectedSite] = useState<string | null>(null)
-  const [selectedSiteName, setSelectedSiteName] = useState<string | null>(null)
+  const [specializationFilter, setSpecializationFilter] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<ExperienceType>(getTypeFromParam(categoryParam))
   const [priceMin, setPriceMin] = useState("")
   const [priceMax, setPriceMax] = useState("")
@@ -155,8 +154,7 @@ export default function ExperiencesPage() {
     heritageSites.find((s) => s.image)?.image
 
   const clearAllFilters = () => {
-    setSelectedSite(null)
-    setSelectedSiteName(null)
+    setSpecializationFilter(null)
     setPriceMin("")
     setPriceMax("")
     setRatingFilter(0)
@@ -165,30 +163,24 @@ export default function ExperiencesPage() {
     setSelectedArtForm(null)
   }
 
-  const handleSiteChange = (siteId: string | null, siteName?: string | null) => {
-    setSelectedSite(siteId)
-    setSelectedSiteName(siteName ?? null)
-  }
-
   const guidesQueryParams = useMemo((): GuidesQueryParams => {
-    const params: GuidesQueryParams = {}
-    if (selectedSite) params.siteId = selectedSite
-    else if (selectedCity) params.cityId = selectedCity
+    const params: GuidesQueryParams = { limit: 200 }
+    if (selectedCity) params.cityId = selectedCity
     if (ratingFilter > 0) params.minRating = ratingFilter
     const min = priceMin.trim() ? Number(priceMin) : undefined
     const max = priceMax.trim() ? Number(priceMax) : undefined
     if (min !== undefined && !Number.isNaN(min)) params.minPrice = min
     if (max !== undefined && !Number.isNaN(max)) params.maxPrice = max
     return params
-  }, [selectedSite, selectedCity, ratingFilter, priceMin, priceMax])
+  }, [selectedCity, ratingFilter, priceMin, priceMax])
 
   const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(guidesQueryParams)
 
   const filteredGuides = useMemo(() => {
     const guides = guidesData?.guides || []
-    if (!selectedSite || !selectedSiteName) return guides
-    return guides.filter((guide) => guideMatchesMonument(guide, selectedSite, selectedSiteName))
-  }, [guidesData?.guides, selectedSite, selectedSiteName])
+    if (!specializationFilter) return guides
+    return guides.filter((guide) => guideMatchesSpecialization(guide, specializationFilter))
+  }, [guidesData?.guides, specializationFilter])
 
   const isGuidesTab = selectedType === "guide"
 
@@ -281,8 +273,8 @@ export default function ExperiencesPage() {
                 <div className="lg:col-span-1">
                   <ExperienceFilter
                     activeTab={selectedType}
-                    selectedSite={selectedSite}
-                    onSiteChange={handleSiteChange}
+                    specializationFilter={specializationFilter}
+                    onSpecializationChange={setSpecializationFilter}
                     priceMin={priceMin}
                     priceMax={priceMax}
                     onPriceMinChange={setPriceMin}

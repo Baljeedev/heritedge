@@ -11,12 +11,11 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Plus, Trash2, X, Search } from "lucide-react"
+import { Plus, Trash2, X } from "lucide-react"
 import { FileUpload } from "@/components/ui/file-upload"
 import { citiesApi, type ICity } from "@/lib/api/cities"
-import { heritageSitesApi } from "@/lib/api/heritage-sites"
 import { toast } from "sonner"
-import type { IGuide, IHeritageSite } from "@/lib/types"
+import type { IGuide } from "@/lib/types"
 
 interface GuideFormProps {
   guide?: IGuide | null
@@ -52,20 +51,13 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
   const [languagesInput, setLanguagesInput] = useState(guide?.languages?.join(", ") || "")
   const [certifications, setCertifications] = useState(guide?.certifications || [])
   const [allCities, setAllCities] = useState<ICity[]>([])
-  const [allSites, setAllSites] = useState<IHeritageSite[]>([])
-  const [siteSearchQuery, setSiteSearchQuery] = useState("")
   const [selectedCityIds, setSelectedCityIds] = useState<string[]>(() => {
     const cities = guide?.cities || []
     return cities.map((city) => (typeof city === "string" ? city : city._id))
   })
-  const [selectedSiteIds, setSelectedSiteIds] = useState<string[]>(() => {
-    const sites = guide?.sites || []
-    return sites.map((site) => (typeof site === "string" ? site : site._id))
-  })
 
   useEffect(() => {
     citiesApi.getAll().then((data) => setAllCities(data.cities)).catch(() => {})
-    heritageSitesApi.getAll({ limit: 500 }).then((data) => setAllSites(data.sites)).catch(() => {})
   }, [])
 
   const toggleCity = (cityId: string) => {
@@ -73,22 +65,6 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       prev.includes(cityId) ? prev.filter((id) => id !== cityId) : [...prev, cityId]
     )
   }
-
-  const toggleSite = (siteId: string) => {
-    setSelectedSiteIds((prev) =>
-      prev.includes(siteId) ? prev.filter((id) => id !== siteId) : [...prev, siteId]
-    )
-  }
-
-  const filteredSites = allSites.filter((site) => {
-    if (!siteSearchQuery.trim()) return true
-    const q = siteSearchQuery.toLowerCase()
-    return (
-      site.name.toLowerCase().includes(q) ||
-      site.city?.toLowerCase().includes(q) ||
-      site.state?.toLowerCase().includes(q)
-    )
-  })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -137,22 +113,18 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       return
     }
 
-    if (selectedSiteIds.length === 0) {
-      toast.error("Please select at least one monument")
+    if (!formData.specialization?.trim()) {
+      toast.error("Please enter specialization")
       return
     }
-
-    const selectedSiteNames = selectedSiteIds
-      .map((id) => allSites.find((s) => s._id === id)?.name)
-      .filter(Boolean) as string[]
 
     const payload: Partial<IGuide> = {
       clerkUserId: formData.clerkUserId || "",
       name: formData.name || "",
       image: formData.image || "",
       video: formData.video,
-      specialization: selectedSiteNames.join(", "),
-      sites: selectedSiteIds,
+      specialization: formData.specialization.trim(),
+      sites: guide?.sites || [],
       cities: selectedCityIds,
       bio: formData.bio || "",
       experience: formData.experience || 0,
@@ -229,66 +201,18 @@ export function GuideForm({ guide, onSave, onCancel }: GuideFormProps) {
       </div>
 
       <div>
-        <Label className="mb-2 block">Monuments (Specialization) *</Label>
-        <p className="text-xs text-muted-foreground mb-2">
-          Select heritage sites this guide specializes in. Add missing monuments in Heritage Sites section.
+        <Label htmlFor="specialization">Specialization *</Label>
+        <Input
+          id="specialization"
+          name="specialization"
+          value={formData.specialization || ""}
+          onChange={handleChange}
+          placeholder="e.g. Mughal Architecture, Hawa Mahal, Delhi Heritage"
+          required
+        />
+        <p className="text-xs text-muted-foreground mt-1">
+          Comma-separated areas or monuments this guide specializes in.
         </p>
-        {selectedSiteIds.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2">
-            {selectedSiteIds.map((siteId) => {
-              const site = allSites.find((item) => item._id === siteId)
-              if (!site) return null
-              return (
-                <Badge key={siteId} variant="secondary" className="flex items-center gap-1">
-                  {site.name}
-                  <button type="button" onClick={() => toggleSite(siteId)}>
-                    <X className="h-3 w-3" />
-                  </button>
-                </Badge>
-              )
-            })}
-          </div>
-        )}
-        <div className="relative mb-2">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            value={siteSearchQuery}
-            onChange={(e) => setSiteSearchQuery(e.target.value)}
-            placeholder="Search monuments..."
-            className="pl-9 text-sm h-9"
-          />
-        </div>
-        <div className="max-h-56 overflow-y-auto border border-border rounded-lg divide-y divide-border">
-          {filteredSites.map((site) => (
-            <label
-              key={site._id}
-              className="flex items-center gap-3 px-3 py-2 hover:bg-background cursor-pointer"
-            >
-              <Checkbox
-                checked={selectedSiteIds.includes(site._id)}
-                onCheckedChange={() => toggleSite(site._id)}
-              />
-              <span className="text-sm">
-                <span className="font-medium">{site.name}</span>
-                {(site.city || site.state) && (
-                  <span className="text-muted-foreground ml-1">
-                    ({[site.city, site.state].filter(Boolean).join(", ")})
-                  </span>
-                )}
-              </span>
-            </label>
-          ))}
-          {allSites.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-3">
-              No monuments found. Add them in the Heritage Sites section.
-            </p>
-          )}
-          {allSites.length > 0 && filteredSites.length === 0 && (
-            <p className="text-sm text-muted-foreground text-center py-3">
-              No monuments match your search.
-            </p>
-          )}
-        </div>
       </div>
 
       <div>

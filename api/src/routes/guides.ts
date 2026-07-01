@@ -86,7 +86,7 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
       }
     }
 
-    if (cityId && !siteId) {
+    if (cityId) {
       query.cities = cityId;
     }
 
@@ -99,7 +99,16 @@ router.get("/", optionalAuth, async (req: Request, res: Response) => {
         { sites: { $in: matchingSites } },
       ];
     } else if (specialization) {
-      query.$text = { $search: specialization as string };
+      const escaped = (specialization as string)
+        .trim()
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      if (escaped) {
+        // Match start of full string or start of a comma/semicolon-separated segment
+        query.specialization = {
+          $regex: `(^|[,;|]\\s*)${escaped}`,
+          $options: "i",
+        };
+      }
     }
 
     if (minRating) query.rating = { $gte: Number(minRating) };
