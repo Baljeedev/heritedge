@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils"
 interface ExperienceFilterProps {
   activeTab: "guide" | "music" | "workshop"
   selectedSite: string | null
-  onSiteChange: (siteId: string | null) => void
+  onSiteChange: (siteId: string | null, siteName?: string | null) => void
   priceFilter: "all" | "budget" | "mid" | "premium"
   onPriceChange: (filter: "all" | "budget" | "mid" | "premium") => void
   ratingFilter: number
@@ -104,14 +104,14 @@ export function ExperienceFilter({
   }, [])
 
   const handleSiteSelect = (site: HeritageSite) => {
-    onSiteChange(site._id)
+    onSiteChange(site._id, site.name)
     setSelectedSiteName(site.name)
     setSearchQuery("")
     setShowSuggestions(false)
   }
 
   const clearMonument = () => {
-    onSiteChange(null)
+    onSiteChange(null, null)
     setSelectedSiteName(null)
     setSearchQuery("")
   }
