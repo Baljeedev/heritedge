@@ -1,13 +1,16 @@
 "use client"
 
 import { Star } from "lucide-react"
+import { Input } from "@/components/ui/input"
 import { useHeritageSites } from "@/lib/api"
 
 interface GuideFilterProps {
   selectedSite: string | null
   onSiteChange: (siteId: string | null) => void
-  priceFilter: "all" | "budget" | "mid" | "premium"
-  onPriceChange: (filter: "all" | "budget" | "mid" | "premium") => void
+  priceMin: string
+  priceMax: string
+  onPriceMinChange: (value: string) => void
+  onPriceMaxChange: (value: string) => void
   ratingFilter: number
   onRatingChange: (rating: number) => void
 }
@@ -15,8 +18,10 @@ interface GuideFilterProps {
 export function GuideFilter({
   selectedSite,
   onSiteChange,
-  priceFilter,
-  onPriceChange,
+  priceMin,
+  priceMax,
+  onPriceMinChange,
+  onPriceMaxChange,
   ratingFilter,
   onRatingChange,
 }: GuideFilterProps) {
@@ -27,7 +32,6 @@ export function GuideFilter({
     <div className="bg-card border border-border rounded-lg p-6 sticky top-24 h-fit space-y-6">
       <h3 className=" font-bold text-foreground text-lg">Filters</h3>
 
-      {/* Site Filter */}
       <div>
         <label className="text-sm font-semibold text-foreground block mb-3">Heritage Site</label>
         <div className="space-y-2">
@@ -62,30 +66,40 @@ export function GuideFilter({
         </div>
       </div>
 
-      {/* Price Filter */}
       <div>
-        <label className="text-sm font-semibold text-foreground block mb-3">Price Range</label>
-        <div className="space-y-2">
-          {["all", "budget", "mid", "premium"].map((price) => (
-            <button
-              key={price}
-              onClick={() => onPriceChange(price as any)}
-              className={`w-full text-left px-3 py-2 rounded-lg transition-colors text-sm ${
-                priceFilter === price
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80 text-foreground"
-              }`}
-            >
-              {price === "all" && "Any Price"}
-              {price === "budget" && "Under $100/day"}
-              {price === "mid" && "$100-$200/day"}
-              {price === "premium" && "Over $200/day"}
-            </button>
-          ))}
+        <label className="text-sm font-semibold text-foreground block mb-3">Price Range (₹/day)</label>
+        <div className="grid grid-cols-2 gap-2">
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Min</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+              <Input
+                type="number"
+                min={0}
+                placeholder="0"
+                value={priceMin}
+                onChange={(e) => onPriceMinChange(e.target.value)}
+                className="pl-7 h-9 text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">Max</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+              <Input
+                type="number"
+                min={0}
+                placeholder="∞"
+                value={priceMax}
+                onChange={(e) => onPriceMaxChange(e.target.value)}
+                className="pl-7 h-9 text-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Rating Filter */}
       <div>
         <label className="text-sm font-semibold text-foreground block mb-3">Minimum Rating</label>
         <div className="space-y-2">

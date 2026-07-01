@@ -12,6 +12,7 @@ import {
   DialogTitle,
 } from "@/core/components/ui/dialog"
 import { bookingsApi, type CreateBookingData } from "@/lib/api/bookings"
+import { formatINR } from "@/lib/currency"
 import { useAuth } from "@clerk/clerk-react"
 import { useNavigate } from "react-router-dom"
 import { AlertCircle, CheckCircle2 } from "lucide-react"
@@ -312,18 +313,18 @@ export function BookingForm({
               <>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('pricePerDay')}:</span>
-                  <span className="font-semibold">${itemPrice}</span>
+                  <span className="font-semibold">{formatINR(itemPrice)}</span>
                 </div>
                 <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
                   <span>{t('estimatedTotal')}:</span>
-                  <span>${itemPrice}</span>
+                  <span>{formatINR(itemPrice)}</span>
                 </div>
               </>
             ) : (
               <>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t('pricePerPerson')}:</span>
-                  <span className="font-semibold">${itemPrice}</span>
+                  <span className="font-semibold">{formatINR(itemPrice)}</span>
                 </div>
                 <div className="flex justify-between text-sm mt-1">
                   <span className="text-muted-foreground">{t('numberOfPeople')}:</span>
@@ -331,7 +332,7 @@ export function BookingForm({
                 </div>
                 <div className="flex justify-between text-base font-bold mt-2 pt-2 border-t border-border">
                   <span>{t('estimatedTotal')}:</span>
-                  <span>${itemPrice * formData.numberOfPeople}</span>
+                  <span>{formatINR(itemPrice * formData.numberOfPeople)}</span>
                 </div>
               </>
             )}

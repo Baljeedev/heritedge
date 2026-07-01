@@ -18,8 +18,10 @@ interface ExperienceFilterProps {
   activeTab: "guide" | "music" | "workshop"
   selectedSite: string | null
   onSiteChange: (siteId: string | null, siteName?: string | null) => void
-  priceFilter: "all" | "budget" | "mid" | "premium"
-  onPriceChange: (filter: "all" | "budget" | "mid" | "premium") => void
+  priceMin: string
+  priceMax: string
+  onPriceMinChange: (value: string) => void
+  onPriceMaxChange: (value: string) => void
   ratingFilter: number
   onRatingChange: (rating: number) => void
   selectedCity: string | null
@@ -43,8 +45,10 @@ export function ExperienceFilter({
   activeTab,
   selectedSite,
   onSiteChange,
-  priceFilter,
-  onPriceChange,
+  priceMin,
+  priceMax,
+  onPriceMinChange,
+  onPriceMaxChange,
   ratingFilter,
   onRatingChange,
   selectedCity,
@@ -121,7 +125,8 @@ export function ExperienceFilter({
     selectedCity ||
     selectedInstrument ||
     selectedArtForm ||
-    priceFilter !== "all" ||
+    priceMin !== "" ||
+    priceMax !== "" ||
     ratingFilter > 0
 
   const cityOptions = cities.map((c) => ({
@@ -261,27 +266,39 @@ export function ExperienceFilter({
 
       <Separator />
 
-      {/* Price — 2x2 grid */}
+      {/* Price — min/max (INR per day) */}
       <div>
         <FilterLabel>{t("priceRange")}</FilterLabel>
+        <p className="text-xs text-muted-foreground mb-2">{t("priceRangeHint")}</p>
         <div className="grid grid-cols-2 gap-2">
-          {(["all", "budget", "mid", "premium"] as const).map((price) => (
-            <button
-              key={price}
-              onClick={() => onPriceChange(price)}
-              className={cn(
-                "px-3 py-2 rounded-lg text-xs font-medium transition-colors text-center",
-                priceFilter === price
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted hover:bg-muted/80 text-foreground"
-              )}
-            >
-              {price === "all" && t("anyPrice")}
-              {price === "budget" && t("under100")}
-              {price === "mid" && t("price100to200")}
-              {price === "premium" && t("over200")}
-            </button>
-          ))}
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t("minPrice")}</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+              <Input
+                type="number"
+                min={0}
+                placeholder="0"
+                value={priceMin}
+                onChange={(e) => onPriceMinChange(e.target.value)}
+                className="pl-7 h-9 text-sm"
+              />
+            </div>
+          </div>
+          <div>
+            <label className="text-xs text-muted-foreground mb-1 block">{t("maxPrice")}</label>
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">₹</span>
+              <Input
+                type="number"
+                min={0}
+                placeholder="∞"
+                value={priceMax}
+                onChange={(e) => onPriceMaxChange(e.target.value)}
+                className="pl-7 h-9 text-sm"
+              />
+            </div>
+          </div>
         </div>
       </div>
 

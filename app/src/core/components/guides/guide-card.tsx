@@ -1,6 +1,6 @@
 "use client"
 
-import { Star, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine } from "lucide-react"
+import { Star, Award, Users, MessageSquare, Heart, Play, BadgeCheck, PenLine, UserCheck } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { useState, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
@@ -11,6 +11,7 @@ import { formatWhatsAppUrl } from "@/lib/whatsapp"
 import { GuideReviewForm } from "@/core/components/guides/guide-review-form"
 import { useI18n } from "@/lib/i18n/context"
 import { parseSpecializationItems } from "@/lib/utils"
+import { formatINR } from "@/lib/currency"
 
 const GUIDE_PLACEHOLDER_IMAGE = "/guide-placeholder.svg"
 
@@ -116,6 +117,7 @@ export function GuideCard({ guide }: GuideCardProps) {
 
   const whatsappNumber = isApiData ? (guide as ApiGuide).whatsappNumber : undefined
   const whatsappUrl = whatsappNumber ? formatWhatsAppUrl(whatsappNumber) : ""
+  const leadCount = isApiData ? ((guide as ApiGuide).leadCount ?? 0) : 0
 
   const handleContactGuide = () => {
     if (!isApiData) return
@@ -187,7 +189,7 @@ export function GuideCard({ guide }: GuideCardProps) {
         <div className="flex items-start justify-between gap-2 mb-1">
           <h3 className="text-lg font-bold text-foreground leading-tight">{guide.name}</h3>
           <div className="text-right shrink-0">
-            <span className="text-xl font-bold text-primary">${guide.pricePerDay}</span>
+            <span className="text-xl font-bold text-primary">{formatINR(guide.pricePerDay)}</span>
             <span className="text-xs text-muted-foreground block">{t("perDay")}</span>
           </div>
         </div>
@@ -226,11 +228,11 @@ export function GuideCard({ guide }: GuideCardProps) {
             {[...Array(5)].map((_, i) => (
               <Star
                 key={i}
-                className={`w-4 h-4 ${i < Math.floor(guide.rating) ? "fill-accent text-accent" : "text-border"}`}
+                className={`w-4 h-4 ${i < Math.floor(Math.min(5, guide.rating)) ? "fill-accent text-accent" : "text-border"}`}
               />
             ))}
           </div>
-          <span className="font-semibold text-foreground">{guide.rating.toFixed(1)}</span>
+          <span className="font-semibold text-foreground">{Math.min(5, guide.rating).toFixed(1)}</span>
           <span className="text-xs text-muted-foreground">({reviewCount})</span>
           {isApiData && guideId && reviewCount > 0 && (
             <Link
@@ -247,6 +249,12 @@ export function GuideCard({ guide }: GuideCardProps) {
             <Award className="w-3.5 h-3.5 text-primary" />
             {experience}+ years
           </span>
+          {isApiData && (
+            <span className="flex items-center gap-1">
+              <UserCheck className="w-3.5 h-3.5 text-primary" />
+              {leadCount} {t("leadsGenerated")}
+            </span>
+          )}
           {languages.length > 0 && (
             <span className="flex items-center gap-1">
               <Users className="w-3.5 h-3.5 text-primary" />

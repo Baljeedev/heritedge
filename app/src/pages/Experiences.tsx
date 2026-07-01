@@ -141,7 +141,8 @@ export default function ExperiencesPage() {
   const [selectedSite, setSelectedSite] = useState<string | null>(null)
   const [selectedSiteName, setSelectedSiteName] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState<ExperienceType>(getTypeFromParam(categoryParam))
-  const [priceFilter, setPriceFilter] = useState<"all" | "budget" | "mid" | "premium">("all")
+  const [priceMin, setPriceMin] = useState("")
+  const [priceMax, setPriceMax] = useState("")
   const [ratingFilter, setRatingFilter] = useState<number>(0)
   const [selectedCity, setSelectedCity] = useState<string | null>(null)
   const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null)
@@ -156,7 +157,8 @@ export default function ExperiencesPage() {
   const clearAllFilters = () => {
     setSelectedSite(null)
     setSelectedSiteName(null)
-    setPriceFilter("all")
+    setPriceMin("")
+    setPriceMax("")
     setRatingFilter(0)
     setSelectedCity(null)
     setSelectedInstrument(null)
@@ -173,13 +175,12 @@ export default function ExperiencesPage() {
     if (selectedSite) params.siteId = selectedSite
     else if (selectedCity) params.cityId = selectedCity
     if (ratingFilter > 0) params.minRating = ratingFilter
-    if (priceFilter === "budget") params.maxPrice = 100
-    else if (priceFilter === "mid") {
-      params.minPrice = 100
-      params.maxPrice = 200
-    } else if (priceFilter === "premium") params.minPrice = 200
+    const min = priceMin.trim() ? Number(priceMin) : undefined
+    const max = priceMax.trim() ? Number(priceMax) : undefined
+    if (min !== undefined && !Number.isNaN(min)) params.minPrice = min
+    if (max !== undefined && !Number.isNaN(max)) params.maxPrice = max
     return params
-  }, [selectedSite, selectedCity, ratingFilter, priceFilter])
+  }, [selectedSite, selectedCity, ratingFilter, priceMin, priceMax])
 
   const { data: guidesData, isLoading: guidesLoading, error: guidesError } = useGuides(guidesQueryParams)
 
@@ -282,8 +283,10 @@ export default function ExperiencesPage() {
                     activeTab={selectedType}
                     selectedSite={selectedSite}
                     onSiteChange={handleSiteChange}
-                    priceFilter={priceFilter}
-                    onPriceChange={setPriceFilter}
+                    priceMin={priceMin}
+                    priceMax={priceMax}
+                    onPriceMinChange={setPriceMin}
+                    onPriceMaxChange={setPriceMax}
                     ratingFilter={ratingFilter}
                     onRatingChange={setRatingFilter}
                     selectedCity={selectedCity}

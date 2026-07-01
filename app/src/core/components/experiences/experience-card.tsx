@@ -6,6 +6,7 @@ import { useState, useRef } from "react"
 import type { Experience as ApiExperience } from "@/lib/api/experiences"
 import type { Experience as StaticExperience, GuideExperience, MusicShowExperience, WorkshopExperience } from "@/data/experiences"
 import { BookingForm } from "@/core/components/bookings/booking-form"
+import { formatINR } from "@/lib/currency"
 
 interface ExperienceCardProps {
   experience: ApiExperience | StaticExperience
@@ -240,7 +241,7 @@ export function ExperienceCard({ experience }: ExperienceCardProps) {
 
         {/* Price */}
         <div className="flex items-baseline gap-1 mb-4 border-t border-border pt-4">
-          <span className="text-2xl font-bold text-primary">${experience.price}</span>
+          <span className="text-2xl font-bold text-primary">{formatINR(experience.price)}</span>
           <span className="text-sm text-muted-foreground">per person</span>
         </div>
 

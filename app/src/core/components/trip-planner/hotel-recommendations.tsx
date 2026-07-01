@@ -3,6 +3,7 @@
 import { Star, Loader2 } from "lucide-react"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useHotels } from "@/lib/api"
+import { formatINR } from "@/lib/currency"
 
 interface HotelRecommendationsProps {
   sites: string[]
@@ -115,7 +116,7 @@ export function HotelRecommendations({ sites, selectedHotels, onSelect }: HotelR
 
                 <div className="flex justify-between items-center">
                   <span className="text-2xl font-bold text-primary">
-                    {hotel.pricePerNight?.currency || '₹'}{hotel.pricePerNight?.min || 'N/A'}
+                    {formatINR(hotel.pricePerNight?.min ?? 0)}
                   </span>
                   <span className="text-sm text-muted-foreground">per night</span>
                 </div>

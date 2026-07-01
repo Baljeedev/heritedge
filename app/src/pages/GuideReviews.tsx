@@ -1,9 +1,14 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import { Link, useParams } from "react-router-dom"
-import { ArrowLeft, Loader2, Star } from "lucide-react"
+import { ArrowLeft, Loader2, Star, X } from "lucide-react"
 import { Navigation } from "@/core/components/navigation"
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from "@/core/components/ui/dialog"
 import {
   Select,
   SelectContent,
@@ -60,6 +65,10 @@ function ReviewerAvatar({
   )
 }
 
+function clampRating(rating: number): number {
+  return Math.min(5, Math.max(0, rating))
+}
+
 function StarRow({
   rating,
   size = "sm",
@@ -68,6 +77,7 @@ function StarRow({
   size?: "sm" | "lg"
 }) {
   const starClass = size === "lg" ? "w-7 h-7 md:w-8 md:h-8" : "w-4 h-4"
+  const displayRating = clampRating(rating)
   return (
     <div className="flex gap-0.5">
       {[1, 2, 3, 4, 5].map((i) => (
@@ -75,7 +85,7 @@ function StarRow({
           key={i}
           className={cn(
             starClass,
-            i <= Math.round(rating) ? "fill-accent text-accent" : "text-border"
+            i <= Math.round(displayRating) ? "fill-accent text-accent" : "text-border"
           )}
         />
       ))}
@@ -83,10 +93,81 @@ function StarRow({
   )
 }
 
+function ReviewImageLightbox({
+  images,
+  startIndex,
+  open,
+  onOpenChange,
+}: {
+  images: string[]
+  startIndex: number
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const { t } = useI18n()
+  const [index, setIndex] = useState(startIndex)
+
+  useEffect(() => {
+    if (open) setIndex(startIndex)
+  }, [open, startIndex])
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-[95vw] sm:max-w-5xl w-auto border-0 bg-transparent shadow-none p-2 data-[state=open]:zoom-in-100 data-[state=closed]:zoom-out-100"
+      >
+        <DialogTitle className="sr-only">{t("reviewExperiencePhoto")}</DialogTitle>
+        <button
+          type="button"
+          onClick={() => onOpenChange(false)}
+          className="absolute top-3 right-3 z-10 rounded-full bg-black/60 p-2 text-white hover:bg-black/80"
+          aria-label="Close"
+        >
+          <X className="w-5 h-5" />
+        </button>
+        <img
+          src={images[index]}
+          alt={t("reviewExperiencePhoto")}
+          className="max-h-[85vh] max-w-full w-auto h-auto object-contain mx-auto rounded-lg"
+        />
+        <a
+          href={images[index]}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block text-center text-xs text-white/80 hover:text-white underline mt-2"
+        >
+          {t("viewFullSizeImage")}
+        </a>
+        {images.length > 1 && (
+          <div className="flex justify-center gap-2 pt-2 flex-wrap">
+            {images.map((img, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setIndex(i)}
+                className={cn(
+                  "w-14 h-14 rounded-md overflow-hidden border-2",
+                  i === index ? "border-primary" : "border-transparent opacity-70"
+                )}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </button>
+            ))}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  )
+}
+
 export default function GuideReviewsPage() {
   const { guideId = "" } = useParams()
   const { t } = useI18n()
   const [ratingFilter, setRatingFilter] = useState<RatingFilter>("all")
+  const [lightboxImages, setLightboxImages] = useState<string[]>([])
+  const [lightboxIndex, setLightboxIndex] = useState(0)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const { data: guide, isLoading: guideLoading, error: guideError } = useGuide(guideId, !!guideId)
   const { data: reviewsData, isLoading: reviewsLoading } = useReviews(
@@ -102,6 +183,18 @@ export default function GuideReviewsPage() {
     const min = Number(ratingFilter)
     return reviews.filter((r) => Math.round(r.rating) === min)
   }, [reviews, ratingFilter])
+
+  const overallRating = useMemo(() => {
+    if (reviews.length === 0) return clampRating(guide?.rating ?? 0)
+    const sum = reviews.reduce((acc, r) => acc + r.rating, 0)
+    return clampRating(Math.round((sum / reviews.length) * 10) / 10)
+  }, [reviews, guide?.rating])
+
+  const openLightbox = (images: string[], index: number) => {
+    setLightboxImages(images)
+    setLightboxIndex(index)
+    setLightboxOpen(true)
+  }
 
   if (!guideId) {
     return (
@@ -148,13 +241,13 @@ export default function GuideReviewsPage() {
 
               <div className="flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1 mt-8">
                 <span className="font-display text-5xl md:text-6xl font-bold text-foreground leading-none">
-                  {guide.rating.toFixed(1)}
+                  {overallRating.toFixed(1)}
                 </span>
                 <span className="text-sm text-muted-foreground">{t("outOf5Stars")}</span>
               </div>
 
               <div className="flex justify-center mt-5">
-                <StarRow rating={guide.rating} size="lg" />
+                <StarRow rating={overallRating} size="lg" />
               </div>
             </section>
 
@@ -174,6 +267,9 @@ export default function GuideReviewsPage() {
                     {guide.name}
                   </h1>
                   <p className="text-xs text-muted-foreground mt-0.5">{t("clientReviews")}</p>
+                  <p className="text-xs font-medium text-primary mt-1">
+                    {guide.leadCount ?? 0} {t("leadsGenerated")}
+                  </p>
                 </div>
               </div>
 
@@ -241,12 +337,18 @@ export default function GuideReviewsPage() {
                       {hasPhotos && (
                         <div className="flex gap-2 mt-4 flex-wrap">
                           {review.images!.map((img, i) => (
-                            <img
+                            <button
                               key={i}
-                              src={img}
-                              alt={t("reviewExperiencePhoto")}
-                              className="w-28 h-28 md:w-32 md:h-32 rounded-lg object-cover border border-border"
-                            />
+                              type="button"
+                              onClick={() => openLightbox(review.images!, i)}
+                              className="rounded-lg overflow-hidden border border-border hover:border-primary hover:ring-2 hover:ring-primary/30 transition-all cursor-zoom-in"
+                            >
+                              <img
+                                src={img}
+                                alt={t("reviewExperiencePhoto")}
+                                className="w-28 h-28 md:w-32 md:h-32 object-cover"
+                              />
+                            </button>
                           ))}
                         </div>
                       )}
@@ -258,6 +360,13 @@ export default function GuideReviewsPage() {
           </div>
         )}
       </main>
+
+      <ReviewImageLightbox
+        images={lightboxImages}
+        startIndex={lightboxIndex}
+        open={lightboxOpen}
+        onOpenChange={setLightboxOpen}
+      />
     </div>
   )
 }
