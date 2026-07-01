@@ -18,21 +18,20 @@ export default function GuidesPage() {
     console.log("GuidesPage mounted/updated - pathname:", location.pathname)
   }, [location.pathname])
   const [selectedSite, setSelectedSite] = useState<string | null>(null)
-  const [priceFilter, setPriceFilter] = useState<"all" | "budget" | "mid" | "premium">("all")
+  const [priceMin, setPriceMin] = useState("")
+  const [priceMax, setPriceMax] = useState("")
   const [ratingFilter, setRatingFilter] = useState<number>(0)
 
-  // Build query parameters for API
   const getQueryParams = (): Record<string, string | number> => {
     const params: Record<string, string | number> = {}
 
     if (selectedSite) params.siteId = selectedSite
     if (ratingFilter > 0) params.minRating = ratingFilter
 
-    if (priceFilter !== "all") {
-      if (priceFilter === "budget") params.maxPrice = 100
-      else if (priceFilter === "mid") params.maxPrice = 200
-      // premium has no maxPrice limit
-    }
+    const min = priceMin.trim() ? Number(priceMin) : undefined
+    const max = priceMax.trim() ? Number(priceMax) : undefined
+    if (min !== undefined && !Number.isNaN(min)) params.minPrice = min
+    if (max !== undefined && !Number.isNaN(max)) params.maxPrice = max
 
     return params
   }
@@ -60,8 +59,10 @@ export default function GuidesPage() {
               <GuideFilter
                 selectedSite={selectedSite}
                 onSiteChange={setSelectedSite}
-                priceFilter={priceFilter}
-                onPriceChange={setPriceFilter}
+                priceMin={priceMin}
+                priceMax={priceMax}
+                onPriceMinChange={setPriceMin}
+                onPriceMaxChange={setPriceMax}
                 ratingFilter={ratingFilter}
                 onRatingChange={setRatingFilter}
               />

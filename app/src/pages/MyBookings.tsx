@@ -11,6 +11,7 @@ import { bookingsApi, type Booking } from "@/lib/api/bookings"
 import { Loader2, Calendar, Users, Phone, Mail, Music, Hammer, User, AlertCircle } from "lucide-react"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/core/components/ui/alert-dialog"
 import { useI18n } from "@/lib/i18n/context"
+import { formatINR } from "@/lib/currency"
 
 export default function MyBookingsPage() {
   const { t } = useI18n()
@@ -120,7 +121,7 @@ export default function MyBookingsPage() {
       return "Contact for pricing"
     }
     if (typeof booking.experienceId === "object" && booking.experienceId !== null) {
-      return `$${booking.experienceId.price} per person`
+      return `${formatINR(booking.experienceId.price)} per person`
     }
     return "Contact for pricing"
   }

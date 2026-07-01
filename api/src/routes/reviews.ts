@@ -9,48 +9,34 @@ import Experience from "../models/Experience";
 
 const router = express.Router();
 
-// Helper function to update rating on target model
-async function updateTargetRating(
-  reviewType: string,
-  targetId: string,
-  rating: number,
-  isDelete = false
-) {
-  const increment = isDelete ? -1 : 1;
-  const ratingChange = isDelete ? -rating : rating;
+// Recalculate average rating from all reviews (fixes summed-rating bug)
+async function recalculateTargetRating(reviewType: string, targetId: string) {
+  const query: Record<string, unknown> = { reviewType, targetId };
+  if (reviewType !== "guide") {
+    query.isVisible = true;
+  }
+
+  const reviews = await Review.find(query);
+  const count = reviews.length;
+  const average =
+    count > 0
+      ? Math.round((reviews.reduce((sum, r) => sum + r.rating, 0) / count) * 10) / 10
+      : 0;
+
+  const update = { rating: average, reviewCount: count };
 
   switch (reviewType) {
     case "site":
-      await HeritageSite.findByIdAndUpdate(targetId, {
-        $inc: {
-          reviewCount: increment,
-          rating: ratingChange,
-        },
-      });
+      await HeritageSite.findByIdAndUpdate(targetId, update);
       break;
     case "guide":
-      await Guide.findByIdAndUpdate(targetId, {
-        $inc: {
-          reviewCount: increment,
-          rating: ratingChange,
-        },
-      });
+      await Guide.findByIdAndUpdate(targetId, update);
       break;
     case "hotel":
-      await Hotel.findByIdAndUpdate(targetId, {
-        $inc: {
-          reviewCount: increment,
-          rating: ratingChange,
-        },
-      });
+      await Hotel.findByIdAndUpdate(targetId, update);
       break;
     case "experience":
-      await Experience.findByIdAndUpdate(targetId, {
-        $inc: {
-          reviewCount: increment,
-          rating: ratingChange,
-        },
-      });
+      await Experience.findByIdAndUpdate(targetId, update);
       break;
   }
 }
@@ -159,8 +145,7 @@ router.post("/", authenticateUser, async (req: Request, res: Response) => {
 
     await review.save();
 
-    // Update rating on target model
-    await updateTargetRating(reviewType, targetId, rating);
+    await recalculateTargetRating(reviewType, targetId);
 
     res.status(201).json(review);
   } catch (error: any) {
@@ -187,19 +172,8 @@ router.put("/:id", authenticateUser, async (req: Request, res: Response) => {
     Object.assign(review, req.body);
     await review.save();
 
-    // Update rating if it changed
-    if (req.body.rating && req.body.rating !== oldRating) {
-      await updateTargetRating(
-        review.reviewType,
-        review.targetId.toString(),
-        -oldRating,
-        true
-      );
-      await updateTargetRating(
-        review.reviewType,
-        review.targetId.toString(),
-        req.body.rating
-      );
+    if (req.body.rating !== undefined && req.body.rating !== oldRating) {
+      await recalculateTargetRating(review.reviewType, review.targetId.toString());
     }
 
     res.json(review);
@@ -223,15 +197,11 @@ router.delete("/:id", authenticateUser, async (req: Request, res: Response) => {
     //   return res.status(403).json({ error: "Unauthorized" });
     // }
 
-    // Update rating on target model
-    await updateTargetRating(
-      review.reviewType,
-      review.targetId.toString(),
-      review.rating,
-      true
-    );
+    const targetId = review.targetId.toString();
+    const reviewType = review.reviewType;
 
     await review.deleteOne();
+    await recalculateTargetRating(reviewType, targetId);
     res.json({ message: "Review deleted successfully" });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

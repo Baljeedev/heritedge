@@ -13,6 +13,7 @@ import { GuideForm } from "./guide-form"
 import { guidesApi } from "@/lib/api"
 import { toast } from "sonner"
 import { parseSpecializationItems } from "@/lib/utils"
+import { formatINR } from "@/lib/currency"
 
 const internshipStatusColors: Record<string, string> = {
   pending: "bg-yellow-100 text-yellow-700",
@@ -231,7 +232,7 @@ export function GuideList() {
               <div className="space-y-2 mt-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-muted-foreground">★ {guide.rating.toFixed(1)}</span>
-                  <span className="text-muted-foreground">${guide.pricePerDay}/day</span>
+                  <span className="text-muted-foreground">{formatINR(guide.pricePerDay)}/day</span>
                 </div>
                 <div className="text-sm text-muted-foreground">{guide.experience} years experience</div>
                 <div className="text-sm font-medium text-foreground">
